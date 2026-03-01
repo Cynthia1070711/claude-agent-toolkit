@@ -9,10 +9,10 @@
 | **優先級** | P1 |
 | **類型** | DevOps/Tooling |
 | **複雜度** | L |
-| **狀態** | 已完成 |
-| **來源** | Batch 2-4 執行缺陷 + Token 耗盡無預警中斷 + 中控調度需求 |
+| **狀態** | 已完成（含批次規劃原則） |
+| **來源** | Batch 2-4 執行缺陷 + Token 耗盡無預警中斷 + 中控調度需求 + EPIC-QGR 依賴關係分析 |
 | **建立日期** | 2026-03-01 |
-| **更新日期** | 2026-03-02 |
+| **更新日期** | 2026-03-02（新增批次規劃章節） |
 
 ---
 
@@ -541,6 +541,242 @@ Claude Max 方案的日配額資訊目前無公開 API 可查。可能方案：
 
 ---
 
+## 批次規劃原則（Batch Planning Principles）
+
+> 依據 EPIC-QGR 4 批次實戰與 API 金鑰依賴鏈經驗總結。
+
+### 11.1 批次規劃五大原則
+
+#### 原則 1：識別所有前置依賴（Critical Path Analysis）
+
+在將 Story 分組到同一批次前，**必須掃描所有前置依賴**：
+
+```yaml
+依賴類型:
+  1. API/Service 依賴 — 上游 API 先完成
+     例：A10-5（到期提醒）依賴 A10-1（基礎服務）先完成
+         BA-4（資料管理）依賴 BA-1/BA-2/BA-3（Entity）先完成
+
+  2. 資料庫 Schema 依賴 — Migration 順序
+     例：QGR-A10-1 新增 ApiKey 表，A10-2/A10-3/A10-4 才能操作
+
+  3. 技術債依賴 — Pending Issue 的來源 Story
+     例：QGR-T8 承載 D1-M3 pending，D1（PDF Worker） 必須先完成修復
+
+  4. 共用資源鎖 — 同一 Controller/Service/頁面
+     例：A10-5 + A10-6 同用 ApiKeyController，必須序列執行
+
+  5. UI/UX 依賴 — 組件或頁面層級
+     例：QGR-A2（趨勢圖）依賴 QGR-A1（Dashboard） 先完成
+
+檢查清單:
+  □ 掃描所有 Story 的 Background 段落尋找「依賴」/「前置」關鍵字
+  □ 讀取 Registry.yaml 確認 pending tech debt 的來源 Story
+  □ 檢查 Entity/Service/Controller 是否被多個 Story 共用
+  □ 驗證新增 DbSet 與 Migration 執行順序
+```
+
+#### 原則 2：依賴故事不放同一批次（No Dependent Stories in Same Batch）
+
+**絕對禁止**將有先後關係的 Story 放到同一批次並行執行：
+
+```yaml
+❌ 錯誤範例 — Batch 4:
+  - QGR-A10-1 (基礎服務)  ← API 金鑰表定義
+  - QGR-A10-5 (到期提醒)  ← 依賴 A10-1 的 Service
+
+  問題：A10-5 dev-story 開始時 A10-1 可能還在 code-review 階段
+       ↓ A10-1 code-review 發現問題改回 dev-story（R2）
+       ↓ A10-5 已完成的程式碼因 A10-1 API 變動而失效
+       ↓ A10-5 code-review 失敗，整批延期
+
+✅ 正確做法 — 分離到不同批次:
+  Batch 4: A10-1（基礎） → done ✅
+  Batch 5: A10-5（依賴） → 可安全執行
+```
+
+#### 原則 3：識別「共用資源衝突」（Shared Resource Conflicts）
+
+相同 Controller/Service/Migration 的 Story **必須序列執行**：
+
+```yaml
+共用資源衝突檢查:
+
+1. Controller 層級衝突
+   例：ApiKeyController (A10-2, A10-5, A10-6)
+   │   A10-2: Add/Edit/Delete API Key 基礎功能
+   │   A10-5: 額外的到期提醒邏輯 ← 依賴 A10-2 的 endpoint
+   │   A10-6: 批次匯入/匯出功能 ← 依賴 A10-5 的提醒系統
+   └─ 執行順序（必須序列）：A10-2 → A10-5 → A10-6
+
+2. Service 層級衝突
+   例：BusinessApiKey Service (BA-1, BA-2)
+   │   BA-1: Entity 定義 + CRUD Service
+   │   BA-2: Entity 定義 + CRUD Service（仰賴 BA-1）
+   └─ 執行順序：BA-1 → BA-2
+
+3. Migration 執行順序衝突
+   例：DbContext 新增 DbSet (A10-1, QGR-BA-1)
+   │   A10-1: Migration 新增 ApiKey 表
+   │   QGR-BA-1: Migration 新增 DataConnection / BusinessApiKey 表
+   └─ 執行順序：A10-1 → QGR-BA-1（依序 apply migration）
+
+防衝突措施:
+  □ 掃描所有 Story 的修改檔案清單，找出重疊
+  □ 若檔案重疊 > 50% ↔ 標記為「共用資源」，強制序列
+  □ 在 sprint-status.yaml 或 Batch 規劃表記錄依賴順序
+```
+
+#### 原則 4：技術債「來源 Story」與「目標 Story」分離
+
+Pending 技術債的來源 Story 與 deferred 目標 Story **不應同批**：
+
+```yaml
+技術債依賴鏈:
+
+問題：QGR-T8 承載 D1-M3（來自 D1 的 pending 技術債）
+  D1: PDF Worker 進度 → CR 時發現 3 個 issue，deferred 至 QGR-T8
+  D1: done ✅（2026-02-25）
+  QGR-T8: pending 📝（2026-03-01，承載 D1-M3）
+
+錯誤規劃：同一批次執行 D1 + QGR-T8
+  ↓ QGR-T8 dev-story 開始前，D1 已 done，無法再從 D1 中提取新修復
+  ↓ QGR-T8 dev-story 重複修復 D1-M3，衝突風險高
+
+正確規劃：
+  Batch N: [其他 Story] + D1 → done ✅
+  Batch N+1: QGR-T8 → 可安全實施 D1-M3 修復
+
+規則：
+  □ 若 Story X 承載來自 Story Y 的 pending tech debt
+  □ Story Y 必須比 Story X 至少早一個批次完成
+  □ 確保 Y 的 code-review R1 報告可供 X 參考
+```
+
+#### 原則 5：優先級與複雜度調度（Priority + Complexity Balance）
+
+批次內優先選擇 **P1 優先級 + 獨立功能**，次選 **P2 + 相互獨立**：
+
+```yaml
+優先級規則:
+
+Priority 1 (P1):
+  ├─ 跨系統通用功能（Batch 1: S1-S4, E12, A6）
+  ├─ 後台基礎設施（Batch 2: A1, E10, E11）
+  └─ 核心 API 鏈（Batch 2: T5, T6）
+
+Priority 2 (P2):
+  ├─ 商務版完整鏈（Batch 3: BA-11~14 + A2）
+  ├─ 技術債清理（Batch 4: S6, M10, S7）
+  └─ 功能擴展（Batch 5-8）
+
+複雜度配置:
+  建議單批次最多 5 個 Story（降低衝突風險）
+  大型 Story（L）盡量單獨一批或配輕量 Story（XS）
+  Example:
+    ✅ [QGR-A10-5 (M) + QGR-T8 (S) + QGR-A10-6 (S)] — 平衡
+    ❌ [QGR-D5 (L) + QGR-E13 (S) + QGR-T7 (L)] — 過重
+```
+
+### 11.2 EPIC-QGR 批次規劃案例（實戰分析）
+
+基於 EPIC-QGR 4 批次執行結果的總結：
+
+#### 成功案例 — Batch 2（所有 Story 獨立）
+
+```yaml
+Batch 2 構成:
+  QGR-A1:   Dashboard KPI（獨立）
+  QGR-E10:  資料來源遺失全域處理（獨立）
+  QGR-E11:  分割防呆規則（依賴 E10？否 ✅）
+  QGR-T5:   Editor Panels 測試（依賴 E10/E11？否，XUnit 獨立 ✅）
+  QGR-T6:   TextProperties 測試（依賴 E10/E11？否，XUnit 獨立 ✅）
+
+成功要因:
+  ✅ 5 個 Story 完全獨立（無共用 Service/Controller）
+  ✅ 無技術債依賴（各自獨立修復，無 deferred）
+  ✅ 複雜度均衡（3M + 1L + 1M）
+  ✅ 結果：全部 Done，5/5 CR 通過（平均 CR:93）
+```
+
+#### 需小心案例 — Batch 4（技術債 + 序列依賴）
+
+```yaml
+Batch 4 構成 v1（規劃時）:
+  QGR-S6:    BlobStorage 修復（獨立）
+  QGR-M10:   結帳 Modal 重構（獨立）
+  QGR-S7:    ErrorCode 枚舉後端（獨立）
+  QGR-A10-5: API 金鑰到期提醒（❌ 依賴 A10-1~4）
+  QGR-T8:    PDF/Seeder 邊界補強（❌ 承載 D1-M3）
+  QGR-A10-6: API 金鑰匯入/匯出（❌ 依賴 A10-5）
+
+風險識別:
+  ❌ A10-5 依賴前置 Service（A10-1~4），不適合首次同批
+  ❌ A10-6 依賴 A10-5 邏輯（共用 Controller），無法並行
+  ❌ QGR-T8 承載 D1 的 pending 技術債，應等 D1 done 後再開始
+
+實際執行（修正後）:
+  → S6/M10/S7 優先完成（獨立，快速）
+  → A10-5 單獨一批（確保 A10-1~4 已 done）
+  → A10-6 跟隨（依賴 A10-5 logic）
+  → T8 單獨（等 D1 完成後才開始）
+
+結果：3 Story 成功，3 Story 延後至後續批次（根據依賴滾動推進）
+```
+
+### 11.3 批次規劃檢查清單
+
+在提交批次執行計劃前，逐一驗證：
+
+```yaml
+□ 依賴掃描
+  ├─ 逐一讀取所有 Story 的 Background 段落
+  ├─ 標記「依賴」/「前置」/「順序」等關鍵字
+  ├─ 確認掃描 tech-debt/registry.yaml 中的所有 pending entries
+  └─ 驗證來源 Story（如 D1）是否已 done
+
+□ 衝突檢查
+  ├─ 掃描所有修改的 Controller/Service 名稱
+  ├─ 找出重疊修改（同一檔案被多個 Story 修改）
+  ├─ 標記需要序列執行的 Story 對
+  └─ 確認共用資源的執行順序
+
+□ 規模檢查
+  ├─ 單批次 Story 數量 ≤ 5 個（超過則拆批）
+  ├─ 複雜度均衡（避免全是 L 或全是 S）
+  ├─ Token 預估：簡單 Story ~12k tokens，複雜 Story ~25k tokens
+  └─ 預留 10-15% buffer 給 R2/R3 code-review
+
+□ 優先級檢查
+  ├─ 前 2 批次優先安排 P1 Story
+  ├─ P2 Story 確認無依賴方能同批
+  └─ 後續批次可混合 P1 + P2（但無依賴關係）
+
+□ 最終驗證
+  ├─ 建立依賴圖（用箭頭標示 A → B 表示 A 必須先完成）
+  ├─ 確認圖中無環形依賴（A → B → C → A 錯誤）
+  ├─ 審視是否有 Story 遺漏依賴（檢查 git blame 與 Issue 關聯）
+  └─ 產出最終批次執行表（含依賴順序備註）
+
+批次規劃表範本:
+┌────────────────────────────────────────────────────────────┐
+│ Batch N — [名稱]（衝突風險：🟢 低 / 🟡 中 / 🔴 高）        │
+├─────────────────────────────────────────────────────────────┤
+│ 序號 │ Story ID │ 複雜度 │ 說明 │ 依賴前置 │ 共用資源      │
+│─────────────────────────────────────────────────────────────│
+│  1   │ QGR-S6   │ XS     │ 安全修復 │ 無 │ BlobStorage.cs │
+│  2   │ QGR-M10  │  S     │ 重構     │ 無 │ CheckoutModal  │
+│  3   │ QGR-S7   │  S     │ 枚舉擴展 │ 無 │ ErrorCode.cs   │
+└─────────────────────────────────────────────────────────────┘
+
+說明欄位：
+  依賴前置: 無 / 依賴 Story-X / 依賴 Story-X done 後
+  共用資源: 若無共用則填「無」；若有列出檔案/Controller
+  執行順序: 1→2→3（序列）或 1|2|3（並行）
+```
+
+---
+
 ## 交付物清單
 
 | # | 檔案 | 動作 | 說明 |
@@ -701,3 +937,4 @@ function Test-TokenHealth {
 | 2026-03-01 | 實作完成：(1) batch-audit.ps1 新建 7 Check + AutoFix + JSON ~280 行 (2) story-pipeline.ps1 +60 行：Phase 間隔 12s + --append-system-prompt + Test-PhaseGate (3) batch-runner.ps1 +80 行：Test-TokenHealth 4 層安全閥 + TOKEN-LIMIT + exit 99 | CC-OPUS |
 | 2026-03-01 | Batch 4 測試（S6/M10/S7）：3/3 全部成功完成（all → done），驗證三層防護可行 | CC-OPUS |
 | 2026-03-02 | Bug 修正：(1) Write-Log `Write-Output` → `Write-Host` 修復 pipeline 洩漏 (2) Test-TokenHealth 改為時間過濾（pre-batch=1hr / pre-story=$StartTime），消除歷史 log 誤判 | CC-OPUS |
+| 2026-03-02 | 新增第 11 章「批次規劃原則」：5 大原則（識別前置依賴、依賴 Story 不同批、共用資源衝突、技術債依賴、優先級調度）+ EPIC-QGR 實戰案例分析 + 批次規劃檢查清單 | CC-OPUS |
