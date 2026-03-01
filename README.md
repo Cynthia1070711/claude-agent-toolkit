@@ -1,6 +1,6 @@
 # 專案部署必讀 — 多引擎協作環境一鍵初始化範本
 
-**版本**: 1.4.0
+**版本**: 1.5.0
 **建立日期**: 2026-02-27
 **適用範圍**: BMAD Method v6.0.0-alpha.21 + Claude Code CLI + Gemini CLI + Antigravity IDE + Rovo Dev CLI
 
@@ -110,6 +110,10 @@ docs/專案部屬必讀/
 ├── BMAD架構演進與優化策略.md              ← 架構版本差異 + Token 量化 + 遷移決策框架
 ├── multi-agent-parallel-execution-strategy.md ← 多 Agent 並行策略（Worktree + File Lock + Total Commit + Debt Registry §10）
 │
+├── Claude智能中控自動化排程/              ← Pipeline 中控調度 + Token 安全閥
+│   ├── pipeline-audit-token-safety.md     ← 完整需求分析 + 根因分析 + Bug 修正紀錄
+│   └── pipeline-audit-token-safety.track.md ← 實作追蹤檔
+│
 ├── agent-cli-guides/                      ← 四引擎入門指南
 │   ├── README.md                          ← 索引 + 功能比較表 + 新引擎接入 SOP
 │   ├── claude-code-guide.md
@@ -160,7 +164,11 @@ docs/專案部屬必讀/
     ├── pre-compact-snapshot.ps1           ← 壓縮前快照保存（Hook 觸發）
     ├── file-lock-check.ps1               ← [TRS-32] 寫入前檢查檔案鎖定狀態
     ├── file-lock-acquire.ps1             ← [TRS-32] 寫入後登記檔案鎖定
-    └── file-lock-release.ps1             ← [TRS-32] 釋放檔案鎖定（Agent/Story/File）
+    ├── file-lock-release.ps1             ← [TRS-32] 釋放檔案鎖定（Agent/Story/File）
+    ├── story-pipeline.ps1                ← [Pipeline] 單 Story 三階段管線（create→dev→review）
+    ├── batch-runner.ps1                  ← [Pipeline] 批次並行（最多 5 Story，間隔 12s）
+    ├── batch-audit.ps1                   ← [Pipeline] 批次後驗證 + AutoFix（7 Check）
+    └── epic-auto-pilot.ps1              ← [Pipeline] 整個 Epic 迴圈自動化
 ```
 
 ---
@@ -358,6 +366,8 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 
 此範本包含了 TRS (Token Reduction Strategy) Epic 的所有成果：
 
+### 核心優化（TRS-0 ~ TRS-34）
+
 | 優化項目 | 效果 |
 |----------|------|
 | Session 固定開銷 | -86%（15,440 → 2,150 tokens/session） |
@@ -370,6 +380,30 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 | 技術債側車模式 | CR 延後項目留原 Epic，不路由至 TD |
 | 技術債中央登錄 (TRS-34) | registry.yaml 為唯一真實來源，三分類 + Push/Pull/Audit |
 
+### 進階優化（TRS-35 ~ TRS-38，2026-03-01 新增）
+
+| 優化項目 | 效果 | Story |
+|----------|------|-------|
+| Sprint Status 行格式縮短 | 每行 120→40 字元（-67%），全檔 6,600→3,700 tokens（-44%） | TRS-35 |
+| Registry 死數據歸檔 | registry.yaml 980→174 行（-82%），消除最大 token 單點黑洞 | TRS-37 (P0) |
+| Registry 單次讀取 | CR 讀取 3次→1次，每次 CR 減少 ~1,148 行無效讀取 | TRS-38 |
+| 已完成 Epic 歸檔 | 49 entries 移至 sprint-status-archive.yaml，主檔 244→180 行 | TRS-35 |
+
+> **已評估但取消的 Story**：TRS-36（三層索引架構 — Grep 已可達成）、TRS-39（Skill 合併審查 — 完整 SKILL.md 載入是品質基礎）、TRS-40（R2 增量審查 — 缺乏事故數據支撐）
+
+### Claude 智能中控自動化排程（2026-03-01 ~ 03-02 新增）
+
+| 優化項目 | 效果 |
+|----------|------|
+| Pipeline 中控調度 | 主視窗 Claude 作為排程器，分批啟動 Story pipeline |
+| 三階段獨立視窗 | create(Opus)→dev(Sonnet)→review(Opus)，每階段全新 Claude 會話 |
+| Token 90% 安全閥 | 4 層防護（Pre-batch / Pre-story / Phase Gate / 事後偵測），達閾值自動停止 |
+| `--append-system-prompt` 強制指令 | 解決 `-p` 模式偶爾跳過 metadata 更新的問題 |
+| batch-audit.ps1 事後驗證 | 7 Check + AutoFix，三層防護預期失敗率從 15-20% 降至 < 1% |
+| Phase 間隔防 Ban | Story 間隔 12s + Phase 間隔 12s，模擬手動操作節奏 |
+
+> 詳細說明：`Claude智能中控自動化排程/pipeline-audit-token-safety.md`
+
 ---
 
 ## 注意事項
@@ -381,6 +415,9 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 5. **腳本為 PowerShell 格式**：macOS/Linux 環境需改寫為 bash
 6. **Gemini Hooks 需要 Node.js 腳本**：`secret-guard.js` 和 `git-safety.js` 需另外建立於 `.gemini/hooks/`
 7. **只安裝 Claude Code 也能正常工作**：其他引擎配置會被自動跳過，不影響 BMAD Workflow 執行
+8. **Pipeline 自動化腳本需配合 Claude Max 方案**：`story-pipeline.ps1` 使用 `claude -p` 模式 + `--dangerously-skip-permissions`，僅適用於可信環境
+9. **Token 安全閥需手動設定日配額**：Claude Max 無公開 API 查詢配額，需設定 `-DailyTokenLimit` 參數（基於方案等級估算）
+10. **Pipeline 批次並行上限 5 個**：超過 5 個並行 Story 會導致 rate-limiting，建議 `-IntervalSec 12` 錯開啟動
 
 ---
 
@@ -388,6 +425,7 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 
 | 版本 | 日期 | 變更 |
 |------|------|------|
+| 1.5.0 | 2026-03-02 | 整合 Claude 智能中控自動化排程（Pipeline 中控 + Token 安全閥 + batch-audit）；新增 TRS-35/37/38 優化成果（Sprint Status 縮行、Registry 歸檔/單讀）；新增 Pipeline 腳本至資料夾結構（story-pipeline/batch-runner/batch-audit/epic-auto-pilot）；部署手冊 v3.2.0→v3.3.0（新增 PART 10 Pipeline 自動化排程） |
 | 1.4.0 | 2026-02-28 | 部署手冊 v3.1.0→v3.2.0：新增 §4.10 技術債中央登錄協議 + §9.7 檢查清單 + Production Gate registry 驅動；worktree-quick-reference 新增 registry.yaml merge 規則；TRS 成果新增中央登錄（TRS-34） |
 | 1.3.0 | 2026-02-27 | 新增 `worktree-quick-reference.md`；部署手冊 v3.0.0→v3.1.0（新增 PART 8.5 Worktree 並行開發 + Merge 衝突 SOP）；更新資料夾結構索引（TRS-33） |
 | 1.2.0 | 2026-02-27 | 新增 `BMAD架構演進與優化策略.md`：BMAD v6.0.3 vs 舊版差異分析、Token 量化基準、ECC 功能覆蓋、遷移決策框架、多引擎相容性；更新安裝指令（stable vs alpha）；新增 Step 0 架構策略閱讀指引 |
