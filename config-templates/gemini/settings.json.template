@@ -1,0 +1,33 @@
+{
+  "mcpServers": {},
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "write_file|edit_file|replace_in_file",
+        "sequential": true,
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .gemini/hooks/secret-guard.js",
+            "name": "SecretGuard",
+            "timeout": 5000,
+            "description": "Prevent writing API keys, tokens, or secrets into source code"
+          }
+        ]
+      },
+      {
+        "matcher": "run_shell_command",
+        "sequential": true,
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .gemini/hooks/git-safety.js",
+            "name": "GitSafety",
+            "timeout": 5000,
+            "description": "Block dangerous git operations (force push, hard reset, etc.)"
+          }
+        ]
+      }
+    ]
+  }
+}
