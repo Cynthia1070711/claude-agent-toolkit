@@ -61,6 +61,7 @@
   - [4. Token 減量策略](#4-token-減量策略)
   - [5. Pipeline 自動化](#5-pipeline-自動化)
   - [6. 多 Agent 並行執行](#6-多-agent-並行執行)
+  - [7. Telegram 遠端控制](#7-telegram-遠端控制)
 - [研究報告索引](#研究報告索引)
 - [TRS 執行故事](#trs-執行故事)
 - [技術需求](#技術需求)
@@ -78,6 +79,7 @@ AI Agent 輔助開發面臨四個核心挑戰：
 | **Token 浪費** | 靜態配置檔膨脹佔用 context window，Workflow 執行開銷巨大（每輪 Sprint ~31K tokens） | 四層 Token 減量架構，MEMORY.md 精簡 90%+ |
 | **多引擎衝突** | Claude Code、Gemini CLI、Antigravity IDE 等多引擎同時操作導致 commit 衝突、檔案覆蓋 | 三層並行策略（Worktree + File Lock + Total Commit） |
 | **流程碎片化** | create-story → dev-story → code-review 手動串接，每步都需人工干預 | Pipeline 自動化 + Token 安全閥 + Telegram 遠端控制 |
+| **遠端操控** | 離開電腦後無法監控或指揮 Agent 執行進度 | Telegram Bot Bridge — 手機遠端操作 Claude CLI |
 
 ---
 
@@ -304,6 +306,21 @@ claude-agent-toolkit/
 │   ├── Copilot CLI 使用手冊編撰指南.md
 │   └── GEMINI CLI_Hooks_JSON schema說明.md
 │
+├── 📡 telegram-bridge/                     # Telegram 遠端控制 Claude CLI
+│   ├── src/                                # TypeScript 原始碼
+│   │   ├── index.ts                        #   程式進入點
+│   │   ├── telegram-bot.ts                 #   Telegram Bot UI 層（指令路由 + 輸出格式化）
+│   │   ├── claude-manager.ts               #   Claude CLI 持久進程管理器
+│   │   ├── stream-json-parser.ts           #   NDJSON 事件流解析器
+│   │   ├── session-store.ts                #   SQLite 會話持久化
+│   │   └── types.ts                        #   TypeScript 型別定義
+│   ├── PRD.md                              # 產品需求文檔（v2.0 持久進程模式）
+│   ├── technical-spec.md                   # 技術規格（三層架構 + 指令系統）
+│   ├── SETUP.md                            # 設定指南（Bot 建立 + 環境變數）
+│   ├── .env.example                        # 環境變數範例
+│   ├── package.json                        # 依賴定義
+│   └── tsconfig.json                       # TypeScript 配置
+│
 └── 📝 stories/                             # TRS 執行故事（41 個, 實戰記錄）
     ├── execution-log.md                    # 執行總覽
     ├── TRS-0  ~ TRS-9                      # Phase 1: 基礎 Token 減量
@@ -514,6 +531,84 @@ Phase 4: 實施與開發   →  /create-story → /dev-story → /code-review（
 # 釋放鎖
 .\scripts\file-lock-release.ps1 -AgentId "CC-OPUS"
 ```
+
+### 7. Telegram 遠端控制
+
+**核心目錄**: `telegram-bridge/`
+
+透過 Telegram Bot 從手機遠端操作 Claude Code CLI，實現「離開電腦也能指揮 AI Agent」。
+
+#### 架構設計
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Telegram Bot Layer                     │
+│  指令: /new /stop /clear /model /status /cd /bookmark   │
+│  訊息路由 → sendInput / startSession                    │
+│  檔案上傳 → 存到工作目錄 + 通知 Claude                   │
+│  心跳機制 → typing 狀態指示                              │
+│  輸出緩衝 → 800ms 批次 + token/耗時統計                  │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│                Claude Manager Layer                      │
+│  startSession() → 啟動 stream-json 持久進程              │
+│  sendInput()    → JSON stdin 寫入 + 佇列管理            │
+│  事件: output / ready / responseComplete / closed        │
+│  自動重連: 進程死亡 → 下次訊息自動重啟                    │
+│  殭屍清理: 啟動前掃描並 kill 殘留進程                     │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│             Stream-JSON Parser Layer                     │
+│  解析 NDJSON 事件流                                      │
+│  累積 text_delta → 完整文字區塊                          │
+│  偵測 message_stop → 標記回應完成                        │
+│  擷取 session_id + usage (token 統計)                    │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│               Session Store (SQLite)                     │
+│  會話持久化 + 訊息歷史 + 模型偏好 + 路徑書籤             │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### v2.0 核心特性（持久進程模式）
+
+v1.0 每條 Telegram 訊息都 spawn 獨立 `claude -p "message"` 進程（one-shot），導致每次重新載入專案上下文（10+ 秒延遲 + Token 重複消耗）。v2.0 改為 **stream-json 持久進程**：
+
+| 特性 | 說明 |
+|------|------|
+| **Stream-JSON 持久進程** | 上下文只載入一次，多輪對話有記憶 |
+| **訊息佇列** | 快速連發訊息不會遺失，依序處理 |
+| **自動重連** | 進程死亡後下次訊息自動重啟，使用者無感 |
+| **Typing 心跳** | Claude 思考時 Telegram 顯示「正在輸入...」|
+| **殭屍進程清理** | 服務啟動/關閉時自動清理殘留進程 |
+| **輸出緩衝** | 800ms 批次發送，附帶 token 用量與耗時統計 |
+
+#### 指令系統
+
+| 指令 | 功能 |
+|------|------|
+| `/new [路徑]` | 開新終端 — 結束現有進程，啟動新的 Claude 會話 |
+| `/stop` | 停止終端 — 結束 Claude 進程 |
+| `/clear` | 清除記憶 — 清空對話上下文 |
+| `/status` | 查看狀態 — 運行中/已停止、模型、工作目錄、對話輪數、累計 token |
+| `/model <name>` | 切換模型 — haiku / sonnet / opus |
+| `/cd <path>` | 切換工作目錄 |
+| `/bookmark add <name> <path>` | 儲存路徑書籤 |
+
+#### 快速部署
+
+```bash
+cd telegram-bridge
+cp .env.example .env
+# 編輯 .env：填入 TELEGRAM_BOT_TOKEN + ALLOWED_USER_IDS
+npm install
+npm run dev
+```
+
+> 詳細設定步驟請見 `telegram-bridge/SETUP.md`（含 BotFather 建立教學）。
 
 ---
 
