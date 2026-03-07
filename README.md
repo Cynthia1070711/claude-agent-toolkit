@@ -1,10 +1,65 @@
 # Claude Agent Toolkit
 
-**AI Agent 開發方法論工具包 — 多引擎協作 · Pipeline 自動化 · 記憶庫策略 · Token 減量**
+**多 Agent 協作策略 · 半自動化排程 · 規格驅動開發 · 跨對話知識累積**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![English](https://img.shields.io/badge/lang-English-blue)](README.en.md)
 
-> 從「直覺式編碼」（Vibe Coding）邁向「規格驅動開發」（Spec-Driven Development）—— 以 **[BMAD Method](https://github.com/bmadcode/BMAD-METHOD)** 規格驅動工作流為核心骨架，整合 **[Everything Claude Code](https://github.com/anthropics/courses)**（Anthropic 黑客松冠軍專案）的 Token 經濟學與持續學習系統，再疊加實戰驗證的多 Agent 協作策略、Context Memory DB、自動化排程系統，為 AI 輔助開發提供完整的方法論基礎設施。
+> 📖 [English version available →](README.en.md)
+
+---
+
+## 這個專案是什麼？
+
+一套**可直接部署到任何專案的 AI Agent 開發方法論工具包**，從「直覺式編碼」（Vibe Coding）邁向「規格驅動開發」（Spec-Driven Development）。
+
+### 主開發策略
+
+```
+Antigravity IDE  +  Claude Code CLI（主力）  +  BMAD Method v6
+     ↓                    ↓                        ↓
+  E2E 測試           架構決策 / CR            四階段 SDLC 骨架
+  UI 開發輔助        Sprint 指揮官            34+ 標準化工作流
+```
+
+### 整合三大體系
+
+| # | 整合項目 | 說明 |
+|:-:|---------|------|
+| 1 | **Claude Token 減量策略** | 靜態消耗 15.4K → 3.6K tokens（-76.5%），MEMORY.md 精簡 90%+，Prompt Caching 快取殺手消除 |
+| 2 | **多 Agent 協作** | Gemini CLI · Rovo Dev CLI · Antigravity IDE 分工矩陣 + 交接 SOP + 並行檔案鎖 |
+| 3 | **[Everything Claude Code](https://github.com/anthropics/courses)**（Anthropic 黑客松冠軍） | Token 經濟學 · 事件驅動 Hooks · 持續學習 v2 · AgentShield 安全審計 |
+
+### 擴充其他 CLI Agent
+
+本工具包提供**開放式擴充架構**，可自行加入其他 AI CLI 工具：
+
+1. **先彙整 CLI 使用手冊** — 參考 `guides/` 目錄中的現有指南格式
+2. **準備相關程式範例** — Hook 腳本、配置模板、指令對照表
+3. **由 Claude Opus 4.6 部署** — 讀取部署手冊 `deployment/開發前環境部署_v3.0.0.md` 自動完成配置
+
+```
+guides/
+├── Claude Code 入門指南.md       ← 已提供
+├── Gemini CLI 入門指南.md        ← 已提供
+├── Antigravity 入門指南.md       ← 已提供
+├── Rovo Dev CLI 入門指南.md      ← 已提供
+├── Copilot CLI 使用手冊編撰指南.md ← 已提供
+└── <your-cli-guide>.md           ← 自行擴充
+```
+
+### 核心優勢一覽
+
+| 優勢 | 說明 |
+|------|------|
+| 🤖 **多 Agent 半自動化排程** | Pipeline 自動化 + Token 安全閥 + Telegram 遠端控制，Sprint 可半自動推進 |
+| 📋 **規格驅動開發** | BMAD Method 四階段 SDLC（分析 → 規劃 → 架構 → 實施），每階段有品質閘門 |
+| 🧠 **跨對話知識累積** | Context Memory DB（SQLite + MCP Server），Agent 不再每次從零開始 |
+| 💰 **Token 極致精簡** | 靜態稅降低 76.5%，Workflow 開銷降低 30%+，每個 token 都花在刀口上 |
+| 🔄 **多引擎無縫協作** | 統一憲章 + Agent ID 體系 + 交接 SOP，四引擎同步工作不衝突 |
+| 📡 **Telegram 遠端操控** | 手機即可監控和指揮 Claude CLI，離開電腦也能推進專案 |
+| 📦 **一鍵可部署** | 所有配置模板、腳本、Rules 打包完成，新專案 5 分鐘內完成環境建置 |
+| 🔧 **開放式擴充** | 提供 CLI 指南模板 + 配置模板框架，可自由加入新的 AI CLI 工具 |
 
 ---
 
