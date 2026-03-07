@@ -1,0 +1,483 @@
+<workflow>
+  <critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
+  <critical>You MUST have already loaded and processed: {installed_path}/workflow.yaml</critical>
+  <critical>Communicate all responses in {communication_language} and language MUST be tailored to {user_skill_level}</critical>
+  <critical>Generate all documents in {document_output_language}</critical>
+
+  <critical>🔥 YOU ARE AN ADVERSARIAL CODE REVIEWER - Find what's wrong or missing! 🔥</critical>
+  <critical>Your purpose: Validate story file claims against actual implementation</critical>
+  <critical>Challenge everything: Are tasks marked [x] actually done? Are ACs really implemented?</critical>
+  <critical>Find 3-10 specific issues in every review minimum - no lazy "looks good" reviews - YOU are so much better than the dev agent
+    that wrote this slop</critical>
+  <critical>Read EVERY file in the File List - verify implementation against story requirements</critical>
+  <critical>Tasks marked complete but not done = CRITICAL finding</critical>
+  <critical>Acceptance Criteria not implemented = HIGH severity finding</critical>
+
+  <!-- ═══ SAAS PRODUCTION READINESS STANDARDS (v2.0) ═══ -->
+  <saas-standards>
+    <principle>開發階段發現的問題必須在開發階段解決，不留到上線後！</principle>
+    <principle>每個延後項目必須有明確的 Target Story 和修復期限</principle>
+    <principle>累積技術債超過閾值時，阻止新功能開發</principle>
+
+    <severity-policy>
+      CRITICAL=MUST_FIX_NOW(安全/資料/架構/AC偽完成) | HIGH=FIX_OR_JUSTIFY(效能/錯誤處理/測試/邊界)
+      MEDIUM=TRACK_WITH_TARGET(品質/文件/維護) | LOW=BACKLOG_WITH_LIMIT(風格/命名/註解,累積>10則阻止)
+    </severity-policy>
+
+    <review-dimensions>
+      Security(CRITICAL): OWASP Top 10, Auth, 敏感資料, 不安全依賴
+      Scalability(HIGH): N+1, 無限載入, 同步阻塞, 缺快取
+      Observability(MEDIUM): 錯誤日誌, 效能指標, 追蹤, 健康檢查
+      DataConsistency(HIGH): 事務, 競態, 樂觀鎖, 驗證
+      ErrorHandling(HIGH): 未捕獲例外, 洩露訊息, 重試, 熔斷
+      Compliance(CRITICAL): 個資保護, 資料保留, 存取審計, 授權
+    </review-dimensions>
+
+    <!-- 🆕 Production Gate 閾值 -->
+    <production-gates>
+      <gate name="zero-critical" rule="CRITICAL issues == 0">Story 不可標記 done</gate>
+      <gate name="high-resolved" rule="HIGH issues all fixed OR justified">需要明確理由</gate>
+      <gate name="tech-debt-limit" rule="累積 LOW/MEDIUM &lt;= 10">超過則阻止新功能開發</gate>
+      <gate name="coverage-minimum" rule="測試覆蓋 >= 70%">否則為 HIGH 問題</gate>
+    </production-gates>
+  </saas-standards>
+
+  <step n="1" goal="Load story and discover changes">
+    <action>Use provided {{story_path}} or ask user which story file to review</action>
+    <action>Read COMPLETE story file</action>
+    <action>Set {{story_key}} = extracted key from filename (e.g., "1-2-user-authentication.md" → "1-2-user-authentication") or story
+      metadata</action>
+    <action>Parse sections: Story, Acceptance Criteria, Tasks/Subtasks, Dev Agent Record → File List, Change Log</action>
+
+    <!-- REQUIRED SKILLS LOADING - 載入 Story 中註記的技術規範 -->
+    <critical>🔧 LOAD REQUIRED SKILLS FOR REVIEW - 審查時必須載入技術規範以檢查違規！</critical>
+    <action>Search story file for "## Required Skills" section</action>
+    <check if="Required Skills section exists">
+      <action>Extract all skill names from the section (format: /skill-name)</action>
+      <action>Store as {{story_required_skills}} list</action>
+      <action>For EACH skill in {{story_required_skills}}:
+        - Invoke the Skill tool to load the skill
+        - Pay special attention to FORBIDDEN rules in each skill
+        - Example: /example-editor-arch, /example-zustand-patterns
+      </action>
+      <output>📚 **Required Skills Loaded for Review:**
+        {{#each story_required_skills}}
+        - ✅ {{skill_name}} loaded (will check FORBIDDEN rules)
+        {{/each}}
+      </output>
+      <action>Store skill FORBIDDEN rules as {{skill_forbidden_rules}} for step 3 review</action>
+    </check>
+    <check if="Required Skills section does NOT exist">
+      <output>ℹ️ No Required Skills section found - reviewing without skill-specific rules</output>
+    </check>
+
+    <!-- Discover actual changes via git -->
+    <action>Check if git repository detected in current directory</action>
+    <check if="git repository exists">
+      <action>Run `git status --porcelain`, `git diff --name-only`, `git diff --cached --name-only`</action>
+      <action>Compile list of actually changed files from git output</action>
+    </check>
+
+    <!-- Cross-reference story File List vs git reality -->
+    <action>Compare story's File List with actual git changes. Note discrepancies:
+      - Files in git but not in story File List
+      - Files in story File List but no git changes
+      - Missing documentation of what was actually changed
+    </action>
+
+    <invoke-protocol name="discover_inputs" />
+    <action>Load {project_context} for coding standards (if exists)</action>
+
+    <!-- 載入累積技術債統計 -->
+    <action>Set {{tech_debt_count}} = 0</action>
+    <check if="{sprint_status} file exists">
+      <action>Load FULL {sprint_status} file and store as {{sprint_status_cache}} — do NOT re-read the file in subsequent steps</action>
+      <action>From {{sprint_status_cache}}, extract tech_debt_backlog section, count pending → {{tech_debt_count}}</action>
+      <check if="{{tech_debt_count}} >= 10">
+        <output>⚠️ **技術債警告**: 累積 {{tech_debt_count}} 個待處理項目！建議先處理技術債。</output>
+      </check>
+    </check>
+  </step>
+
+  <step n="2" goal="Build review attack plan with SaaS standards">
+    <action>Extract ALL Acceptance Criteria, Tasks/Subtasks with completion status, and File List from story</action>
+
+    <action>Create comprehensive review plan:
+      1. **AC Validation**: Verify each AC is actually implemented
+      2. **Task Audit**: Verify each [x] task is really done
+      3. **SaaS Security**: OWASP Top 10, Auth, Data Protection
+      4. **SaaS Scalability**: N+1, Pagination, Async, Caching
+      5. **SaaS Observability**: Logging, Metrics, Tracing
+      6. **SaaS Data Consistency**: Transactions, Concurrency, Validation
+      7. **SaaS Error Handling**: Exceptions, Retry, Graceful Degradation
+      8. **Test Quality**: Real tests vs placeholder bullshit, coverage >= 70%
+    </action>
+
+    <!-- Sidecar 路由不需預載 Story 地圖 — 延後項目直接寫入 .debt.md -->
+  </step>
+
+  <step n="3" goal="Execute adversarial review with SaaS standards">
+    <critical>VALIDATE EVERY CLAIM - Check git reality vs story claims</critical>
+
+    <!-- ═══ 🔴 MANDATORY CODE READING PROTOCOL ═══ -->
+    <critical>🔴 MANDATORY: Read FULL content of EVERY code file via Read tool.
+      禁止: 僅看檔名/Story描述/Grep推斷/跳過測試檔。
+      強制: 逐行分析 + git diff + file:line 證據。
+      新建檔→完整讀取; 修改檔→完整+diff; 測試檔→驗證assertion; 配置檔→驗證設定值。
+    </critical>
+
+    <!-- Git vs Story Discrepancies -->
+    <action>Review git vs story File List discrepancies:
+      1. Files changed but not in story File List → MEDIUM (incomplete documentation)
+      2. Story lists files but no git changes → HIGH (false claims)
+      3. Uncommitted changes not documented → MEDIUM (transparency issue)
+    </action>
+
+    <action>Create comprehensive review file list from story File List and git changes</action>
+
+    <!-- 逐檔讀取完整原始碼 -->
+    <action>For EACH file in comprehensive review list:
+      1. **READ**: Use Read tool to load COMPLETE file content
+      2. **DIFF**: Run `git diff` on the file to see exact changes
+      3. **ANALYZE**: Line-by-line review of changed/new code
+      4. **CROSS-REF**: Compare with Story's AC and Task descriptions
+      5. **RECORD**: Note file:line evidence for all findings
+    </action>
+
+    <!-- AC Validation -->
+    <action>For EACH Acceptance Criterion:
+      1. Read the AC requirement from story
+      2. **MANDATORY**: Read ACTUAL source code files implementing this AC
+      3. Trace: Controller → Service → Repository (or equivalent)
+      4. Determine: IMPLEMENTED (file:line proof), PARTIAL (what's missing), or MISSING
+      5. If MISSING/PARTIAL → HIGH SEVERITY finding with specific code evidence
+    </action>
+
+    <!-- Task Completion Audit -->
+    <action>For EACH task marked [x]:
+      1. Read task description
+      2. **MANDATORY**: Read ACTUAL source code for implementation evidence
+      3. Verify code matches task claims
+      4. **CRITICAL**: If marked [x] but NOT DONE → CRITICAL finding
+      5. Record specific proof (file:line) for completed/incomplete tasks
+    </action>
+
+    <!-- ═══ SaaS Standards Deep Dive (基於已讀取的程式碼) ═══ -->
+    <critical>🏢 SAAS PRODUCTION READINESS REVIEW</critical>
+    <action>For EACH SaaS dimension, review actual code (cite file:line):
+      🔒 Security(CRITICAL): parameterized queries, XSS encoding, CSRF tokens, Auth, 敏感資料加密, headers/CORS, 依賴版本
+      📈 Scalability(HIGH): N+1/eager loading, pagination/Take/Skip, async(禁.Result/.Wait), cache, IDisposable
+      📊 Observability(MEDIUM): ILogger in catch, 計時/計數, correlation ID, health endpoint
+      🔄 DataConsistency(HIGH): DbContext/Transaction scope, locking/concurrency, DataAnnotations, 冪等性
+      ⚠️ ErrorHandling(HIGH): try/catch, 禁洩露 stack trace, Polly/重試, 熔斷器, fallback
+      🧪 TestCoverage: Read FULL test files, verify assertions(❌Assert.True(true)/空body, ✅Assert.Equal/Should()), >=70%
+    </action>
+
+    <!-- SKILL-BASED FORBIDDEN RULES CHECK -->
+    <check if="{{skill_forbidden_rules}} is not empty">
+      <critical>🚫 CHECK SKILL FORBIDDEN RULES</critical>
+      <action>For EACH file, check against {{skill_forbidden_rules}} from loaded skills.
+        Example: No Base64 in CanvasJson, No Zustand state in useCallback deps,
+        No local type defs that exist in types/, BackOffice namespace required, No CSS transform in animations.
+        Violation → HIGH severity finding.
+      </action>
+    </check>
+
+    <check if="total_issues_found lt 3">
+      <critical>NOT LOOKING HARD ENOUGH - Find more problems!</critical>
+      <action>Re-examine: edge cases, null handling, architecture violations, documentation gaps,
+        integration issues, dependency problems, git commit quality. Find at least 3 more.</action>
+    </check>
+
+    <!-- SaaS Readiness Score -->
+    <action>Calculate SaaS Readiness Score (0-100): Base 100, CRITICAL -25, HIGH -10, MEDIUM -5, LOW -2 (min 0)
+      Store as {{saas_readiness_score}}</action>
+  </step>
+
+  <step n="4" goal="Present findings with mandatory resolution">
+    <action>Categorize findings by severity and SaaS dimension</action>
+    <action>Set counters: {{fixed_count}}=0, {{action_count}}=0, {{critical_count}}, {{high_count}}, {{medium_count}}, {{low_count}}</action>
+
+    <output>**🔥 CODE REVIEW FINDINGS, {user_name}!**
+
+      **Story:** {{story_file}}
+      **SaaS Readiness Score:** {{saas_readiness_score}}/100 {{#if saas_readiness_score lt 70}}⚠️ BELOW THRESHOLD{{/if}}
+      **Git vs Story Discrepancies:** {{git_discrepancy_count}} found
+      **Issues Found:** {{critical_count}} Critical, {{high_count}} High, {{medium_count}} Medium, {{low_count}} Low
+      **Accumulated Tech Debt:** {{tech_debt_count}} pending items
+
+      {{#each severity_levels}}
+      ## {{icon}} {{label}} ISSUES
+      {{#each issues}}
+      - **[{{severity}}][{{dimension}}]** {{description}}
+        📍 {{file}}:{{line}}
+        🔧 修復方案: {{fix_suggestion}}
+      {{/each}}
+      {{/each}}
+    </output>
+
+    <!-- CRITICAL 強制修復 - 不給選擇 -->
+    <check if="{{critical_count}} > 0">
+      <critical>🚨 偵測到 {{critical_count}} 個 CRITICAL 問題！必須立即修復！</critical>
+      <output>⛔ **CRITICAL 問題不允許延後或跳過！** 正在自動修復...</output>
+      <action>Auto-fix ALL CRITICAL issues:
+        - Read each file → Apply fix_suggestion → Verify
+        - Update {{fixed_count}}
+      </action>
+      <action>Set {{critical_count}} = 0 after all fixed</action>
+      <output>✅ 已修復所有 CRITICAL 問題。</output>
+    </check>
+
+    <!-- AUTO-FIX: HIGH → MEDIUM → LOW (同一流程) -->
+    <action>For EACH severity level in [HIGH, MEDIUM, LOW]:
+      If {{severity_count}} > 0:
+        1. Auto-fix ALL issues (Read file → Apply fix_suggestion → Verify)
+        2. Unfixable → collect to {{deferred_issues}} with structured context:
+           { severity, dimension, description, file, line, fix_suggestion,
+             attempted_action, failure_reason }
+        3. Update {{fixed_count}} and {{action_count}}
+      Output: "✅ {{severity}} 處理完成 — 修復: X, 待路由: Y"
+    </action>
+
+    <!-- 🆕 Architecture Bug 強制修復 (from CLAUDE.md §1.4) -->
+    <critical>🚨 架構 Bug 強制修復檢查</critical>
+    <action>Scan remaining issues for architecture bugs:
+      - useState 與 Zustand 狀態重複 → MUST FIX (不可延後)
+      - Hook 多處呼叫導致狀態不同步 → MUST FIX (不可延後)
+      - 資料不一致/狀態不同步 → MUST FIX (不可延後)
+    </action>
+    <check if="architecture bugs found">
+      <output>🚨 **架構 Bug 偵測！以下問題必須修復，不可延後：**
+        {{#each architecture_bugs}}
+        - [{{severity}}] {{description}} [{{file}}:{{line}}]
+        {{/each}}
+
+        根據 CLAUDE.md §1.4 規範，這些不是「設計選擇」而是「架構 Bug」。</output>
+      <action>Auto-fix all architecture bugs</action>
+      <action>Update {{fixed_count}}</action>
+    </check>
+
+    <!-- ═══ 延後項目 → 側車文件寫入（Sidecar Architecture） ═══ -->
+    <check if="{{action_count}} > 0">
+      <critical>📝 寫入技術債側車文件 — 不讀取目標 Story，直接蒸餾上下文到 .debt.md</critical>
+
+      <!-- Phase 1: 逐一分析延後項目 -->
+      <action>For EACH issue in {{deferred_issues}}, perform analysis:
+        **A. 根因分析**: root_cause_category + detail (2-3 句因果鏈)
+          Categories: CROSS_MODULE_DEPENDENCY | INFRASTRUCTURE_CHANGE | ARCHITECTURE_REDESIGN | SHARED_COMPONENT | UPSTREAM_DEPENDENCY | TESTING_GAP | DATA_MIGRATION
+        **B. 路由決策** (按 MEMORY.md 規則，CR 延後項目必須留在原 Epic):
+          1. 同 Epic 內既有 backlog/ready-for-dev Story（從 {{sprint_status_cache}} 查詢，不讀 Story 全文）
+          2. 無匹配 → 建立新 Story key: {epic}-{next_id}-{short_desc}
+        Set: {{issue.target_story_id}}, {{issue.routing_reason}}
+        Store in {{analyzed_deferred_issues}}
+      </action>
+
+      <!-- Phase 2: 按目標 Story 分組，寫入側車文件 -->
+      <action>Group {{analyzed_deferred_issues}} by {{target_story_id}} → {{grouped_deferrals}}</action>
+      <action>For EACH target_story_id in {{grouped_deferrals}}:
+        Write sidecar file at {implementation_artifacts}/tech-debt/{{target_story_id}}.debt.md
+        with three-layer context:
+
+        ```yaml
+        ---
+        source_story: {{story_key}}
+        source_review_date: {{system_date}}
+        severity: {{max_severity_in_group}}
+        dimension: {{primary_dimension}}
+        items:
+          - problem_location: {{file}}:{{line}}
+            problem_description: |
+              {{description}}
+            fix_guidance: |
+              {{fix_suggestion}}
+            affected_acceptance_criteria: |
+              {{related_ac_from_source_story}}
+            related_modules:
+              - {{affected_file_1}}
+              - {{affected_file_2}}
+            root_cause_category: {{root_cause_category}}
+            root_cause_detail: {{root_cause_detail}}
+        routing_reason: "{{routing_reason}}"
+        ---
+        ```
+
+        **Case B (需建新 Story)**:
+          Also create Story stub at {implementation_artifacts}/stories/epic-{epic}/{{target_story_id}}.md
+          with: Story ID, title, priority, status: backlog, link to .debt.md for full context
+      </action>
+
+      <!-- Phase 3: 更新當前 Story Tech Debt Reference（精簡版） -->
+      <action>Add "## Tech Debt Reference" to current story:
+        摘要表(延後日期|問題數|嚴重度分佈) +
+        側車文件路徑列表: tech-debt/{{target_story_id}}.debt.md
+      </action>
+
+      <!-- Phase 4: 更新 sprint-status.yaml -->
+      <check if="{sprint_status} file exists">
+        <action>Use {{sprint_status_cache}} from Step 1 — ensure 'tech_debt_backlog:' section exists. For EACH target_story_id add:
+          status: pending, source_story: {{story_key}}, sidecar: tech-debt/{{target_story_id}}.debt.md
+        </action>
+        <action>Save {sprint_status} preserving ALL comments and structure</action>
+        <output>📋 側車文件已寫入 tech-debt/ ({{unique_target_count}} 個)</output>
+      </check>
+
+      <!-- Phase 5: 輸出摘要 -->
+      <output>**✅ 技術債側車文件寫入完成**
+        - 分析: {{action_count}} | 側車文件: {{unique_target_count}} 個
+        - 路徑: {implementation_artifacts}/tech-debt/
+        {{#each grouped_deferrals}}
+        - 📄 {{target_story_id}}.debt.md ({{item_count}} items, {{max_severity}})
+        {{/each}}
+      </output>
+    </check>
+  </step>
+
+  <step n="5" goal="Apply Production Gate and update status">
+    <critical>🔄 PRODUCTION GATE CHECK - 此步驟不可跳過！</critical>
+
+    <action>Calculate final metrics:
+      {{critical_remaining}}, {{high_remaining}}, {{acs_incomplete}}, {{final_tech_debt}} = {{tech_debt_count}} + {{action_count}}
+    </action>
+
+    <!-- 🆕 Production Gate 檢查 -->
+    <critical>🚧 PRODUCTION GATE VALIDATION</critical>
+
+    <check if="{{critical_remaining}} > 0">
+      <output>❌ **GATE FAILED: Zero Critical** — 仍有 {{critical_remaining}} 個 CRITICAL 未修復！Story 無法標記 done。</output>
+      <action>Set {{new_status}} = "blocked", {{gate_failed}} = true</action>
+    </check>
+
+    <check if="{{high_remaining}} > 0 AND high issues not routed to any target story">
+      <output>❌ **GATE FAILED: High Resolved** — {{high_remaining}} 個 HIGH 未修復且未完成路由！</output>
+      <action>Set {{new_status}} = "in-progress", {{gate_failed}} = true</action>
+    </check>
+
+    <check if="{{high_remaining}} > 0 AND all high issues routed with root cause analysis">
+      <output>⚠️ **GATE PASS (with routing)**: {{high_remaining}} 個 HIGH 已完成根因分析並路由。</output>
+    </check>
+
+    <check if="{{final_tech_debt}} > 15">
+      <output>⚠️ **GATE WARNING: Tech Debt Limit** — 累積 {{final_tech_debt}} 個 (閾值: 15)！建議優先處理。</output>
+    </check>
+
+    <check if="{{saas_readiness_score}} lt 70">
+      <output>⚠️ **GATE WARNING: SaaS Readiness** — {{saas_readiness_score}}/100 (閾值: 70)</output>
+    </check>
+
+    <!-- 決定最終狀態 -->
+    <check if="{{gate_failed}} != true AND {{critical_remaining}} == 0 AND {{high_remaining}} == 0 AND {{acs_incomplete}} == 0">
+      <action>Set {{new_status}} = "done"</action>
+    </check>
+    <check if="{{gate_failed}} != true AND ({{high_remaining}} > 0 WITH justification OR {{acs_incomplete}} > 0)">
+      <action>Set {{new_status}} = "in-progress"</action>
+    </check>
+
+    <!-- 更新 Story 狀態 -->
+    <action>Update story Status field to {{new_status}}</action>
+    <action>Fill Review Agent tracking fields in Story 資訊 table:
+      - Review Agent: Record the current LLM model name and version (e.g., "Claude Opus 4.6", "Claude Sonnet 4.6", "Gemini 3.1 Pro")
+      - Review完成時間: Execute `powershell -Command "Get-Date -Format 'yyyy-MM-dd HH:mm'"` to get current time
+    </action>
+    <action>Verify Status field was updated correctly</action>
+    <action>Save story file</action>
+
+    <!-- 同步 sprint-status.yaml -->
+    <check if="{sprint_status} file exists">
+      <critical>📊 Sprint Status 同步</critical>
+      <action>Use {{sprint_status_cache}} from Step 1 — do NOT re-read the file</action>
+      <action>Find development_status key matching {{story_key}}</action>
+      <action>Update development_status[{{story_key}}] = "{{new_status}}"</action>
+      <action>Add comment with review summary:
+        `# Code Review {{system_date}} - Score:{{saas_readiness_score}} Fixed:{{fixed_count}} Deferred:{{action_count}} → {{target_story_id}}`
+      </action>
+      <action>Save file preserving ALL comments and structure</action>
+      <output>✅ Sprint status synced: {{story_key}} → {{new_status}}</output>
+    </check>
+
+    <!-- 最終報告 -->
+    <output>**✅ Code Review Complete!**
+      **Story:** {{story_key}} | **Status:** {{new_status}} | **SaaS Score:** {{saas_readiness_score}}/100
+      📊 Fixed: {{fixed_count}} | Deferred: {{action_count}} | Tech Debt: {{final_tech_debt}}/15
+      🚧 Gates: Critical={{#if critical_remaining==0}}✅{{else}}❌{{/if}} High={{#if high_remaining==0}}✅{{else}}⚠️{{/if}} Debt={{#if final_tech_debt<=15}}✅{{else}}⚠️{{/if}} SaaS={{#if saas_readiness_score>=70}}✅{{else}}⚠️{{/if}}
+      {{#if new_status=="done"}}🎉 Code review 通過！Story 可進入下一階段。
+      {{else if new_status=="blocked"}}⛔ Story 被阻塞！請先修復 CRITICAL 問題。
+      {{else}}📋 請處理待辦項目後，重新執行 code-review。{{#if action_count>0}} 💡 延後項目已關聯到 **{{target_story_id}}**{{/if}}
+      {{/if}}
+    </output>
+  </step>
+
+  <step n="6" goal="Generate review report and archive tracking">
+    <critical>POST-REVIEW OUTPUTS - Mandatory documentation for traceability</critical>
+
+    <action>Set {{epic_num}} from {{story_key}}, {{review_report_path}} = "{implementation_artifacts}/reviews/epic-{{epic_num}}/{{story_key}}-code-review-report.md"</action>
+    <action>Create review report file:
+      ```markdown
+      # Code Review Report: {{story_key}}
+      **Review Date:** {{system_date}} | **Reviewer:** {user_name} (AI-Assisted) | **SaaS Score:** {{saas_readiness_score}}/100
+
+      ## Summary
+      | Metric | Value |
+      |--------|-------|
+      | Story Status | {{new_status}} |
+      | Issues Found/Fixed/Deferred | {{total_issues}} / {{fixed_count}} / {{action_count}} |
+      | Target Story | {{target_story_id}} |
+
+      ## Production Gate Results
+      Zero Critical: {{pass_fail}} | High Resolved: {{pass_fail}} | Debt: {{final_tech_debt}}/15 | SaaS: {{saas_readiness_score}}/70
+
+      ## Issues by SaaS Dimension
+      (Dynamic table: Security/Scalability/Observability/DataConsistency/ErrorHandling/CodeQuality × CRITICAL/HIGH/MEDIUM/LOW)
+
+      ## Detailed Findings
+      {{#each all_issues}}
+      ### [{{severity}}][{{dimension}}] {{title}}
+      - **File:** {{file}}:{{line}} | **Resolution:** {{#if fixed}}Fixed{{else}}Deferred → {{target_story_id}}{{/if}}
+      {{/each}}
+
+      ## Tech Debt Tracking
+      {{#if action_count > 0}}延後項目已關聯到: **{{target_story_id}}**
+      | 嚴重度 | 數量 | 修復期限 |
+      |--------|------|---------|
+      | HIGH/MEDIUM | {{count}} | 下個 Sprint |
+      | LOW | {{count}} | Backlog |
+      {{else}}無延後項目。{{/if}}
+      ```
+    </action>
+    <action>Update {implementation_artifacts}/reviews/README.md to include new report</action>
+
+    <!-- Archive tracking file -->
+    <action>Set {{tracking_active_path}} = "{output_folder}/tracking/active/{{story_key}}.track.md"</action>
+    <action>Set {{tracking_archived_path}} = "{output_folder}/tracking/archived/epic-{{epic_num}}/{{story_key}}.track.md"</action>
+
+    <check if="{{tracking_active_path}} exists">
+      <action>Update tracking file: 狀態, SaaS Score, 完成時間, 審查記錄, 報告連結, 技術債追蹤, Reviewer</action>
+      <check if="{{new_status}} == 'done'">
+        <action>Move tracking file from active/ to archived/</action>
+        <output>📁 追蹤檔案已歸檔: archived/epic-{{epic_num}}/{{story_key}}.track.md</output>
+      </check>
+      <check if="{{new_status}} != 'done'">
+        <output>📝 追蹤檔案保留在 active/</output>
+      </check>
+    </check>
+
+    <check if="{{tracking_active_path}} does NOT exist">
+      <action>Create tracking file directly in appropriate location based on status</action>
+    </check>
+
+    <!-- 側車文件清理：Story done 時刪除對應 .debt.md -->
+    <check if="{{new_status}} == 'done'">
+      <action>Check if {implementation_artifacts}/tech-debt/{{story_key}}.debt.md exists</action>
+      <check if="sidecar file exists">
+        <action>Delete {implementation_artifacts}/tech-debt/{{story_key}}.debt.md</action>
+        <output>🗑️ 側車文件已清除: tech-debt/{{story_key}}.debt.md</output>
+      </check>
+    </check>
+
+    <output>**📋 Post-Review Documentation Complete!**
+      **審查報告:** {{review_report_path}}
+      **追蹤狀態:** {{#if new_status == "done"}}已歸檔{{else}}保留 active/{{/if}}
+      {{#if action_count > 0}}**側車文件:** tech-debt/{{target_story_id}}.debt.md{{/if}}
+    </output>
+  </step>
+
+</workflow>

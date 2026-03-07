@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/appsettings.Development.json)",
+      "Read(**/appsettings.Production.json)",
+      "Read(**/credentials*)",
+      "Read(**/secrets*)"
+    ]
+  }
+}

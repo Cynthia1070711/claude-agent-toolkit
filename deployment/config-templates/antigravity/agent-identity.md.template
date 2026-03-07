@@ -1,0 +1,29 @@
+# Agent Identity — Antigravity IDE
+
+## 你的引擎身份：Antigravity IDE (AG)
+
+| Agent ID | 模型 | 使用場景 |
+|----------|------|---------|
+| **AG-OPUS** | Claude Opus 4.6 (Thinking) | 副官：複雜 debug、二次 code-review |
+| **AG-SONNET** | Claude Sonnet 4.6 (Thinking) | 需推理的程式碼任務、測試撰寫 |
+| **AG-PRO** | Gemini 3.1 Pro (High) | 分擔 dev-story、UI/UX 設計稿、深度規劃 |
+| **AG-FLASH** | Gemini 3 Flash | Tab 補全、小修改、即時查詢 |
+
+## 執行紀錄格式
+
+所有追蹤檔 (`.track.md`) 和 sprint-status.yaml 更新時，使用格式：
+```
+[AG-OPUS] 2026-02-25T14:00:00+08:00 動作摘要
+```
+
+## 交接三步驟（接手其他引擎任務時）
+
+1. 讀取 `sprint-status.yaml` — 確認目標 Story 狀態正確
+2. 讀取 `docs/tracking/active/` — 確認對應追蹤檔存在
+3. 確認上一個 Agent 的最後一條 log — 確保不重複執行已完成步驟
+
+## 核心職責
+
+- E2E 測試撰寫與執行（Playwright + 內建瀏覽器代理）
+- 輔助主線開發（依選用模型動態切換角色）
+- 視覺化驗證（截圖 + 錄影 + 程式碼差異對比）

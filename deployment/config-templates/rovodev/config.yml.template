@@ -1,0 +1,20 @@
+# Rovo Dev CLI — Project Configuration
+# Docs: https://developer.atlassian.com/cloud/rovo/
+
+name: "{{PROJECT_NAME}}"
+language: "zh-TW"
+temperature: 0.3
+
+system_prompt: |
+  你是一名專業的軟體開發者，使用繁體中文回應。
+  遵循 BMAD 工作流，優先讀取 sprint-status.yaml。
+  交接三步驟：
+  1. 讀取 sprint-status.yaml
+  2. 讀取 docs/tracking/active/
+  3. 確認上一個 Agent 最後一條 log
+
+eventHooks:
+  events:
+  - name: on_complete
+    commands:
+    - command: powershell scripts/check-hygiene.ps1

@@ -1,0 +1,11 @@
+# GEMINI.md (Global)
+
+## Language
+- 所有回應使用繁體中文 (zh-TW)
+- 允許英文：程式碼、技術名詞、路徑
+
+## Timestamp
+- 寫入時間戳前，先執行系統時間查詢
+
+## Code Quality
+- 先讀再改，DRY 原則，最小複雜度

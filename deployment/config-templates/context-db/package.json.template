@@ -1,0 +1,17 @@
+{
+  "name": "{{PROJECT_NAME}}-context-db",
+  "version": "0.1.0",
+  "description": "AI Agent Context Memory DB — SQLite + FTS5 + MCP Server",
+  "type": "module",
+  "scripts": {
+    "init": "node scripts/init-db.js",
+    "server": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.7.0"
+  },
+  "optionalDependencies": {
+    "openai": "^6.27.0"
+  }
+}

@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.context-db/*.db
+.context-db/*.db-wal
+.context-db/*.db-shm
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build
+dist/
+build/
