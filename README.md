@@ -1,219 +1,166 @@
 # Claude Agent Toolkit
 
-**多 Agent 協作策略 · 半自動化排程 · 規格驅動開發 · 跨對話知識累積**
+**Multi-Agent Collaboration Strategy | Semi-Automated Sprint Pipeline | Shared Project Toolkit**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![English](https://img.shields.io/badge/lang-English-blue)](README.en.md)
-
-> 📖 [English version available →](README.en.md)
+[![繁體中文](https://img.shields.io/badge/lang-繁體中文-green)](README.zh-TW.md)
 
 ---
 
-## 這個專案是什麼？
+### Primary Development Strategy
 
-一套**可直接部署到任何專案的 AI Agent 開發方法論工具包**，從「直覺式編碼」（Vibe Coding）邁向「規格驅動開發」（Spec-Driven Development）。
+**Antigravity IDE + Claude Code CLI (Primary) + BMAD Method v6**
 
-### 主開發策略
+1. **Claude Token Reduction Strategy**
+   Static consumption 15.4K → 3.6K tokens (-76.5%), MEMORY.md 90%+ slimmer, Prompt Cache killer elimination. Systematically validated across 41 TRS stories covering Always-On slimming, On-Demand loading, and Workflow compression.
 
-```
-Antigravity IDE  +  Claude Code CLI（主力）  +  BMAD Method v6
-     ↓                    ↓                        ↓
-  E2E 測試           架構決策 / CR            四階段 SDLC 骨架
-  UI 開發輔助        Sprint 指揮官            34+ 標準化工作流
-```
+2. **Multi-Agent Collaboration (Gemini CLI, Rovo Dev CLI, Antigravity IDE)**
+   4-engine task matrix + handoff SOP + parallel file locks (Worktree + File Lock + Total Commit). Open extension architecture — compile your CLI usage guide + code examples, then deploy via Claude Opus 4.6 reading the deployment manual for automated setup. Guides provided for: Claude Code, Gemini CLI, Antigravity IDE, Rovo Dev CLI, Copilot CLI.
 
-### 整合三大體系
+3. **[Everything Claude Code](https://github.com/anthropics/courses) Integration (Anthropic Hackathon Winner)**
+   Token economics, Event-driven Hooks, Continuous Learning v2, AgentShield security audit. Each project can adjust its primary strategy to Everything Claude Code, BMAD Method, or custom workflows depending on its needs.
 
-| # | 整合項目 | 說明 |
-|:-:|---------|------|
-| 1 | **Claude Token 減量策略** | 靜態消耗 15.4K → 3.6K tokens（-76.5%），MEMORY.md 精簡 90%+，Prompt Caching 快取殺手消除 |
-| 2 | **多 Agent 協作** | Gemini CLI · Rovo Dev CLI · Antigravity IDE 分工矩陣 + 交接 SOP + 並行檔案鎖 |
-| 3 | **[Everything Claude Code](https://github.com/anthropics/courses)**（Anthropic 黑客松冠軍） | Token 經濟學 · 事件驅動 Hooks · 持續學習 v2 · AgentShield 安全審計 |
+4. **Context Memory DB (Vector Memory Database)**
+   SQLite + FTS5 + MCP Server — multi-agent shared memory, precise knowledge retrieval, expandable breadth. 4-layer progressive architecture:
+   - **L0 Knowledge Memory**: FTS5 full-text search + 6 MCP Tools (search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context)
+   - **L1 Code Semantic**: Roslyn AST symbol extraction + dependency graph
+   - **L2 Vector Semantic**: OpenAI Embedding + Cosine Similarity search
+   - **L3 Dynamic Injection**: UserPromptSubmit Hook auto-injects relevant context per prompt
 
-### 擴充其他 CLI Agent
+5. **Semi-Automated Sprint Pipeline (BMAD Workflows)**
+   Pipeline automation + Token safety valve + Sprint semi-auto execution. Includes batch-runner (batch execution), story-pipeline (single story end-to-end), epic-auto-pilot (entire epic auto-push), batch-audit (batch code review). Recommend **Claude Opus 4.6 as the controller**, with Sonnet/Haiku for sub-tasks.
 
-本工具包提供**開放式擴充架構**，可自行加入其他 AI CLI 工具：
+6. **Telegram Integration Strategy**
+   Remote control to launch Claude tasks from your phone. Telegram Bot Bridge v2.0 uses stream-json persistent process mode (context loaded once), supporting multi-turn conversation memory, message queue, auto-reconnect, model switching (`/model opus`), path bookmarks (`/bookmark`). Monitor progress, send commands, and switch working directories from mobile.
 
-1. **先彙整 CLI 使用手冊** — 參考 `guides/` 目錄中的現有指南格式
-2. **準備相關程式範例** — Hook 腳本、配置模板、指令對照表
-3. **由 Claude Opus 4.6 部署** — 讀取部署手冊 `deployment/開發前環境部署_v3.0.0.md` 自動完成配置
-
-```
-guides/
-├── Claude Code 入門指南.md       ← 已提供
-├── Gemini CLI 入門指南.md        ← 已提供
-├── Antigravity 入門指南.md       ← 已提供
-├── Rovo Dev CLI 入門指南.md      ← 已提供
-├── Copilot CLI 使用手冊編撰指南.md ← 已提供
-└── <your-cli-guide>.md           ← 自行擴充
-```
-
-### 核心優勢一覽
-
-| 優勢 | 說明 |
-|------|------|
-| 🤖 **多 Agent 半自動化排程** | Pipeline 自動化 + Token 安全閥 + Telegram 遠端控制，Sprint 可半自動推進 |
-| 📋 **規格驅動開發** | BMAD Method 四階段 SDLC（分析 → 規劃 → 架構 → 實施），每階段有品質閘門 |
-| 🧠 **跨對話知識累積** | Context Memory DB（SQLite + MCP Server），Agent 不再每次從零開始 |
-| 💰 **Token 極致精簡** | 靜態稅降低 76.5%，Workflow 開銷降低 30%+，每個 token 都花在刀口上 |
-| 🔄 **多引擎無縫協作** | 統一憲章 + Agent ID 體系 + 交接 SOP，四引擎同步工作不衝突 |
-| 📡 **Telegram 遠端操控** | 手機即可監控和指揮 Claude CLI，離開電腦也能推進專案 |
-| 📦 **一鍵可部署** | 所有配置模板、腳本、Rules 打包完成，新專案 5 分鐘內完成環境建置 |
-| 🔧 **開放式擴充** | 提供 CLI 指南模板 + 配置模板框架，可自由加入新的 AI CLI 工具 |
+7. **TDD / BDD Strategy Planning**
+   Test-Driven Development (RED → GREEN → IMPROVE) + Executable Spec pattern. Integrated with Context Memory TDD — query `search_tech` for historical test patterns before tasks, write new test findings after. Covers xUnit + Moq + FluentAssertions (backend) and Vitest + Playwright E2E (frontend) unified testing strategy.
 
 ---
 
-## 核心框架整合：BMAD Method × Everything Claude Code
+## What Is This?
 
-本工具包並非從零建構，而是站在兩大開源框架的肩膀上，取其精華並補其不足：
-
-### BMAD Method — 規格驅動的敏捷團隊模擬
-
-[BMAD Method](https://github.com/bmadcode/BMAD-METHOD)（Build More Architect Dreams）將 AI 視為一個完整的敏捷開發團隊，實作了「代理即程式碼」（Agent-as-Code）概念：
-
-- **12+ 專業角色**：商業分析師、產品經理、架構師、Scrum Master、開發者、QA 等，各自定義為獨立的 YAML/Markdown 檔案
-- **34+ 標準化工作流**：從產品分析到實施開發的四階段生命週期，每個階段有嚴格的 Gate Check
-- **規模自適應**：依專案複雜度自動調整（L0 單一修復 → L4 企業級系統）
-- **上下文分片**：強制將大型 PRD 切割為微小的使用者故事，確保每次執行的上下文純淨
-
-### Everything Claude Code — Anthropic 黑客松冠軍的 Token 經濟學
-
-[Everything Claude Code](https://github.com/anthropics/courses)（ECC）源自 Anthropic 黑客松冠軍團隊，經 10 個月以上高強度生產環境驗證：
-
-- **Token 經濟學**：將 200K context window 視為珍貴資源，靜態消耗從 18K 瘦身至 ~10K tokens
-- **事件驅動 Hooks**：PreToolUse / PostToolUse / SessionStart 生命週期事件，背景自動執行格式化、安全掃描
-- **持續學習 v2**：自動觀察編碼習慣，萃取帶「信心分數」的微型直覺（Instincts），演化為永久技能
-- **AgentShield**：基於 Opus 模型的紅藍軍對抗審計，掃描硬編碼金鑰與過度寬鬆權限
-
-### 我們的整合策略 — 取兩家之長
-
-| 層面 | 取自 BMAD | 取自 ECC | 本工具包的強化 |
-|------|----------|---------|--------------|
-| **流程骨架** | ✅ 四階段 SDLC + Gate Check | — | + 雙重狀態更新 + 五項同步 |
-| **角色分工** | ✅ Agent-as-Code 角色體系 | — | + 多引擎 Agent ID 體系 |
-| **Token 管控** | — | ✅ Token 經濟學理念 | + 量化基準 + 快取殺手消除 |
-| **Hooks 機制** | — | ✅ 事件驅動架構 | + File Lock + Hygiene Check |
-| **知識持久化** | — | ✅ 持續學習概念 | + Context Memory DB (SQLite + MCP) |
-| **安全防護** | — | ✅ AgentShield 理念 | + check-hygiene.ps1 |
-| **品質閘門** | ✅ code-review workflow | — | + useState/Zustand 重複偵測 |
-| **自動化** | ✅ Sprint Planning | — | + Pipeline + Auto-Pilot + Telegram |
-
-> **設計原則**：BMAD 負責「做什麼」（What），ECC 負責「怎麼省」（How to Save），本工具包負責「怎麼協作」（How to Collaborate）。
+A **ready-to-deploy AI Agent development methodology toolkit** that moves teams from "Vibe Coding" to **Spec-Driven Development (SDD)**.
 
 ---
 
-## 目錄
+## Framework Integration: BMAD Method x Everything Claude Code
 
-- [解決什麼問題？](#解決什麼問題)
-- [核心能力總覽](#核心能力總覽)
-- [架構全景](#架構全景)
-- [目錄結構](#目錄結構)
-- [快速開始](#快速開始)
-- [模組詳解](#模組詳解)
-  - [1. 多引擎協作策略](#1-多引擎協作策略)
+This toolkit stands on the shoulders of two major open-source frameworks:
+
+### BMAD Method — Spec-Driven Agile Team Simulation
+
+[BMAD Method](https://github.com/bmadcode/BMAD-METHOD) (Build More Architect Dreams) treats AI as a full agile development team with "Agent-as-Code":
+
+- **12+ Specialized Roles**: Business analyst, PM, architect, Scrum Master, developer, QA — each defined as independent YAML/Markdown files
+- **34+ Standardized Workflows**: Four-phase lifecycle from analysis to implementation, each phase with strict gate checks
+- **Scale-Adaptive**: Auto-adjusts from L0 single fix to L4 enterprise systems
+- **Context Sharding**: Forces large PRDs into atomic user stories for clean context windows
+
+### Everything Claude Code — Anthropic Hackathon Winner's Token Economics
+
+[Everything Claude Code](https://github.com/anthropics/courses) (ECC) comes from the Anthropic Hackathon winning team, validated over 10+ months of production use:
+
+- **Token Economics**: Treats 200K context window as precious — static consumption from 18K down to ~10K tokens
+- **Event-Driven Hooks**: PreToolUse / PostToolUse / SessionStart lifecycle events for background formatting and security scanning
+- **Continuous Learning v2**: Auto-observes coding habits, extracts "instincts" with confidence scores, evolves into permanent skills
+- **AgentShield**: Opus-based red/blue team audit — scans for hardcoded keys and overly permissive settings
+
+### Our Integration Strategy — Best of Both Worlds
+
+| Aspect | From BMAD | From ECC | Our Enhancement |
+|--------|----------|---------|----------------|
+| **Process** | 4-phase SDLC + Gate Check | — | + Dual status update + 5-point sync |
+| **Roles** | Agent-as-Code system | — | + Multi-engine Agent ID system |
+| **Token Control** | — | Token economics | + Quantified baselines + cache killer elimination |
+| **Hooks** | — | Event-driven architecture | + File Lock + Hygiene Check |
+| **Knowledge** | — | Continuous learning concept | + Context Memory DB (SQLite + MCP) |
+| **Security** | — | AgentShield concept | + check-hygiene.ps1 |
+| **Quality Gates** | Code review workflow | — | + useState/Zustand duplication detection |
+| **Automation** | Sprint Planning | — | + Pipeline + Auto-Pilot + Telegram |
+
+> **Design Principle**: BMAD handles "What to do", ECC handles "How to save", this toolkit handles "How to collaborate".
+
+---
+
+## Table of Contents
+
+- [Problems Solved](#problems-solved)
+- [Architecture Overview](#architecture-overview)
+- [Directory Structure](#directory-structure)
+- [Quick Start](#quick-start)
+- [Module Details](#module-details)
+  - [1. Multi-Engine Collaboration](#1-multi-engine-collaboration)
   - [2. Context Memory DB](#2-context-memory-db)
-  - [3. BMAD Method 整合與強化](#3-bmad-method-整合與強化)
-  - [4. Token 減量策略](#4-token-減量策略)
-  - [5. Pipeline 自動化](#5-pipeline-自動化)
-  - [6. 多 Agent 並行執行](#6-多-agent-並行執行)
-  - [7. Telegram 遠端控制](#7-telegram-遠端控制)
-- [研究報告索引](#研究報告索引)
-- [TRS 執行故事](#trs-執行故事)
-- [技術需求](#技術需求)
-- [授權](#授權)
+  - [3. BMAD Method Integration](#3-bmad-method-integration)
+  - [4. Token Reduction Strategy](#4-token-reduction-strategy)
+  - [5. Pipeline Automation](#5-pipeline-automation)
+  - [6. Multi-Agent Parallel Execution](#6-multi-agent-parallel-execution)
+  - [7. Telegram Remote Control](#7-telegram-remote-control)
+- [Research Reports Index](#research-reports-index)
+- [TRS Execution Stories](#trs-execution-stories)
+- [Requirements](#requirements)
+- [License](#license)
 
 ---
 
-## 解決什麼問題？
+## Problems Solved
 
-AI Agent 輔助開發面臨四個核心挑戰：
-
-| 挑戰 | 症狀 | 本工具包的解法 |
-|------|------|--------------|
-| **上下文遺失** | 每次新對話從零開始，上一次對話的 Bug 修復模式、架構決策、Code Review 教訓全部遺忘 | Context Memory DB — SQLite + MCP Server 按需查詢 |
-| **Token 浪費** | 靜態配置檔膨脹佔用 context window，Workflow 執行開銷巨大（每輪 Sprint ~31K tokens） | 四層 Token 減量架構，MEMORY.md 精簡 90%+ |
-| **多引擎衝突** | Claude Code、Gemini CLI、Antigravity IDE 等多引擎同時操作導致 commit 衝突、檔案覆蓋 | 三層並行策略（Worktree + File Lock + Total Commit） |
-| **流程碎片化** | create-story → dev-story → code-review 手動串接，每步都需人工干預 | Pipeline 自動化 + Token 安全閥 + Telegram 遠端控制 |
-| **遠端操控** | 離開電腦後無法監控或指揮 Agent 執行進度 | Telegram Bot Bridge — 手機遠端操作 Claude CLI |
+| Challenge | Symptom | Solution |
+|-----------|---------|----------|
+| **Context Loss** | Every new conversation starts from zero — bug patterns, architecture decisions, CR lessons forgotten | Context Memory DB — SQLite + MCP Server on-demand queries |
+| **Token Waste** | Bloated static configs consume context window, workflow overhead ~31K tokens/sprint | 4-layer token reduction, MEMORY.md 90%+ slimmer |
+| **Multi-Engine Conflicts** | Claude Code, Gemini CLI, Antigravity IDE operating simultaneously → commit conflicts, file overwrites | 3-layer parallel strategy (Worktree + File Lock + Total Commit) |
+| **Fragmented Workflow** | create-story → dev-story → code-review requires manual chaining | Pipeline automation + Token safety valve + Telegram remote |
+| **Remote Control** | Cannot monitor or command agents after leaving the computer | Telegram Bot Bridge — operate Claude CLI from mobile |
 
 ---
 
-## 核心能力總覽
+## Architecture Overview
+
+### Token Consumption 3-Layer Architecture
+
+| Layer | Content | Load Mode | Before | After |
+|:-----:|---------|-----------|:------:|:-----:|
+| 1 | Global `~/.claude/CLAUDE.md` | Always-On | ~3,640 | ~220 |
+| 2 | Project `CLAUDE.md` + `.claude/rules/*` | Always-On | ~11,000 | ~2,600 |
+| 3 | Skills descriptions + MCP tools | On-Demand | ~800 | ~800 |
+| **Total** | | | **~15,440** | **~3,620** |
+
+> Static consumption reduced **76.5%** — ~12K tokens freed for actual work.
+
+### Context Memory DB 4-Layer Progressive Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                   Claude Agent Toolkit                       │
-├──────────────┬──────────────┬──────────────┬────────────────┤
-│  多引擎協作   │ Context      │  BMAD        │  Pipeline      │
-│  策略        │ Memory DB    │  Overlay     │  自動化         │
-├──────────────┼──────────────┼──────────────┼────────────────┤
-│ • 4 引擎分工  │ • SQLite +   │ • dev-story  │ • batch-runner │
-│   矩陣       │   FTS5       │   強化       │ • Token 安全閥  │
-│ • 交接 SOP   │ • MCP Server │ • code-review│ • epic-auto-   │
-│ • 統一憲章   │   (6 Tools)  │   深度審查    │   pilot        │
-│ • Agent ID   │ • 四層遞進   │ • create-    │ • Telegram     │
-│   體系       │   架構       │   story 自動 │   通訊控制      │
-├──────────────┼──────────────┼──────────────┼────────────────┤
-│  Token       │  多 Agent    │  TDD/BDD     │  一鍵部署       │
-│  減量策略     │  並行執行     │  整合        │  工具包         │
-├──────────────┼──────────────┼──────────────┼────────────────┤
-│ • Always-On  │ • Worktree   │ • 可執行規格 │ • 配置模板      │
-│   瘦身       │   隔離       │   模式       │ • 部署腳本      │
-│ • On-Demand  │ • File Lock  │ • Context    │ • Rules        │
-│   按需載入    │   機制       │   Memory TDD │ • 衛生檢查      │
-│ • 快取殺手   │ • Total      │ • RED→GREEN  │ • .claudeignore │
-│   消除       │   Commit     │   →IMPROVE   │                │
-└──────────────┴──────────────┴──────────────┴────────────────┘
-```
-
----
-
-## 架構全景
-
-### Token 消耗三層架構
-
-Claude Code 每次新對話的初始 token 消耗分為三層：
-
-| 層級 | 內容 | 載入方式 | 優化前 | 優化後 |
-|:----:|------|---------|:------:|:------:|
-| Layer 1 | 全域 `~/.claude/CLAUDE.md` | Always-On | ~3,640 tokens | ~220 tokens |
-| Layer 2 | 專案 `CLAUDE.md` + `.claude/rules/*` | Always-On | ~11,000 tokens | ~2,600 tokens |
-| Layer 3 | Skills 描述 + MCP 工具 | On-Demand | ~800 tokens | ~800 tokens |
-| **合計** | | | **~15,440** | **~3,620** |
-
-> 靜態消耗降低 **76.5%**，節省的 ~12K tokens 全部回歸實際工作使用。
-
-### Context Memory DB 四層遞進架構
-
-```
-L0 知識記憶層（必要 — 零外部依賴）
-  ├── context_entries: 決策、Pattern、除錯發現、事故記錄
-  ├── tech_entries: 技術方案（成功/失敗）、Bug 修復、架構決策
-  ├── FTS5 trigram: 全文搜尋（中英文混合查詢）
+L0 Knowledge Memory Layer (Required — zero external deps)
+  ├── context_entries: decisions, patterns, debug findings, incidents
+  ├── tech_entries: technical solutions (success/fail), bug fixes, architecture decisions
+  ├── FTS5 trigram: full-text search (CJK + English)
   └── MCP Tools: search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context
 
-L1 程式碼語意層（選用 — 需 .NET SDK）
-  ├── symbol_index: class / method / interface / enum（Roslyn AST 提取）
+L1 Code Semantic Layer (Optional — requires .NET SDK)
+  ├── symbol_index: class / method / interface / enum (Roslyn AST extraction)
   ├── symbol_dependencies: calls / inherits / implements / uses
   └── MCP Tools: search_symbols / get_symbol_context
 
-L2 向量語意層（選用 — 需 OpenAI API Key）
-  ├── symbol_embeddings: text-embedding-3-small（1536 維）
-  ├── Cosine Similarity 語意搜尋
+L2 Vector Semantic Layer (Optional — requires OpenAI API Key)
+  ├── symbol_embeddings: text-embedding-3-small (1536 dimensions)
+  ├── Cosine Similarity semantic search
   └── MCP Tool: semantic_search
 
-L3 動態注入層（選用 — 需 L2）
+L3 Dynamic Injection Layer (Optional — requires L2)
   ├── UserPromptSubmit Hook
-  ├── 使用者每次提問自動注入相關程式碼上下文
+  ├── Auto-injects relevant code context per user prompt
   └── S_final = 0.6×vec + 0.2×graph + 0.2×fts
 ```
 
-### 多引擎協作架構
+### Multi-Engine Collaboration Architecture
 
 ```
 ┌─────────────────────────────────────────────────┐
-│              AGENTS.md 統一憲章                   │
-│    （四引擎共用：語言規範、目錄結構、觸發規則）       │
+│           AGENTS.md Unified Charter              │
+│  (Shared by 4 engines: language, structure,      │
+│   trigger rules)                                 │
 └──────┬──────────┬──────────┬──────────┬──────────┘
        │          │          │          │
   ┌────▼────┐ ┌───▼────┐ ┌──▼───────┐ ┌▼─────────┐
@@ -235,515 +182,376 @@ L3 動態注入層（選用 — 需 L2）
 
 ---
 
-## 目錄結構
+## Directory Structure
 
 ```
 claude-agent-toolkit/
 │
-├── 📦 deployment/                          # 一鍵部署工具包
-│   │
-│   ├── config-templates/                   # 各引擎配置模板
-│   │   ├── claude/                         # Claude Code CLI
-│   │   │   ├── CLAUDE.md.template          #   專案級指令模板（Triggers + Skills + Checklists）
-│   │   │   ├── CLAUDE.local.md.template    #   本地 Agent ID 配置
-│   │   │   ├── MEMORY.md.template          #   Auto-memory 最小化模板（~380 tokens）
-│   │   │   ├── claudeignore.template       #   .claudeignore 排除規則
-│   │   │   ├── settings.json.template      #   Hooks 配置（PreToolUse / PostToolUse）
-│   │   │   ├── settings.local.json.template#   本地 Hooks（epic-readme sync / compact snapshot）
-│   │   │   ├── hooks/                      #   Hook 腳本
-│   │   │   │   └── pre-prompt-rag.js       #     L3 Code RAG 自動注入 Hook
-│   │   │   └── rules/                      #   行為規則（Always-On，每個 ~100-200 tokens）
-│   │   │       ├── coding-style.md         #     不可變性、檔案長度、巢狀限制
-│   │   │       ├── constitutional-standard.md #  繁體中文輸出強制規則
-│   │   │       ├── context-memory-db.md    #     查詢優先 + 寫入紀律
-│   │   │       ├── git-workflow.md         #     Commit 格式、PR 規範
-│   │   │       ├── performance.md          #     Subagent 模型選擇、Plan Mode
-│   │   │       ├── security.md             #     OWASP Top 10 防護規則
-│   │   │       └── testing.md              #     TDD 流程、80% 覆蓋率
-│   │   │
-│   │   ├── context-db/                     # Context Memory DB
-│   │   │   ├── server.js                   #   MCP Server（6 Tools, stdio 傳輸）
-│   │   │   ├── package.json.template       #   依賴定義（better-sqlite3 + MCP SDK）
-│   │   │   ├── mcp.json.template           #   MCP 註冊配置
-│   │   │   └── scripts/
-│   │   │       └── init-db.js              #   SQLite Schema 初始化（WAL 模式 + FTS5）
-│   │   │
-│   │   ├── gemini/                         # Gemini CLI
-│   │   │   ├── GEMINI.md.template          #   專案級指令模板
-│   │   │   └── settings.json.template      #   context.fileName 配置
-│   │   │
-│   │   ├── antigravity/                    # Antigravity IDE
-│   │   │   └── agent-identity.md.template  #   Agent 身份配置
-│   │   │
-│   │   └── rovodev/                        # Rovo Dev CLI
-│   │       └── config.yml.template         #   Charter + System Prompt 配置
-│   │
-│   ├── scripts/                            # 自動化腳本（PowerShell）
-│   │   ├── deploy-context-db.ps1           #   Context Memory DB 一鍵部署（6 步驟）
-│   │   ├── batch-runner.ps1                #   批次 Story 執行器（IntervalSec 節流）
-│   │   ├── batch-audit.ps1                 #   批次 Code Review 審計
-│   │   ├── story-pipeline.ps1              #   Story 全流程管線（create → dev → review）
-│   │   ├── epic-auto-pilot.ps1             #   Sprint 自動執行引擎
-│   │   ├── check-hygiene.ps1               #   Commit 前衛生檢查（敏感資料掃描）
-│   │   ├── sync-epic-readme.ps1            #   Epic README 自動同步
-│   │   ├── pre-compact-snapshot.ps1        #   Context 壓縮前快照保存
-│   │   ├── file-lock-acquire.ps1           #   多 Agent 檔案鎖取得
-│   │   ├── file-lock-check.ps1             #   多 Agent 檔案鎖檢查
-│   │   └── file-lock-release.ps1           #   多 Agent 檔案鎖釋放
-│   │
-│   ├── bmad-overlay/                       # BMAD Workflow 強化覆蓋層
-│   │   └── 4-implementation/
-│   │       ├── code-review/                #   深度審查：useState vs Zustand 重複偵測
-│   │       │   ├── instructions.xml
-│   │       │   ├── checklist.md
-│   │       │   └── workflow.yaml
-│   │       ├── create-story/               #   自動 Skills 分析 + Tracking 建立
-│   │       │   ├── instructions.xml
-│   │       │   ├── checklist.md
-│   │       │   └── workflow.yaml
-│   │       └── dev-story/                  #   雙重狀態更新 + 五項同步
-│   │           ├── instructions.xml
-│   │           ├── checklist.md
-│   │           └── workflow.yaml
-│   │
-│   ├── agent-cli-guides/                   # 各引擎使用指南
-│   │   ├── README.md
-│   │   ├── claude-code-guide.md
-│   │   ├── gemini-cli-guide.md
-│   │   ├── antigravity-guide.md
-│   │   └── rovo-dev-guide.md
-│   │
-│   ├── BMAD-METHOD-main/                   # BMAD Method 原始碼（第三方, MIT）
-│   ├── everything-claude-code-main/        # Everything Claude Code（第三方）
-│   │
-│   ├── 開發前環境部署_v3.0.0.md              # 完整部署手冊（10 個 PART + 4 個附錄）
-│   ├── context-memory-db-strategy.md       # Context Memory DB 策略文件（L0~L3）
-│   ├── multi-agent-parallel-execution-strategy.md  # 多 Agent 並行策略
-│   ├── BMAD架構演進與優化策略.md              # BMAD Token 消耗量化 + ECC 整合
-│   ├── worktree-quick-reference.md         # Git Worktree 快速參考
-│   ├── Claude智能中控自動化排程/              # Pipeline 自動化排程策略
-│   │   ├── pipeline-audit-token-safety.md
-│   │   └── pipeline-audit-token-safety.track.md
-│   └── README.md                           # 部署包自身說明
+├── deployment/                            # One-click deployment package
+│   ├── config-templates/                  # Engine-specific config templates
+│   │   ├── claude/                        # Claude Code CLI
+│   │   │   ├── CLAUDE.md.template         #   Project-level instructions
+│   │   │   ├── MEMORY.md.template         #   Minimized auto-memory (~380 tokens)
+│   │   │   ├── hooks/pre-prompt-rag.js    #   L3 Code RAG auto-injection hook
+│   │   │   └── rules/*.md                 #   Behavioral rules (7 files)
+│   │   ├── context-db/                    # Context Memory DB (MCP Server + SQLite)
+│   │   ├── gemini/                        # Gemini CLI templates
+│   │   ├── antigravity/                   # Antigravity IDE templates
+│   │   └── rovodev/                       # Rovo Dev CLI templates
+│   ├── scripts/                           # Automation scripts (PowerShell)
+│   │   ├── deploy-context-db.ps1          #   Context Memory DB one-click deploy
+│   │   ├── batch-runner.ps1               #   Batch story executor
+│   │   ├── epic-auto-pilot.ps1            #   Sprint auto-execution engine
+│   │   ├── check-hygiene.ps1              #   Pre-commit hygiene check
+│   │   └── file-lock-*.ps1               #   Multi-agent file locking (3 scripts)
+│   ├── bmad-overlay/                      # BMAD workflow enhancement overlay
+│   ├── agent-cli-guides/                  # Engine-specific usage guides
+│   ├── BMAD-METHOD-main/                  # BMAD Method source (3rd party, MIT)
+│   └── everything-claude-code-main/       # Everything Claude Code (3rd party)
 │
-├── 📊 research/                            # 策略研究報告
-│   ├── token-reduction-analysis.md         # Token 減量初始分析
-│   ├── token-reduction-final-report.md     # Token 減量最終報告（16 份報告彙整）
-│   ├── multi-engine-collaboration-strategy.md  # 多引擎協作策略（四引擎規格 + 分工矩陣）
-│   ├── multi-agent-collaboration-web-research.md # 多 Agent 協作 Web 研究
-│   ├── auto-pilot-multi-agent-research.md  # Auto-Pilot 工作流研究
-│   ├── bmad-vs-everything-claude-code.md   # BMAD vs ECC 深度比較與整合方案
-│   ├── tasks-history.md                    # 研究任務歷史
-│   │
-│   ├── context-memory-db/                  # 記憶庫策略分析（多 Agent + 多模型視角）
-│   │   ├── CC-Agent記憶庫策略分析報告.md      #   Claude Code Agent 分析
-│   │   ├── AC-Agent記憶庫策略分析報告.md      #   Antigravity Agent 分析
-│   │   ├── GC-Agent記憶庫策略分析報告.md      #   Gemini CLI Agent 分析
-│   │   ├── RC-Agent記憶庫策略分析報告.md      #   Rovo Dev Agent 分析
-│   │   ├── Chatgpt分析報告*.md              #   ChatGPT 交叉驗證（3 份）
-│   │   ├── CC-sub-R8-skill-script-split.md #   Skill/Script 分離策略
-│   │   ├── CC-sub-R9-document-classification.md # 文件分類策略
-│   │   └── CC-sub-R10-workflow-sync-mechanism.md # Workflow 同步機制
-│   │
-│   ├── pipeline-automation/                # Pipeline 自動化研究
-│   │   ├── pipeline-audit-token-safety.md  #   Token 安全閥設計
-│   │   └── pipeline-audit-token-safety.track.md
-│   │
-│   └── claude-mem-reference/               # claude-mem 開源參考實作
-│       ├── ragtime/                        #   RAG 管線參考
-│       └── plugin/                         #   MCP Plugin 參考
+├── research/                              # Strategy research reports
+│   ├── token-reduction-final-report.md    # Token reduction final report (16 reports consolidated)
+│   ├── multi-engine-collaboration-strategy.md  # 4-engine specs + task matrix
+│   ├── bmad-vs-everything-claude-code.md  # BMAD vs ECC deep comparison
+│   ├── context-memory-db/                 # Memory DB analysis (multi-agent + multi-model)
+│   ├── pipeline-automation/               # Pipeline + Token safety valve
+│   └── claude-mem-reference/              # claude-mem open source reference
 │
-├── 📖 guides/                              # Agent CLI 使用指南（繁體中文）
-│   ├── Claude Code 入門指南.md
-│   ├── Gemini CLI 入門指南.md
-│   ├── Antigravity 入門指南.md
-│   ├── Rovo Dev CLI 入門指南.md
-│   ├── Copilot CLI 使用手冊編撰指南.md
-│   └── GEMINI CLI_Hooks_JSON schema說明.md
+├── guides/                                # AI CLI usage guides
+│   ├── Claude Code Guide.md
+│   ├── Gemini CLI Guide.md
+│   ├── Antigravity Guide.md
+│   ├── Rovo Dev CLI Guide.md
+│   └── Copilot CLI Guide.md
 │
-├── 📡 telegram-bridge/                     # Telegram 遠端控制 Claude CLI
-│   ├── src/                                # TypeScript 原始碼
-│   │   ├── index.ts                        #   程式進入點
-│   │   ├── telegram-bot.ts                 #   Telegram Bot UI 層（指令路由 + 輸出格式化）
-│   │   ├── claude-manager.ts               #   Claude CLI 持久進程管理器
-│   │   ├── stream-json-parser.ts           #   NDJSON 事件流解析器
-│   │   ├── session-store.ts                #   SQLite 會話持久化
-│   │   └── types.ts                        #   TypeScript 型別定義
-│   ├── PRD.md                              # 產品需求文檔（v2.0 持久進程模式）
-│   ├── technical-spec.md                   # 技術規格（三層架構 + 指令系統）
-│   ├── SETUP.md                            # 設定指南（Bot 建立 + 環境變數）
-│   ├── .env.example                        # 環境變數範例
-│   ├── package.json                        # 依賴定義
-│   └── tsconfig.json                       # TypeScript 配置
+├── telegram-bridge/                       # Telegram remote control for Claude CLI
+│   ├── src/                               # TypeScript source
+│   │   ├── telegram-bot.ts                #   Telegram Bot UI layer
+│   │   ├── claude-manager.ts              #   Claude CLI persistent process manager
+│   │   ├── stream-json-parser.ts          #   NDJSON event stream parser
+│   │   └── session-store.ts               #   SQLite session persistence
+│   ├── PRD.md                             # Product requirements (v2.0 persistent mode)
+│   ├── technical-spec.md                  # Technical spec (3-layer architecture)
+│   └── SETUP.md                           # Setup guide (BotFather + env vars)
 │
-└── 📝 stories/                             # TRS 執行故事（41 個, 實戰記錄）
-    ├── execution-log.md                    # 執行總覽
-    ├── TRS-0  ~ TRS-9                      # Phase 1: 基礎 Token 減量
-    ├── TRS-10 ~ TRS-19                     # Phase 2: Workflow 壓縮 + 多引擎整合
-    ├── TRS-20 ~ TRS-29                     # Phase 3: 四引擎統一配置
-    ├── TRS-30 ~ TRS-33                     # Phase 4: 並行執行策略
-    └── TRS-34 ~ TRS-40                     # Phase 5: 技術債登錄 + 進階優化
+└── stories/                               # TRS execution stories (41, battle-tested)
+    ├── TRS-0  ~ TRS-9                     # Phase 1: Basic token reduction
+    ├── TRS-10 ~ TRS-19                    # Phase 2: Workflow compression
+    ├── TRS-20 ~ TRS-29                    # Phase 3: 4-engine unification
+    ├── TRS-30 ~ TRS-33                    # Phase 4: Parallel execution
+    └── TRS-34 ~ TRS-40                    # Phase 5: Advanced optimization
 ```
 
 ---
 
-## 快速開始
+## Quick Start
 
-### 前置條件
+### Prerequisites
 
 ```bash
-# 必要
+# Required
 node --version    # Node.js 18+
 claude --version  # Claude Code CLI
 
-# 選用
-gemini --version  # Gemini CLI（大上下文開發）
-dotnet --version  # .NET SDK 8+（L1 Code RAG）
+# Optional
+gemini --version  # Gemini CLI (large context)
+dotnet --version  # .NET SDK 8+ (L1 Code RAG)
 ```
 
-### 步驟 1：部署 Context Memory DB
+### Step 1: Deploy Context Memory DB
 
 ```powershell
 cd <your-project-root>
-
-# 一鍵部署（自動完成 6 個步驟）
 powershell -ExecutionPolicy Bypass -File <toolkit-path>/deployment/scripts/deploy-context-db.ps1
 ```
 
-部署腳本自動完成：
+Automatically completes 6 steps: directory creation → MCP Server copy → npm install → DB init → .mcp.json registration → rules deployment.
 
-| 步驟 | 動作 | 產出 |
-|:----:|------|------|
-| 1 | 建立 `.context-db/` 目錄結構 | 目錄 |
-| 2 | 複製 MCP Server + Schema 初始化腳本 | `server.js`, `init-db.js` |
-| 3 | `npm install` 安裝依賴 | `node_modules/` |
-| 4 | 初始化 SQLite DB（WAL 模式） | `context-memory.db` |
-| 5 | 建立 `.mcp.json` 註冊 MCP Server | MCP 配置 |
-| 6 | 部署查詢優先 + 寫入紀律規則 | `.claude/rules/context-memory-db.md` |
-
-### 步驟 2：配置 CLAUDE.md
+### Step 2: Configure CLAUDE.md
 
 ```bash
-# 複製模板到專案根目錄
 cp <toolkit-path>/deployment/config-templates/claude/CLAUDE.md.template ./CLAUDE.md
-
-# 編輯模板，填入專案特定資訊：
-# - {{PROJECT_NAME}} → 你的專案名稱
-# - Skill 索引表
-# - 測試帳號
-# - 核心禁止事項
+# Edit: replace {{PROJECT_NAME}}, add skills index, set up project-specific rules
 ```
 
-### 步驟 3：部署 Rules
+### Step 3: Deploy Rules
 
 ```bash
-# 複製行為規則到 .claude/rules/
 mkdir -p .claude/rules
 cp <toolkit-path>/deployment/config-templates/claude/rules/*.md .claude/rules/
 ```
 
-### 步驟 4：安裝 BMAD Overlay（選用）
+### Step 4: Install BMAD Overlay (Optional)
 
 ```bash
-# 將強化版 workflow 覆蓋到 BMAD 安裝目錄
 cp -r <toolkit-path>/deployment/bmad-overlay/4-implementation/* \
   _bmad/bmm/workflows/4-implementation/
 ```
 
-### 步驟 5：驗證部署
+### Step 5: Verify
 
 ```bash
-# 確認 MCP Server 已註冊
-claude mcp list
-
-# 重啟 Claude Code（讓 MCP Server 自動啟動）
-# 測試查詢
-# → 在新對話中輸入：「搜尋記憶庫中關於 Token 減量的記錄」
+claude mcp list  # Confirm MCP Server registered
+# Restart Claude Code, then test: "Search memory DB for token reduction records"
 ```
 
 ---
 
-## 模組詳解
+## Module Details
 
-### 1. 多引擎協作策略
+### 1. Multi-Engine Collaboration
 
-**核心文件**: `research/multi-engine-collaboration-strategy.md`
+**Core file**: `research/multi-engine-collaboration-strategy.md`
 
-支援四個 AI 開發引擎的分工協作：
+| Engine | Type | Best For | Agent ID |
+|--------|------|----------|:--------:|
+| **Claude Code CLI** | Terminal CLI | Primary commander, architecture, CR | `CC-` |
+| **Gemini CLI** | Terminal CLI | Large context analysis, bulk tasks | `GC-` |
+| **Antigravity IDE** | Agent-First IDE | E2E testing, UI development | `AG-` |
+| **Rovo Dev CLI** | Terminal CLI + IDE | Non-mainline tasks, quick fixes | `RD-` |
 
-| 引擎 | 類型 | 最佳用途 | Agent ID 前綴 |
-|------|------|---------|:------------:|
-| **Claude Code CLI** | 終端機 CLI | 主線任務指揮官、架構決策、Code Review | `CC-` |
-| **Gemini CLI** | 終端機 CLI | 大上下文分析、繁瑣執行任務 | `GC-` |
-| **Antigravity IDE** | Agent-First IDE | E2E 測試、UI 開發輔助 | `AG-` |
-| **Rovo Dev CLI** | 終端機 CLI + IDE 整合 | 非主線任務、快速修復 | `RD-` |
-
-**關鍵設計**：
-- **統一憲章** (`AGENTS.md`) — 四引擎共用的語言規範、目錄結構、觸發規則
-- **交接 SOP** — Agent 切換時的三步驟確認（Sprint Status → Tracking → Last Log）
-- **模型分工矩陣** — 每個引擎依任務類型選擇最佳模型（Opus/Sonnet/Haiku/Pro）
+Key designs:
+- **Unified Charter** (`AGENTS.md`) — shared language rules, directory structure, triggers
+- **Handoff SOP** — 3-step verification on agent switch (Sprint Status → Tracking → Last Log)
+- **Model Task Matrix** — each engine selects optimal model per task type
 
 ### 2. Context Memory DB
 
-**核心文件**: `deployment/context-memory-db-strategy.md`
+**Core file**: `deployment/context-memory-db-strategy.md`
 
-解決 AI Agent「每次對話從零開始」的根本問題。
+Solves the fundamental problem of AI agents "starting from zero every conversation."
 
-| 層級 | 名稱 | 功能 | 依賴 |
-|:----:|------|------|------|
-| **L0** | 知識記憶層 | FTS5 全文搜尋 + 6 個 MCP Tools | Node.js 18+ |
-| **L1** | 程式碼語意層 | Roslyn AST Symbol 提取 + 依賴圖譜 | .NET SDK 8+ |
-| **L2** | 向量語意層 | OpenAI Embedding + Cosine Similarity | OpenAI API Key |
-| **L3** | 動態注入層 | UserPromptSubmit Hook 自動注入上下文 | L2 完成 |
+| Level | Name | Function | Dependency |
+|:-----:|------|----------|-----------|
+| **L0** | Knowledge Memory | FTS5 full-text search + 6 MCP Tools | Node.js 18+ |
+| **L1** | Code Semantic | Roslyn AST symbol extraction + dependency graph | .NET SDK 8+ |
+| **L2** | Vector Semantic | OpenAI Embedding + Cosine Similarity | OpenAI API Key |
+| **L3** | Dynamic Injection | UserPromptSubmit Hook auto-injects context | L2 complete |
 
-**MCP Tools（L0 基礎）**：
+**MCP Tools (L0 Base)**:
 
-| Tool | 功能 | 使用場景 |
-|------|------|---------|
-| `search_context` | 搜尋上下文記憶 | 任務開始前查歷史決策 |
-| `search_tech` | 搜尋技術知識庫 | Bug 修復前查已知解法 |
-| `add_context` | 寫入上下文記憶 | 新的架構決策、模式確認 |
-| `add_tech` | 寫入技術發現 | 技術方案驗證結果 |
-| `add_cr_issue` | 寫入 CR 發現 | Code Review 發現的問題 |
-| `trace_context` | 追蹤關聯上下文 | 擴展 story_id + related_files |
+| Tool | Function | Use Case |
+|------|----------|----------|
+| `search_context` | Search context memory | Query historical decisions before tasks |
+| `search_tech` | Search technical knowledge | Check known solutions before bug fixes |
+| `add_context` | Write context memory | New architecture decisions, pattern confirmations |
+| `add_tech` | Write technical findings | Technical solution validation results |
+| `add_cr_issue` | Write CR findings | Issues discovered during code review |
+| `trace_context` | Trace related context | Expand story_id + related_files |
 
-**自動行為規則**（透過 `.claude/rules/context-memory-db.md` 注入）：
-- **查詢優先**：每個任務開始前，先用 `search_context` / `search_tech` 查詢相關記憶
-- **寫入紀律**：任務完成後，將新發現寫入 DB（不重複、不暫時性）
+### 3. BMAD Method Integration
 
-### 3. BMAD Method 整合與強化
+**Core file**: `deployment/bmad-overlay/`
 
-**核心文件**: `deployment/bmad-overlay/` + `deployment/BMAD架構演進與優化策略.md`
+Production-grade enhancements on top of [BMAD Method](https://github.com/bmadcode/BMAD-METHOD) v6.0:
 
-在 [BMAD Method](https://github.com/bmadcode/BMAD-METHOD) v6.0 基礎上，疊加生產級強化：
+| Workflow | Original | Overlay Enhancement |
+|----------|----------|-------------------|
+| **dev-story** | Basic task execution | + Dual status update (Story file + YAML) + 5-point sync + Auto skills loading |
+| **code-review** | Basic code review | + useState/Zustand duplication detection + Full-fix tech debt policy + CR deferred routing |
+| **create-story** | Basic story creation | + Auto-analyze skills_list.md + Auto-create tracking file + Auto-update sprint status |
 
-| Workflow | 原版能力 | Overlay 強化 |
-|----------|---------|-------------|
-| **dev-story** | 基本任務執行 | + 雙重狀態更新（Story 文件 + YAML）<br>+ 五項同步（狀態 + YAML + Tracking + Agent 時間 + H1 emoji）<br>+ Skills 自動載入 |
-| **code-review** | 基本程式碼審查 | + useState vs Zustand 重複偵測<br>+ 技術債全修復原則（WON'T FIX 僅限風格偏好）<br>+ CR 延後路由（留原 Epic，禁止路由至 Epic TD） |
-| **create-story** | 基本 Story 建立 | + 自動分析 `skills_list.md` 寫入 Required Skills<br>+ 自動建立 Tracking 文件<br>+ 自動更新 Sprint Status |
-
-**BMAD 四階段開發生命週期**：
+**BMAD 4-Phase Development Lifecycle**:
 
 ```
-Phase 1: 分析與探索   →  /product-brief（產品綱要）
-Phase 2: 需求規劃     →  /create-prd（產品需求文件）
-Phase 3: 架構方案     →  /create-architecture（架構設計 + Gate Check）
-Phase 4: 實施與開發   →  /create-story → /dev-story → /code-review（Sprint 循環）
+Phase 1: Analysis    →  /product-brief
+Phase 2: Planning    →  /create-prd
+Phase 3: Architecture →  /create-architecture (+ Gate Check)
+Phase 4: Implementation →  /create-story → /dev-story → /code-review (Sprint cycle)
 ```
 
-### 4. Token 減量策略
+### 4. Token Reduction Strategy
 
-**核心文件**: `research/token-reduction-final-report.md`
+**Core file**: `research/token-reduction-final-report.md`
 
-經過 41 個 TRS Story 的系統性優化，涵蓋五個層面：
+Systematic optimization across 41 TRS Stories:
 
-| 策略 | 做法 | 效果 |
-|------|------|------|
-| **靜態消耗瘦身** | CLAUDE.md 重寫、Rules 拆分、Auto-memory 精簡 | 靜態稅 15.4K → 3.6K tokens |
-| **快取殺手消除** | 移除動態內容（Sprint 狀態、時間戳）、路徑引用替代嵌入 | Prompt Caching 命中率恢復 |
-| **Workflow 壓縮** | XML 指令精簡、Checklist 合併、重複段落消除 | Sprint 循環 31.2K → ~22K tokens |
-| **按需查詢** | MEMORY.md → Context Memory DB，8.8KB → 723B | Auto-memory 固定成本 -90% |
-| **Skills On-Demand** | 完整 Skill 內容按需載入，僅摘要 Always-On | 避免 15+ Skills 全量載入 |
+| Strategy | Approach | Result |
+|----------|----------|--------|
+| **Static Slimming** | CLAUDE.md rewrite, Rules split, Auto-memory minimization | Static tax 15.4K → 3.6K tokens |
+| **Cache Killer Elimination** | Remove dynamic content (sprint status, timestamps) | Prompt Caching hit rate restored |
+| **Workflow Compression** | XML instruction trimming, checklist merging | Sprint cycle 31.2K → ~22K tokens |
+| **On-Demand Queries** | MEMORY.md → Context Memory DB, 8.8KB → 723B | Auto-memory fixed cost -90% |
+| **Skills On-Demand** | Full Skill content loaded on-demand, only summaries Always-On | Prevents 15+ Skills full-load |
 
-### 5. Pipeline 自動化
+### 5. Pipeline Automation
 
-**核心文件**: `deployment/Claude智能中控自動化排程/` + `deployment/scripts/`
+**Core files**: `deployment/scripts/`
 
-| 腳本 | 功能 | 使用場景 |
-|------|------|---------|
-| `batch-runner.ps1` | 批次 Story 執行器 | ≥2 Story 同時推進 |
-| `batch-audit.ps1` | 批次 Code Review | 多 Story 一次審查 |
-| `story-pipeline.ps1` | 完整管線（create → dev → review） | 單 Story 全流程自動化 |
-| `epic-auto-pilot.ps1` | Sprint 自動執行引擎 | 整個 Epic 自動推進 |
-| `check-hygiene.ps1` | Commit 前衛生檢查 | 敏感資料掃描、編碼驗證 |
+| Script | Function | Use Case |
+|--------|----------|----------|
+| `batch-runner.ps1` | Batch story executor | ≥2 stories in parallel |
+| `batch-audit.ps1` | Batch code review | Multi-story review in one pass |
+| `story-pipeline.ps1` | Full pipeline (create → dev → review) | Single story end-to-end |
+| `epic-auto-pilot.ps1` | Sprint auto-execution engine | Push entire epic automatically |
+| `check-hygiene.ps1` | Pre-commit hygiene check | Sensitive data scanning |
 
-**Token 安全閥機制**：
-- 批次執行時自動偵測 Token 消耗異常
-- 單一 Story 超過閾值自動暫停並通知
-- `IntervalSec 12` 節流：避免 API Rate Limit
+**Token Safety Valve**: Auto-detects abnormal token consumption during batch execution, pauses and notifies when threshold exceeded.
 
-### 6. 多 Agent 並行執行
+### 6. Multi-Agent Parallel Execution
 
-**核心文件**: `deployment/multi-agent-parallel-execution-strategy.md`
+**Core file**: `deployment/multi-agent-parallel-execution-strategy.md`
 
-三層解決架構，依場景選擇：
+Three-layer architecture, choose per scenario:
 
-| 層級 | 策略 | 解決問題 | 適用場景 |
-|:----:|------|---------|---------|
-| Layer 1 | **Worktree 隔離** | 同引擎多開的檔案衝突 | 5×CC-OPUS 並行推進 Sprint |
-| Layer 2 | **File Lock 機制** | 跨引擎同目錄的檔案覆蓋 | CC + GC 同時工作不同功能 |
-| Layer 3 | **Total Commit** | Commit 衝突與 token 浪費 | Agent 不 commit，人工決定時機 |
+| Layer | Strategy | Problem Solved | Scenario |
+|:-----:|----------|---------------|----------|
+| 1 | **Worktree Isolation** | Same-engine multi-instance file conflicts | 5xCC-OPUS parallel sprint |
+| 2 | **File Lock** | Cross-engine same-directory file overwrites | CC + GC working different features |
+| 3 | **Total Commit** | Commit conflicts + token waste | Agents don't commit, human decides timing |
 
-**File Lock 工具鏈**：
-```powershell
-# 取得鎖
-.\scripts\file-lock-acquire.ps1 -AgentId "CC-OPUS" -Files "src/App.tsx,src/store.ts"
+### 7. Telegram Remote Control
 
-# 檢查鎖
-.\scripts\file-lock-check.ps1 -Files "src/App.tsx"
+**Core directory**: `telegram-bridge/`
 
-# 釋放鎖
-.\scripts\file-lock-release.ps1 -AgentId "CC-OPUS"
-```
+Control Claude Code CLI from your phone via Telegram Bot.
 
-### 7. Telegram 遠端控制
-
-**核心目錄**: `telegram-bridge/`
-
-透過 Telegram Bot 從手機遠端操作 Claude Code CLI，實現「離開電腦也能指揮 AI Agent」。
-
-#### 架構設計
+#### Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                   Telegram Bot Layer                     │
-│  指令: /new /stop /clear /model /status /cd /bookmark   │
-│  訊息路由 → sendInput / startSession                    │
-│  檔案上傳 → 存到工作目錄 + 通知 Claude                   │
-│  心跳機制 → typing 狀態指示                              │
-│  輸出緩衝 → 800ms 批次 + token/耗時統計                  │
+│  Commands: /new /stop /clear /model /status /cd /bookmark│
+│  Message routing → sendInput / startSession              │
+│  File upload → save to working dir + notify Claude       │
+│  Heartbeat → typing status indicator                     │
+│  Output buffer → 800ms batch + token/time stats          │
 └──────────────────────┬──────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────┐
 │                Claude Manager Layer                      │
-│  startSession() → 啟動 stream-json 持久進程              │
-│  sendInput()    → JSON stdin 寫入 + 佇列管理            │
-│  事件: output / ready / responseComplete / closed        │
-│  自動重連: 進程死亡 → 下次訊息自動重啟                    │
-│  殭屍清理: 啟動前掃描並 kill 殘留進程                     │
+│  startSession() → launch stream-json persistent process  │
+│  sendInput()    → JSON stdin write + queue management    │
+│  Events: output / ready / responseComplete / closed      │
+│  Auto-reconnect: process death → restart on next message │
+│  Zombie cleanup: scan and kill residual processes        │
 └──────────────────────┬──────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────┐
 │             Stream-JSON Parser Layer                     │
-│  解析 NDJSON 事件流                                      │
-│  累積 text_delta → 完整文字區塊                          │
-│  偵測 message_stop → 標記回應完成                        │
-│  擷取 session_id + usage (token 統計)                    │
+│  Parse NDJSON event stream                               │
+│  Accumulate text_delta → complete text blocks            │
+│  Detect message_stop → mark response complete            │
+│  Extract session_id + usage (token stats)                │
 └──────────────────────┬──────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────┐
 │               Session Store (SQLite)                     │
-│  會話持久化 + 訊息歷史 + 模型偏好 + 路徑書籤             │
+│  Session persistence + message history + model pref      │
+│  + path bookmarks                                        │
 └─────────────────────────────────────────────────────────┘
 ```
 
-#### v2.0 核心特性（持久進程模式）
+#### v2.0 Key Features (Persistent Process Mode)
 
-v1.0 每條 Telegram 訊息都 spawn 獨立 `claude -p "message"` 進程（one-shot），導致每次重新載入專案上下文（10+ 秒延遲 + Token 重複消耗）。v2.0 改為 **stream-json 持久進程**：
+v1.0 spawned an independent `claude -p "message"` process per Telegram message (one-shot), causing repeated project context loading (10+ second delay + token re-consumption). v2.0 uses **stream-json persistent process**:
 
-| 特性 | 說明 |
-|------|------|
-| **Stream-JSON 持久進程** | 上下文只載入一次，多輪對話有記憶 |
-| **訊息佇列** | 快速連發訊息不會遺失，依序處理 |
-| **自動重連** | 進程死亡後下次訊息自動重啟，使用者無感 |
-| **Typing 心跳** | Claude 思考時 Telegram 顯示「正在輸入...」|
-| **殭屍進程清理** | 服務啟動/關閉時自動清理殘留進程 |
-| **輸出緩衝** | 800ms 批次發送，附帶 token 用量與耗時統計 |
+| Feature | Description |
+|---------|-------------|
+| **Stream-JSON Persistent Process** | Context loaded once, multi-turn with memory |
+| **Message Queue** | Rapid-fire messages won't be lost, processed in order |
+| **Auto-Reconnect** | Process death → auto-restart on next message |
+| **Typing Heartbeat** | Telegram shows "typing..." while Claude thinks |
+| **Zombie Cleanup** | Auto-cleans residual processes on start/stop |
+| **Output Buffer** | 800ms batch send with token usage and time stats |
 
-#### 指令系統
+#### Commands
 
-| 指令 | 功能 |
-|------|------|
-| `/new [路徑]` | 開新終端 — 結束現有進程，啟動新的 Claude 會話 |
-| `/stop` | 停止終端 — 結束 Claude 進程 |
-| `/clear` | 清除記憶 — 清空對話上下文 |
-| `/status` | 查看狀態 — 運行中/已停止、模型、工作目錄、對話輪數、累計 token |
-| `/model <name>` | 切換模型 — haiku / sonnet / opus |
-| `/cd <path>` | 切換工作目錄 |
-| `/bookmark add <name> <path>` | 儲存路徑書籤 |
+| Command | Function |
+|---------|----------|
+| `/new [path]` | Start new session — end current process, launch new Claude session |
+| `/stop` | Stop Claude process |
+| `/clear` | Clear conversation context |
+| `/status` | Show status, model, working dir, turn count, cumulative tokens |
+| `/model <name>` | Switch model (haiku/sonnet/opus) |
+| `/cd <path>` | Change working directory |
+| `/bookmark add <name> <path>` | Save path bookmark |
 
-#### 快速部署
+#### Quick Deploy
 
 ```bash
 cd telegram-bridge
 cp .env.example .env
-# 編輯 .env：填入 TELEGRAM_BOT_TOKEN + ALLOWED_USER_IDS
+# Edit .env: fill TELEGRAM_BOT_TOKEN + ALLOWED_USER_IDS
 npm install
 npm run dev
 ```
 
-> 詳細設定步驟請見 `telegram-bridge/SETUP.md`（含 BotFather 建立教學）。
+> See `telegram-bridge/SETUP.md` for detailed setup steps (including BotFather tutorial).
 
 ---
 
-## 研究報告索引
+## Research Reports Index
 
-本工具包的策略設計經過多引擎、多模型交叉驗證：
+All strategies were cross-validated across multiple engines and models:
 
-| 報告 | 分析主題 | 參與模型 |
-|------|---------|---------|
-| `token-reduction-final-report.md` | Token 減量策略彙整 | Opus 4.6, Sonnet 4.6, Gemini Pro |
-| `multi-engine-collaboration-strategy.md` | 四引擎規格與分工矩陣 | BMAD Party Mode（5 角色） |
-| `auto-pilot-multi-agent-research.md` | Auto-Pilot 工作流改進 | AG-OPUS（Antigravity） |
-| `bmad-vs-everything-claude-code.md` | BMAD vs ECC 架構整合 | Web AI 深度研究 |
-| `context-memory-db/CC-Agent*.md` | 記憶庫策略（CC 視角） | Claude Code Agent |
-| `context-memory-db/AC-Agent*.md` | 記憶庫策略（AG 視角） | Antigravity Agent |
-| `context-memory-db/GC-Agent*.md` | 記憶庫策略（GC 視角） | Gemini CLI Agent |
-| `context-memory-db/RC-Agent*.md` | 記憶庫策略（RD 視角） | Rovo Dev Agent |
-| `context-memory-db/Chatgpt*.md` | 記憶庫策略交叉驗證 | ChatGPT（3 份） |
+| Report | Topic | Models Involved |
+|--------|-------|----------------|
+| `token-reduction-final-report.md` | Token reduction consolidated | Opus 4.6, Sonnet 4.6, Gemini Pro |
+| `multi-engine-collaboration-strategy.md` | 4-engine specs + task matrix | BMAD Party Mode (5 roles) |
+| `auto-pilot-multi-agent-research.md` | Auto-Pilot workflow improvement | AG-OPUS (Antigravity) |
+| `bmad-vs-everything-claude-code.md` | BMAD vs ECC architecture integration | Web AI deep research |
+| `context-memory-db/*.md` | Memory DB strategy (multi-perspective) | CC + AC + GC + RC + ChatGPT |
 
 ---
 
-## TRS 執行故事
+## TRS Execution Stories
 
-41 個 TRS（Token Reduction Strategy）Story 記錄了從發現問題到解決方案的完整過程：
+41 TRS (Token Reduction Strategy) stories documenting the full problem-to-solution journey:
 
-| Phase | Stories | 主題 |
-|:-----:|:-------:|------|
-| **1** | TRS-0 ~ TRS-9 | 基礎 Token 減量：.claudeignore、CLAUDE.md 瘦身、Rules 拆分、Sprint Status 優化 |
-| **2** | TRS-10 ~ TRS-19 | Workflow 壓縮：dev-story XML 優化、code-review 審計、settings.json deny rules |
-| **3** | TRS-20 ~ TRS-29 | 四引擎統一：Gemini MD 對齊、Antigravity Skills、Rovo Dev 配置、Progressive Disclosure |
-| **4** | TRS-30 ~ TRS-33 | 並行策略：Rovo Dev Hooks、Multi-Agent 並行報告、File Lock 機制、Worktree SOP |
-| **5** | TRS-34 ~ TRS-40 | 進階優化：技術債登錄、Registry YAML 索引、Skill Review Checklist、增量審查 |
+| Phase | Stories | Theme |
+|:-----:|:-------:|-------|
+| **1** | TRS-0 ~ TRS-9 | Basic token reduction: .claudeignore, CLAUDE.md slimming, Rules split |
+| **2** | TRS-10 ~ TRS-19 | Workflow compression: XML optimization, code-review audit |
+| **3** | TRS-20 ~ TRS-29 | 4-engine unification: Gemini MD alignment, Antigravity Skills |
+| **4** | TRS-30 ~ TRS-33 | Parallel execution: File Lock mechanism, Worktree SOP |
+| **5** | TRS-34 ~ TRS-40 | Advanced: Tech debt registry, YAML index optimization |
 
-> 每個 Story 包含：問題定義、執行內容、修改檔案清單、量化效益。
-
----
-
-## 技術需求
-
-| 項目 | 版本 | 必要性 | 用途 |
-|------|------|:------:|------|
-| **Node.js** | 18+ | 必要 | MCP Server 運行環境 |
-| **PowerShell** | 5.1+ | 必要 | 部署腳本、Pipeline 自動化 |
-| **Claude Code CLI** | Latest | 必要 | 主要 AI Agent 引擎 |
-| **Git** | 2.30+ | 建議 | 版本控制、Worktree 支援 |
-| **Gemini CLI** | Latest | 選用 | 大上下文開發、文檔分析 |
-| **Antigravity IDE** | Latest | 選用 | E2E 測試、UI 開發 |
-| **Rovo Dev CLI** | Latest | 選用 | 非主線任務 |
-| **.NET SDK** | 8+ | 選用 | L1 Code RAG（Roslyn AST） |
-| **OpenAI API Key** | — | 選用 | L2 向量語意搜尋 |
+> Each story contains: problem definition, execution details, file change list, quantified benefits.
 
 ---
 
-## 適用場景
+## Requirements
 
-| 場景 | 推薦部署層級 |
-|------|------------|
-| **個人開發者 + Claude Code** | L0 Context Memory DB + Rules + Token 減量 |
-| **小團隊 + 雙引擎** | 上述 + BMAD Overlay + batch-runner |
-| **多引擎並行開發** | 上述 + File Lock + Worktree + Pipeline 自動化 |
-| **企業級 Sprint 管理** | 全部部署 + L1/L2 Code RAG + Auto-Pilot |
+| Item | Version | Required | Purpose |
+|------|---------|:--------:|---------|
+| **Node.js** | 18+ | Yes | MCP Server runtime |
+| **PowerShell** | 5.1+ | Yes | Deployment scripts, pipeline automation |
+| **Claude Code CLI** | Latest | Yes | Primary AI agent engine |
+| **Git** | 2.30+ | Recommended | Version control, Worktree support |
+| **Gemini CLI** | Latest | Optional | Large context development |
+| **Antigravity IDE** | Latest | Optional | E2E testing, UI development |
+| **Rovo Dev CLI** | Latest | Optional | Non-mainline tasks |
+| **.NET SDK** | 8+ | Optional | L1 Code RAG (Roslyn AST) |
+| **OpenAI API Key** | — | Optional | L2 vector semantic search |
 
 ---
 
-## 授權
+## Deployment Scenarios
 
-本工具包包含以下元件：
+| Scenario | Recommended Level |
+|----------|------------------|
+| **Solo developer + Claude Code** | L0 Context Memory DB + Rules + Token reduction |
+| **Small team + dual engine** | Above + BMAD Overlay + batch-runner |
+| **Multi-engine parallel development** | Above + File Lock + Worktree + Pipeline automation |
+| **Enterprise sprint management** | Full deployment + L1/L2 Code RAG + Auto-Pilot |
 
-| 元件 | 授權 | 來源 |
-|------|------|------|
+---
+
+## License
+
+| Component | License | Source |
+|-----------|---------|--------|
 | BMAD Method | MIT | [bmadcode/BMAD-METHOD](https://github.com/bmadcode/BMAD-METHOD) |
-| Everything Claude Code | 原始授權 | [anthropics/courses](https://github.com/anthropics/courses) |
-| claude-mem | 參考實作 | 開源社群 |
-| **自訂部分** | **MIT** | 本倉庫 |
+| Everything Claude Code | Original | [anthropics/courses](https://github.com/anthropics/courses) |
+| claude-mem | Reference | Open source community |
+| **Custom parts** | **MIT** | This repository |
 
 ---
 
-## 致謝
+## Acknowledgments
 
-- [BMAD Method](https://github.com/bmadcode/BMAD-METHOD) — 規格驅動開發的「代理即程式碼」框架
-- [Everything Claude Code](https://github.com/anthropics/courses) — Token 經濟學與持續學習系統
-- [claude-mem](https://github.com/anthropics/claude-mem) — MCP-based 記憶持久化參考
-- Anthropic Claude — 提供 Opus / Sonnet / Haiku 模型驅動整個開發流程
+- [BMAD Method](https://github.com/bmadcode/BMAD-METHOD) — Spec-driven "Agent-as-Code" framework
+- [Everything Claude Code](https://github.com/anthropics/courses) — Token economics and continuous learning
+- [claude-mem](https://github.com/anthropics/claude-mem) — MCP-based memory persistence reference
+- Anthropic Claude — Opus / Sonnet / Haiku models powering the entire workflow
