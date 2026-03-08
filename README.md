@@ -21,11 +21,12 @@
    Token economics, Event-driven Hooks, Continuous Learning v2, AgentShield security audit. Each project can adjust its primary strategy to Everything Claude Code, BMAD Method, or custom workflows depending on its needs.
 
 4. **Context Memory DB (Vector Memory Database)**
-   SQLite + FTS5 + MCP Server — multi-agent shared memory, precise knowledge retrieval, expandable breadth. 4-layer progressive architecture:
+   SQLite + FTS5 + MCP Server — multi-agent shared memory, precise knowledge retrieval, expandable breadth. 4-layer progressive architecture + **CMI Epic** (6 stories) for auto-lifecycle recording:
    - **L0 Knowledge Memory**: FTS5 full-text search + 6 MCP Tools (search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context)
    - **L1 Code Semantic**: Roslyn AST symbol extraction + dependency graph
    - **L2 Vector Semantic**: OpenAI Embedding + Cosine Similarity search
    - **L3 Dynamic Injection**: UserPromptSubmit Hook auto-injects relevant context per prompt
+   - **CMI Enhancements**: Auto session lifecycle (Stop/SessionEnd/PreCompact Hooks), full document ETL (136 stories + 50 CRs + 29 ADRs), conversation-level memory (list_sessions / get_session_detail / search_conversations), UTC+8 timezone normalization, compaction recovery guard
 
 5. **Semi-Automated Sprint Pipeline (BMAD Workflows)**
    Pipeline automation + Token safety valve + Sprint semi-auto execution. Includes batch-runner (batch execution), story-pipeline (single story end-to-end), epic-auto-pilot (entire epic auto-push), batch-audit (batch code review). Recommend **Claude Opus 4.6 as the controller**, with Sonnet/Haiku for sub-tasks.
@@ -215,6 +216,7 @@ claude-agent-toolkit/
 │   ├── bmad-vs-everything-claude-code.md  # BMAD vs ECC deep comparison
 │   ├── context-memory-db/                 # Memory DB analysis (multi-agent + multi-model)
 │   ├── pipeline-automation/               # Pipeline + Token safety valve
+│   ├── methodology/                       # SDD+ATDD+TDD methodology research (3 cross-analyses)
 │   └── claude-mem-reference/              # claude-mem open source reference
 │
 ├── guides/                                # AI CLI usage guides
@@ -338,6 +340,23 @@ Solves the fundamental problem of AI agents "starting from zero every conversati
 | `add_tech` | Write technical findings | Technical solution validation results |
 | `add_cr_issue` | Write CR findings | Issues discovered during code review |
 | `trace_context` | Trace related context | Expand story_id + related_files |
+
+**MCP Tools (CMI Conversation Memory)**:
+
+| Tool | Function | Use Case |
+|------|----------|----------|
+| `list_sessions` | List recent sessions | Review conversation history overview |
+| `get_session_detail` | Get session details + turns | Deep-dive into a specific past conversation |
+| `search_conversations` | Search conversation content | Find past discussions by keyword |
+
+**Hook Automation (CMI-1)**:
+
+| Hook | Trigger | Behavior |
+|------|---------|----------|
+| **Stop** | Every Claude response | Auto-save session snapshot (UPDATE if <2min, INSERT otherwise) |
+| **SessionEnd** | Conversation ends | Unconditional INSERT (last-resort backup) |
+| **PreCompact** | Before context compaction | Shares dedup logic with Stop hook |
+| **UserPromptSubmit** | Each user prompt | Injects last 3 session records into additionalContext |
 
 ### 3. BMAD Method Integration
 
@@ -507,6 +526,8 @@ All strategies were cross-validated across multiple engines and models:
 | **3** | TRS-20 ~ TRS-29 | 4-engine unification: Gemini MD alignment, Antigravity Skills |
 | **4** | TRS-30 ~ TRS-33 | Parallel execution: File Lock mechanism, Worktree SOP |
 | **5** | TRS-34 ~ TRS-40 | Advanced: Tech debt registry, YAML index optimization |
+| **CMI** | CMI-1 ~ CMI-6 | Context Memory Improvement: auto session lifecycle, document ETL, conversation memory, timezone fix, compaction guard, quality enhancement |
+| **FLOW** | FLOW-OPT-001 | SDD+ATDD+TDD methodology integration: BDD demotion, spec-gen auto-trigger, AC-BR traceability, VSDD simplified |
 
 > Each story contains: problem definition, execution details, file change list, quantified benefits.
 

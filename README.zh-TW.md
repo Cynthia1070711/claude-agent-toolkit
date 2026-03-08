@@ -22,11 +22,12 @@
    Token 經濟學 · 事件驅動 Hooks · 持續學習 v2 · AgentShield 安全審計。各專案可依使用狀況調整主開發策略為 Everything Claude Code 或 BMAD Method，或自行規劃 Workflows。
 
 4. **上下文記憶庫策略（Context Memory DB）**
-   建立向量記憶點資料庫（SQLite + FTS5 + MCP Server），多 Agent 協作共享同一個記憶庫、精準搜尋關鍵資料、可擴充記憶知識廣度。四層遞進架構：
+   建立向量記憶點資料庫（SQLite + FTS5 + MCP Server），多 Agent 協作共享同一個記憶庫、精準搜尋關鍵資料、可擴充記憶知識廣度。四層遞進架構 + **Epic CMI**（6 Stories）自動化生命週期記錄：
    - **L0 知識記憶層**：FTS5 全文搜尋 + 6 個 MCP Tools（search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context）
    - **L1 程式碼語意層**：Roslyn AST Symbol 提取 + 依賴圖譜
    - **L2 向量語意層**：OpenAI Embedding + Cosine Similarity 語意搜尋
    - **L3 動態注入層**：UserPromptSubmit Hook 每次提問自動注入相關上下文
+   - **CMI 進階強化**：Session 生命週期自動記錄（Stop/SessionEnd/PreCompact Hook）、全量文檔 ETL（136 Story + 50 CR + 29 ADR）、對話級記憶（list_sessions / get_session_detail / search_conversations）、UTC+8 時區正規化、壓縮恢復防護機制
 
 5. **智能半自動化排程（BMAD Workflows）**
    Pipeline 自動化 + Token 安全閥 + Sprint 半自動推進。包含 batch-runner（批次執行）· story-pipeline（單 Story 全流程）· epic-auto-pilot（整個 Epic 自動推進）· batch-audit（批次 Code Review）。建議使用 **Claude Opus 4.6 作為中控**指揮官，搭配 Sonnet/Haiku 執行子任務。
@@ -208,6 +209,7 @@ claude-agent-toolkit/
 │   ├── bmad-vs-everything-claude-code.md  # BMAD vs ECC 深度比較
 │   ├── context-memory-db/                 # 記憶庫策略分析（多 Agent + 多模型視角）
 │   ├── pipeline-automation/               # Pipeline + Token 安全閥
+│   ├── methodology/                       # SDD+ATDD+TDD 方法論研究（3 份交叉分析）
 │   └── claude-mem-reference/              # claude-mem 開源參考實作
 │
 ├── guides/                                # Agent CLI 使用指南
@@ -291,7 +293,7 @@ claude mcp list  # 確認 MCP Server 已註冊
 詳細模組說明請參見 [英文版 README](README.md#module-details)，包含：
 
 1. **多引擎協作策略** — 四引擎分工矩陣、統一憲章、交接 SOP
-2. **Context Memory DB** — 四層遞進架構、6 個 MCP Tools、自動行為規則
+2. **Context Memory DB** — 四層遞進架構、9 個 MCP Tools（+CMI 對話記憶 3 Tool）、Hook 自動化、自動行為規則
 3. **BMAD Method 整合與強化** — dev-story / code-review / create-story Overlay + SDD-TDD Bridge + VSDD Simplified
 4. **Token 減量策略** — 五個層面的系統性優化
 5. **Pipeline 自動化** — batch-runner / epic-auto-pilot / Token 安全閥
@@ -324,6 +326,8 @@ claude mcp list  # 確認 MCP Server 已註冊
 | **3** | TRS-20 ~ TRS-29 | 四引擎統一配置 |
 | **4** | TRS-30 ~ TRS-33 | 並行執行策略 |
 | **5** | TRS-34 ~ TRS-40 | 進階優化 |
+| **CMI** | CMI-1 ~ CMI-6 | 記憶庫進階優化：Session 自動記錄、全量文檔 ETL、對話記憶、時區修正、壓縮防護、品質強化 |
+| **FLOW** | FLOW-OPT-001 | SDD+ATDD+TDD 方法論整合：BDD 降級、spec-gen 自動觸發、AC-BR 追溯、VSDD 簡化版 |
 
 ---
 
