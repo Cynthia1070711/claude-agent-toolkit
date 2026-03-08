@@ -1,4 +1,4 @@
-# Claude Agent Toolkit
+# Claude Agent Toolkit (v1.7.0)
 
 **Multi-Agent Collaboration Strategy | Semi-Automated Sprint Pipeline | Shared Project Toolkit**
 
