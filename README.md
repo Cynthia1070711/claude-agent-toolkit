@@ -1,6 +1,6 @@
-# 專案部署必讀 — 多引擎協作環境一鍵初始化範本
+# 專案部署必讀 — 多引擎協作環境一鍵初始化範本 (v1.7.0)
 
-**版本**: 1.5.0
+**版本**: 1.7.1
 **建立日期**: 2026-02-27
 **適用範圍**: BMAD Method v6.0.0-alpha.21 + Claude Code CLI + Gemini CLI + Antigravity IDE + Rovo Dev CLI
 
@@ -114,6 +114,8 @@ docs/專案部屬必讀/
 │   ├── pipeline-audit-token-safety.md     ← 完整需求分析 + 根因分析 + Bug 修正紀錄
 │   └── pipeline-audit-token-safety.track.md ← 實作追蹤檔
 │
+├── context-memory-db-strategy.md          ← Context Memory DB 策略全文（TD-32~36）
+│
 ├── agent-cli-guides/                      ← 四引擎入門指南
 │   ├── README.md                          ← 索引 + 功能比較表 + 新引擎接入 SOP
 │   ├── claude-code-guide.md
@@ -124,15 +126,16 @@ docs/專案部屬必讀/
 ├── bmad-overlay/                          ← TRS 優化後的 BMAD Workflow 覆蓋包
 │   └── 4-implementation/
 │       ├── code-review/                   ← instructions.xml (471行, 原廠923行, -49%)
-│       │   ├── instructions.xml              checklist.md (59行, 原廠129行, -55%)
+│       │   ├── instructions.xml              checklist.md (+VSDD Simplified)
 │       │   ├── checklist.md                  workflow.yaml
 │       │   └── workflow.yaml
 │       ├── create-story/                  ← instructions.xml (449行, 原廠542行, -20%)
-│       │   ├── instructions.xml              checklist.md (62行, 原廠358行, -83%)
-│       │   ├── checklist.md                  workflow.yaml
+│       │   ├── instructions.xml              checklist.md (+AC-BR Traceability + SDD Pre-check)
+│       │   ├── checklist.md                  template.md (+SDD Spec 欄位 + ATDD 格式)
+│       │   ├── template.md               ← [NEW] SDD+ATDD Story 模板
 │       │   └── workflow.yaml
 │       └── dev-story/                     ← instructions.xml (436行, 原廠480行, -15%)
-│           ├── instructions.xml              checklist.md (80行)
+│           ├── instructions.xml              checklist.md (+SDD-TDD Bridge)
 │           ├── checklist.md                  workflow.yaml
 │           └── workflow.yaml
 │
@@ -140,16 +143,26 @@ docs/專案部屬必讀/
 │   ├── claude/                            ← [必要] Claude Code CLI
 │   │   ├── CLAUDE.md.template             ← 專案級配置骨架（需修改）
 │   │   ├── CLAUDE.local.md.template       ← Agent Identity（直接複製）
+│   │   ├── MEMORY.md.template             ← Auto-memory 精簡範本（直接複製）
 │   │   ├── claudeignore.template          ← .claudeignore（直接複製）
 │   │   ├── settings.json.template         ← 安全 deny 清單（直接複製）
 │   │   ├── settings.local.json.template   ← Hooks 配置（直接複製）
-│   │   └── rules/                         ← 6 個品質規則（直接複製）
+│   │   ├── hooks/                         ← Hook 腳本（選用）
+│   │   │   └── pre-prompt-rag.js          ← Phase 3 Code RAG 動態注入（需 OpenAI API Key）
+│   │   └── rules/                         ← 7 個品質規則（直接複製）
 │   │       ├── coding-style.md
 │   │       ├── constitutional-standard.md
+│   │       ├── context-memory-db.md       ← [NEW] 查詢優先 + 寫入紀律
 │   │       ├── git-workflow.md
 │   │       ├── performance.md
 │   │       ├── security.md
 │   │       └── testing.md
+│   ├── context-db/                        ← [選用] Context Memory DB
+│   │   ├── server.js                      ← MCP Server (6 Tools, stdio)
+│   │   ├── package.json.template          ← 依賴（需替換專案名）
+│   │   ├── mcp.json.template              ← .mcp.json 註冊範本
+│   │   └── scripts/
+│   │       └── init-db.js                 ← SQLite Schema 初始化（冪等）
 │   ├── gemini/                            ← [選用] Gemini CLI
 │   │   ├── GEMINI.md.template             ← 全域配置（直接複製到 ~/.gemini/）
 │   │   └── settings.json.template         ← Hooks + MCP（直接複製）
@@ -168,7 +181,8 @@ docs/專案部屬必讀/
     ├── story-pipeline.ps1                ← [Pipeline] 單 Story 三階段管線（create→dev→review）
     ├── batch-runner.ps1                  ← [Pipeline] 批次並行（最多 5 Story，間隔 12s）
     ├── batch-audit.ps1                   ← [Pipeline] 批次後驗證 + AutoFix（7 Check）
-    └── epic-auto-pilot.ps1              ← [Pipeline] 整個 Epic 迴圈自動化
+    ├── epic-auto-pilot.ps1              ← [Pipeline] 整個 Epic 迴圈自動化
+    └── deploy-context-db.ps1            ← [NEW] Context Memory DB 一鍵部署
 ```
 
 ---
@@ -287,6 +301,40 @@ New-Item -ItemType Directory -Path "scripts" -Force
 Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 ```
 
+#### 4.6 Context Memory DB（建議 — 跨對話知識累積）
+
+> Context Memory DB 讓 AI Agent 能跨對話累積知識：除錯教訓、架構決策、Code Review 發現。
+> 每次新對話不再從零開始，而是先查詢已知模式再行動。
+
+```powershell
+# 方式一：一鍵部署（推薦）
+powershell -ExecutionPolicy Bypass -File docs\專案部屬必讀\scripts\deploy-context-db.ps1
+
+# 方式二：手動部署
+# 1. 複製 MCP Server
+New-Item -ItemType Directory -Path ".context-db/scripts" -Force
+Copy-Item "docs\專案部屬必讀\config-templates\context-db\server.js" ".context-db\server.js"
+Copy-Item "docs\專案部屬必讀\config-templates\context-db\scripts\init-db.js" ".context-db\scripts\init-db.js"
+
+# 2. 建立 package.json（替換專案名）
+$pkg = Get-Content "docs\專案部屬必讀\config-templates\context-db\package.json.template" -Raw
+$pkg = $pkg -replace '\{\{PROJECT_NAME\}\}', 'my-project'
+Set-Content ".context-db\package.json" -Value $pkg -Encoding UTF8
+
+# 3. 安裝依賴 + 初始化 DB
+cd .context-db && npm install && node scripts/init-db.js && cd ..
+
+# 4. 註冊 MCP Server
+$mcp = Get-Content "docs\專案部屬必讀\config-templates\context-db\mcp.json.template" -Raw
+$mcp = $mcp -replace '\{\{PROJECT_NAME\}\}', 'my-project'
+Set-Content ".mcp.json" -Value $mcp -Encoding UTF8
+```
+
+> **MEMORY.md 精簡原則**（TD-36 教訓）：
+> Auto-memory 目錄下的檔案每次新對話全量載入，佔用 context window。
+> 詳細規則和事故記錄應存入 Context Memory DB 按需查詢，MEMORY.md 僅保留一行摘要指引。
+> 範本：`config-templates/claude/MEMORY.md.template`（~350 tokens，對比未精簡前 ~5.9k tokens）
+
 ### Step 5: 修改專案特定配置
 
 以下檔案需要根據新專案修改：
@@ -348,7 +396,7 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 | 類型 | 檔案 | 處理方式 | 引擎 |
 |------|------|---------|------|
 | 直接複製 | `bmad-overlay/*` | 覆蓋 `_bmad/bmm/workflows/4-implementation/` | 通用 |
-| 直接複製 | `rules/*.md` | 複製到 `.claude/rules/` | Claude |
+| 直接複製 | `rules/*.md` (含 context-memory-db.md) | 複製到 `.claude/rules/` | Claude |
 | 直接複製 | `claudeignore.template` | 複製為 `.claudeignore` | Claude |
 | 直接複製 | `settings.json.template` | 複製為 `.claude/settings.json` | Claude |
 | 直接複製 | `settings.local.json.template` | 複製為 `.claude/settings.local.json` | Claude |
@@ -358,6 +406,8 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 | 直接複製 | `gemini/settings.json.template` | 複製到 `.gemini/settings.json` | Gemini |
 | **需修改** | `CLAUDE.md.template` | 填入專案名、Skills、Test Accounts | Claude |
 | **需修改** | `config.yml.template` | 填入專案名稱 | Rovo Dev |
+| 一鍵部署 | `context-db/*` | `deploy-context-db.ps1` 自動部署至 `.context-db/` | 通用 |
+| 直接複製 | `MEMORY.md.template` | 複製到 auto-memory 目錄（精簡版） | Claude |
 | **不複製** | 專案特定 Skills (`phycool-*`) | 每個專案自行建立 | — |
 
 ---
@@ -404,6 +454,140 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 
 > 詳細說明：`Claude智能中控自動化排程/pipeline-audit-token-safety.md`
 
+### Context Memory DB 策略（TD-32~36，2026-03-07 新增）
+
+> **核心理念**：靜態檔案（MEMORY.md、rules/）每次新對話全量載入佔用 context window；
+> 詳細知識改存 SQLite DB 按需查詢，靜態檔案僅保留一行摘要指引。
+
+| 優化項目 | 效果 | Story |
+|----------|------|-------|
+| SQLite Schema + FTS5 trigram | 3 張表 + 自動同步 Trigger + WAL 模式 | TD-32a |
+| MCP Server 6 Tools | search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context | TD-32b/c |
+| 搜尋準確度驗證 | 20 案例測試 + 種子資料 + sync-from-yaml | TD-32d |
+| Roslyn AST Symbol 提取 | symbol_index (class/method/interface/enum) + symbol_dependencies | TD-33 |
+| Symbol Embedding + 語意搜尋 | OpenAI text-embedding-3-small + Cosine Similarity + semantic_search Tool | TD-34 |
+| Hook 動態注入 | UserPromptSubmit 自動注入相關程式碼上下文 (< 10K tokens) | TD-35 |
+| **靜態 Memory 遷移** | **MEMORY.md 94% 減量 (8.8KB→723B)，pipeline-lessons.md 刪除，11 條記錄遷入 DB** | **TD-36** |
+| 意識層注入 | `.claude/rules/context-memory-db.md` — 查詢優先 + 寫入紀律（~200 tokens） | TD-36 |
+
+**四層架構**：
+
+```
+知識記憶層（TD-32）: context_entries / tech_entries
+  └── FTS5 全文搜尋（search_context, search_tech）
+
+程式碼語意層（TD-33）: symbol_index / symbol_dependencies
+  └── LIKE 關鍵字搜尋（search_symbols, get_symbol_context）
+
+向量語意層（TD-34）: symbol_embeddings
+  └── Cosine Similarity 語意搜尋（semantic_search）
+
+動態注入層（TD-35）: UserPromptSubmit Hook
+  └── 自動注入（pre-prompt-rag.js → additionalContext）
+```
+
+**部署層級**（依專案需求選擇）：
+
+| 層級 | 內容 | 依賴 | 部署腳本 |
+|------|------|------|----------|
+| **L0 基礎（建議全部署）** | SQLite + MCP Server + Rules | Node.js 18+ | `deploy-context-db.ps1` |
+| L1 Code RAG | Roslyn AST 提取 | .NET SDK 8+ | 手動（需 symbol-indexer 專案） |
+| L2 語意搜尋 | OpenAI Embedding | OPENAI_API_KEY | `generate-embeddings.js --full` |
+| L3 自動注入 | UserPromptSubmit Hook | L2 | 複製 `pre-prompt-rag.js` + 配置 settings.json |
+
+> 詳細說明：`context-memory-db-strategy.md`
+
+### Epic CMI：Context Memory 進階優化（CMI-1~6，2026-03-07 新增）
+
+> **核心理念**：從「手動寫入」升級為「自動生命週期記錄 + 全量文檔 ETL + 對話級記憶 + 時區正規化 + 壓縮恢復防護」。
+
+| 優化項目 | 效果 | Story |
+|----------|------|-------|
+| Session 生命週期自動記錄 | Stop/SessionEnd/PreCompact Hook → 每次對話自動存檔，不再遺忘 | CMI-1 |
+| 全量文檔 ETL | 136 Story + 50 CR + 29 ADR 匯入 DB，三層分類 + 5 張表 | CMI-2 |
+| 對話級記憶 Schema | conversation_sessions + turns + 3 MCP Tool（list/get/search） | CMI-3 |
+| 時間戳 UTC+8 修正 | timezone.js 共用工具、19,727 筆歷史記錄批次修正 | CMI-4 |
+| 壓縮恢復防護 | Rules 硬注入 + 記憶庫 lesson + 三重防護矩陣 | CMI-5 |
+| Session 品質強化 | Regex 內容擷取 + 提問歷史注入 + Story ID 修正 | CMI-6 |
+
+> 詳細策略文件：`context-memory-db-strategy.md` §5
+
+### G類：SDD+ATDD+TDD 開發方法論優化（FLOW-OPT-001，2026-03-08 新增）
+
+> **核心理念**：BDD 降級為需求溝通輔助，改用 SDD（Spec Driven）+ ATDD + TDD 閉環，
+> 減少 Agent 架構漂移、降低 Debug Token 消耗。
+
+| 優化項目 | 效果 | 影響檔案 |
+|----------|------|----------|
+| BDD 降級 | 開發迴圈完全移除 BDD，消除語意自由度導致的架構漂移 | CLAUDE.md Triggers |
+| SDD Spec Generator | M/L/XL Story 自動產出 `{id}-spec.md`（BR + API + DB + Boundary） | `.claude/skills/sdd-spec-generator/` |
+| AC ATDD 格式 | 每個 AC 附 `[Verifies: BR-XXX]`，100% 可追溯 | create-story template + checklist |
+| SDD-TDD Bridge | 從 Spec BR 直接驅動 TDD（命名規則 `{BR_ID}_{Scenario}_{Expected}`） | dev-story checklist |
+| VSDD Simplified | code-review 增加 Spec vs Code 比對（M/L/XL Only） | code-review checklist |
+| 3-Round Debug Limit | 測試修復 ≤ 3 輪，超過強制上下文壓縮 | dev-story checklist |
+| 自動觸發 spec-gen | CLAUDE.md Triggers 自動判斷複雜度並觸發 `/sdd-spec-generator` | CLAUDE.md §1.3 |
+
+**預估 Token 降幅**：在現有 76.5% 基礎上再降 20%~35%（需實際 Story 驗證）
+
+> 詳細決策紀錄：`ATDD-SDD-TDD-BDD/決策總覽-SDD-ATDD-TDD整合方案.md`
+> Spec 輸出目錄：`docs/implementation-artifacts/specs/epic-{X}/`
+
+### TD-15~19 資料庫/Skill 維護（2026-03-03 新增）
+
+| 優化項目 | 效果 | Story |
+|----------|------|-------|
+| DeviceSession 影子 FK 清理 | 消除冗餘 ApplicationUserId 外鍵，Migration 安全遷移 | TD-15 |
+| Invoice/Order FK 屬性修復 | 雙向 [ForeignKey] 衝突解決 | TD-16 |
+| Workflow Migration 同步 | 資料庫 Migration 同步機制補強 | TD-17 |
+| create-story DB 變更偵測 | 自動偵測 Schema 變更並標注影響範圍 | TD-18 |
+| Skill 超限瘦身 | 6 個 > 500 行 Skill 重構精簡 | TD-19 |
+
+---
+
+## 搭配 DevConsole Web UI 查看記憶庫資料
+
+> **適用場景**：想要以視覺化介面瀏覽/搜尋記憶庫內容，而非透過 Claude CLI MCP Tools 查詢。
+
+### 啟動方式
+
+```powershell
+# 方式一：手動 BAT 檔（推薦）
+# 啟動：雙擊執行
+claude token減量策略研究分析\記憶庫策略\手動開關Server\1.DevConsole啟動.bat
+
+# 關閉：雙擊執行
+claude token減量策略研究分析\記憶庫策略\手動開關Server\2.DevConsole關閉.bat
+
+# 方式二：命令列
+cd tools/dev-console && npm run dev
+```
+
+### 存取位址
+
+- 前端 UI：`http://localhost:5174`
+- 後端 API：`http://localhost:3001`
+
+### 功能總覽
+
+| 頁面 | 說明 |
+|------|------|
+| Dashboard | Story 狀態分佈 KPI + 最近活動 |
+| Stories | Kanban 看板 + Epic 篩選 + Story 詳情（Markdown 渲染） |
+| Memory | 記憶庫搜尋/瀏覽 + 分類篩選 + 手動 CRUD |
+| Sessions | Session 工作紀錄時間軸 |
+| CR Issues | Code Review 問題追蹤 + Severity/Resolution 統計 |
+
+### 語言切換
+
+- 預設繁體中文，Header 右上角按鈕切換英文
+- 設定儲存於瀏覽器 `localStorage`（key: `dvc-lang`）
+
+### 注意事項
+
+- DevConsole 為**唯讀查看工具**，不會修改記憶庫或 YAML 檔案的核心資料
+- 手動 CRUD（Memory 頁面）會直接寫入 SQLite，使用時請注意資料正確性
+- 需先確認 `.context-db/context-memory.db` 存在（即已完成 Context Memory DB 部署）
+
 ---
 
 ## 注意事項
@@ -418,6 +602,9 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 8. **Pipeline 自動化腳本需配合 Claude Max 方案**：`story-pipeline.ps1` 使用 `claude -p` 模式 + `--dangerously-skip-permissions`，僅適用於可信環境
 9. **Token 安全閥需手動設定日配額**：Claude Max 無公開 API 查詢配額，需設定 `-DailyTokenLimit` 參數（基於方案等級估算）
 10. **Pipeline 批次並行上限 5 個**：超過 5 個並行 Story 會導致 rate-limiting，建議 `-IntervalSec 12` 錯開啟動
+11. **Context Memory DB 需要 Node.js 18+**：MCP Server 使用 ES Module + better-sqlite3 native addon，需確認 Node.js 版本
+12. **Auto-memory 檔案必須精簡**：`~/.claude/projects/<hash>/memory/` 下的檔案每次新對話全量載入。詳細內容存 DB，MEMORY.md 只保留一行摘要（TD-36 教訓）
+13. **Context Memory DB 是增量式的**：DB 檔案 `.context-db/context-memory.db` 隨專案累積知識越來越有價值，建議納入備份但不納入 Git（已列入 .gitignore）
 
 ---
 
@@ -425,6 +612,9 @@ Copy-Item "docs\專案部屬必讀\scripts\*" "scripts\" -Recurse
 
 | 版本 | 日期 | 變更 |
 |------|------|------|
+| 1.7.1 | 2026-03-08 | 新增 DevConsole Web UI 使用說明章節；記錄 5 項 Bug 修復（CRLF/Epic ID/路徑/Schema/預設模式）+ i18n 國際化 + SDD Spec 徽章 |
+| 1.7.0 | 2026-03-08 | 整合 G類 SDD+ATDD+TDD 方法論（FLOW-OPT-001）+ Epic CMI 記憶庫進階優化（CMI-1~6）；同步 bmad-overlay 5 檔；新增 `sdd-spec-generator` Skill；`context-memory-db-strategy.md` v1.0→v1.1（+CMI 章節）；反向同步 Pipeline 檔案；更新 TRS 成果摘要 |
+| 1.6.0 | 2026-03-07 | 整合 Context Memory DB 策略（TD-32~36）；新增 `config-templates/context-db/`（MCP Server + init-db + package.json）；新增 `deploy-context-db.ps1` 一鍵部署腳本；新增 `context-memory-db.md` 規則檔、`MEMORY.md.template` 精簡範本；更新 README 資料夾結構、部署步驟（Step 4.6）、TRS 成果（TD-15~36）；補全 TD-15~19 資料庫/Skill 維護策略 |
 | 1.5.0 | 2026-03-02 | 整合 Claude 智能中控自動化排程（Pipeline 中控 + Token 安全閥 + batch-audit）；新增 TRS-35/37/38 優化成果（Sprint Status 縮行、Registry 歸檔/單讀）；新增 Pipeline 腳本至資料夾結構（story-pipeline/batch-runner/batch-audit/epic-auto-pilot）；部署手冊 v3.2.0→v3.3.0（新增 PART 10 Pipeline 自動化排程） |
 | 1.4.0 | 2026-02-28 | 部署手冊 v3.1.0→v3.2.0：新增 §4.10 技術債中央登錄協議 + §9.7 檢查清單 + Production Gate registry 驅動；worktree-quick-reference 新增 registry.yaml merge 規則；TRS 成果新增中央登錄（TRS-34） |
 | 1.3.0 | 2026-02-27 | 新增 `worktree-quick-reference.md`；部署手冊 v3.0.0→v3.1.0（新增 PART 8.5 Worktree 並行開發 + Merge 衝突 SOP）；更新資料夾結構索引（TRS-33） |
