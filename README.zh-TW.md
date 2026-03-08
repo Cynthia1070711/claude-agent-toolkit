@@ -34,8 +34,8 @@
 6. **Telegram 整合策略**
    遠端操控啟動 Claude 執行任務。Telegram Bot Bridge v2.0 採用 stream-json 持久進程模式（上下文只載入一次），支援多輪對話記憶、訊息佇列、自動重連、模型切換（`/model opus`）、路徑書籤（`/bookmark`）。手機即可監控進度、發送指令、切換工作目錄。
 
-7. **TDD / BDD 策略規劃**
-   測試驅動開發（RED → GREEN → IMPROVE）+ 可執行規格（Executable Spec）模式。整合 Context Memory TDD — 任務前先查 `search_tech` 歷史測試模式，任務後寫入新的測試發現。涵蓋 xUnit + Moq + FluentAssertions（後端）與 Vitest + Playwright E2E（前端）的統一測試策略。
+7. **SDD + ATDD + TDD 開發方法論（規格驅動開發）**
+   BDD 降級為需求溝通輔助（僅 PRD/Epic 層級），核心開發迴圈改為：**SDD Spec → ATDD 驗收測試 → TDD 單元測試 → 最小實作**。M/L/XL Story 自動觸發 `/sdd-spec-generator` 產出 `{id}-spec.md`（Business Rules + API 合約 + DB Schema + 邊界條件）。每個 AC 映射 `[Verifies: BR-XXX]`，3 輪 Debug 上限，VSDD 簡化版 code-review 進行 Spec vs Code 比對。預估在現有 76.5% Token 降幅基礎上再降 20%~35%。涵蓋 xUnit + Moq + FluentAssertions（後端）與 Vitest + Playwright E2E（前端）。
 
 ---
 
@@ -197,7 +197,7 @@ claude-agent-toolkit/
 │   │   ├── epic-auto-pilot.ps1            #   Sprint 自動執行引擎
 │   │   ├── check-hygiene.ps1              #   Commit 前衛生檢查
 │   │   └── file-lock-*.ps1               #   多 Agent 檔案鎖（3 個腳本）
-│   ├── bmad-overlay/                      # BMAD Workflow 強化覆蓋層
+│   ├── bmad-overlay/                      # BMAD Workflow 強化覆蓋層（+SDD/ATDD/TDD）
 │   ├── agent-cli-guides/                  # 各引擎使用指南
 │   ├── BMAD-METHOD-main/                  # BMAD Method 原始碼（第三方, MIT）
 │   └── everything-claude-code-main/       # Everything Claude Code（第三方）
@@ -292,7 +292,7 @@ claude mcp list  # 確認 MCP Server 已註冊
 
 1. **多引擎協作策略** — 四引擎分工矩陣、統一憲章、交接 SOP
 2. **Context Memory DB** — 四層遞進架構、6 個 MCP Tools、自動行為規則
-3. **BMAD Method 整合與強化** — dev-story / code-review / create-story Overlay
+3. **BMAD Method 整合與強化** — dev-story / code-review / create-story Overlay + SDD-TDD Bridge + VSDD Simplified
 4. **Token 減量策略** — 五個層面的系統性優化
 5. **Pipeline 自動化** — batch-runner / epic-auto-pilot / Token 安全閥
 6. **多 Agent 並行執行** — Worktree / File Lock / Total Commit 三層策略
@@ -309,6 +309,7 @@ claude mcp list  # 確認 MCP Server 已註冊
 | `auto-pilot-multi-agent-research.md` | Auto-Pilot 工作流改進 | AG-OPUS（Antigravity） |
 | `bmad-vs-everything-claude-code.md` | BMAD vs ECC 架構整合 | Web AI 深度研究 |
 | `context-memory-db/*.md` | 記憶庫策略（多視角） | CC + AC + GC + RC + ChatGPT |
+| `methodology/*.md` | SDD+ATDD+TDD 方法論研究 | ChatGPT + Gemini + Claude 交叉分析 |
 
 ---
 

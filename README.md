@@ -33,8 +33,8 @@
 6. **Telegram Integration Strategy**
    Remote control to launch Claude tasks from your phone. Telegram Bot Bridge v2.0 uses stream-json persistent process mode (context loaded once), supporting multi-turn conversation memory, message queue, auto-reconnect, model switching (`/model opus`), path bookmarks (`/bookmark`). Monitor progress, send commands, and switch working directories from mobile.
 
-7. **TDD / BDD Strategy Planning**
-   Test-Driven Development (RED → GREEN → IMPROVE) + Executable Spec pattern. Integrated with Context Memory TDD — query `search_tech` for historical test patterns before tasks, write new test findings after. Covers xUnit + Moq + FluentAssertions (backend) and Vitest + Playwright E2E (frontend) unified testing strategy.
+7. **SDD + ATDD + TDD Methodology (Spec-Driven Development)**
+   BDD demoted to requirements-communication aid only (PRD/Epic level). Core development loop: **SDD Spec → ATDD Acceptance Tests → TDD Unit Tests → Implementation**. M/L/XL Stories auto-trigger `/sdd-spec-generator` to produce `{id}-spec.md` (Business Rules + API Contract + DB Schema + Boundary Conditions). Every AC maps to `[Verifies: BR-XXX]`, 3-round debug limit, VSDD Simplified code-review for Spec vs Code alignment. Estimated additional 20%~35% token reduction on top of existing 76.5% baseline. Covers xUnit + Moq + FluentAssertions (backend) and Vitest + Playwright E2E (frontend).
 
 ---
 
@@ -204,7 +204,7 @@ claude-agent-toolkit/
 │   │   ├── epic-auto-pilot.ps1            #   Sprint auto-execution engine
 │   │   ├── check-hygiene.ps1              #   Pre-commit hygiene check
 │   │   └── file-lock-*.ps1               #   Multi-agent file locking (3 scripts)
-│   ├── bmad-overlay/                      # BMAD workflow enhancement overlay
+│   ├── bmad-overlay/                      # BMAD workflow enhancement overlay (+SDD/ATDD/TDD)
 │   ├── agent-cli-guides/                  # Engine-specific usage guides
 │   ├── BMAD-METHOD-main/                  # BMAD Method source (3rd party, MIT)
 │   └── everything-claude-code-main/       # Everything Claude Code (3rd party)
@@ -347,9 +347,9 @@ Production-grade enhancements on top of [BMAD Method](https://github.com/bmadcod
 
 | Workflow | Original | Overlay Enhancement |
 |----------|----------|-------------------|
-| **dev-story** | Basic task execution | + Dual status update (Story file + YAML) + 5-point sync + Auto skills loading |
-| **code-review** | Basic code review | + useState/Zustand duplication detection + Full-fix tech debt policy + CR deferred routing |
-| **create-story** | Basic story creation | + Auto-analyze skills_list.md + Auto-create tracking file + Auto-update sprint status |
+| **dev-story** | Basic task execution | + Dual status update + 5-point sync + Auto skills loading + **SDD-TDD Bridge** (BR→Test mapping, 3-round debug limit) |
+| **code-review** | Basic code review | + useState/Zustand duplication detection + Full-fix tech debt policy + CR deferred routing + **VSDD Simplified** (Spec vs Code alignment) |
+| **create-story** | Basic story creation | + Auto-analyze skills_list.md + Auto-create tracking + Auto-update sprint status + **AC-BR Traceability** + SDD Spec pre-check (M/L/XL) |
 
 **BMAD 4-Phase Development Lifecycle**:
 
@@ -492,6 +492,7 @@ All strategies were cross-validated across multiple engines and models:
 | `auto-pilot-multi-agent-research.md` | Auto-Pilot workflow improvement | AG-OPUS (Antigravity) |
 | `bmad-vs-everything-claude-code.md` | BMAD vs ECC architecture integration | Web AI deep research |
 | `context-memory-db/*.md` | Memory DB strategy (multi-perspective) | CC + AC + GC + RC + ChatGPT |
+| `methodology/*.md` | SDD+ATDD+TDD methodology research | ChatGPT + Gemini + Claude cross-analysis |
 
 ---
 
