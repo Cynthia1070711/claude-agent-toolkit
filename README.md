@@ -27,6 +27,7 @@
    - **L2 Vector Semantic**: OpenAI Embedding + Cosine Similarity search
    - **L3 Dynamic Injection**: UserPromptSubmit Hook auto-injects relevant context per prompt
    - **CMI Enhancements**: Auto session lifecycle (Stop/SessionEnd/PreCompact Hooks), full document ETL (136 stories + 50 CRs + 29 ADRs), conversation-level memory (list_sessions / get_session_detail / search_conversations), UTC+8 timezone normalization, compaction recovery guard
+   - **DevConsole Web UI**: Standalone Node.js app (Express 5 + Vite + React 18) for visual memory DB browsing/search/CRUD, Story Kanban board, CR Issue tracking, Session timeline. i18n support (zh-TW / en). `localhost:5174` (frontend) + `localhost:3001` (API)
 
 5. **Semi-Automated Sprint Pipeline (BMAD Workflows)**
    Pipeline automation + Token safety valve + Sprint semi-auto execution. Includes batch-runner (batch execution), story-pipeline (single story end-to-end), epic-auto-pilot (entire epic auto-push), batch-audit (batch code review). Recommend **Claude Opus 4.6 as the controller**, with Sonnet/Haiku for sub-tasks.
@@ -226,6 +227,12 @@ claude-agent-toolkit/
 │   ├── Rovo Dev CLI Guide.md
 │   └── Copilot CLI Guide.md
 │
+├── tools/                                 # Developer tools
+│   └── dev-console/                      # DevConsole Web UI (Memory DB visualization)
+│       ├── server/                       #   Express 5 REST API (better-sqlite3)
+│       ├── src/                          #   React 18 SPA + i18n (zh-TW / en)
+│       └── package.json                  #   `npm run dev` starts both frontend & backend
+│
 ├── telegram-bridge/                       # Telegram remote control for Claude CLI
 │   ├── src/                               # TypeScript source
 │   │   ├── telegram-bot.ts                #   Telegram Bot UI layer
@@ -357,6 +364,28 @@ Solves the fundamental problem of AI agents "starting from zero every conversati
 | **SessionEnd** | Conversation ends | Unconditional INSERT (last-resort backup) |
 | **PreCompact** | Before context compaction | Shares dedup logic with Stop hook |
 | **UserPromptSubmit** | Each user prompt | Injects last 3 session records into additionalContext |
+
+### 2.1. DevConsole Web UI
+
+**Core directory**: `tools/dev-console/`
+
+A standalone visual interface for browsing and managing Context Memory DB data, complementing the CLI-based MCP Tools.
+
+| Page | Function |
+|------|----------|
+| **Dashboard** | Story status KPI distribution + recent activity |
+| **Stories** | Kanban board + Epic filter + Story detail (Markdown rendering) |
+| **Memory** | Memory DB browse/search + category filter + manual CRUD |
+| **Sessions** | Session work log timeline |
+| **CR Issues** | Code Review issue tracking + severity/resolution stats |
+
+**Tech Stack**: Express 5 (API, port 3001) + Vite + React 18 (SPA, port 5174) + better-sqlite3 + i18n (zh-TW default / en)
+
+```bash
+cd tools/dev-console && npm run dev
+# Frontend: http://localhost:5174
+# API: http://localhost:3001
+```
 
 ### 3. BMAD Method Integration
 

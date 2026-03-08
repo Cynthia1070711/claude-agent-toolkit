@@ -28,6 +28,7 @@
    - **L2 向量語意層**：OpenAI Embedding + Cosine Similarity 語意搜尋
    - **L3 動態注入層**：UserPromptSubmit Hook 每次提問自動注入相關上下文
    - **CMI 進階強化**：Session 生命週期自動記錄（Stop/SessionEnd/PreCompact Hook）、全量文檔 ETL（136 Story + 50 CR + 29 ADR）、對話級記憶（list_sessions / get_session_detail / search_conversations）、UTC+8 時區正規化、壓縮恢復防護機制
+   - **DevConsole Web UI**：獨立 Node.js 應用（Express 5 + Vite + React 18），提供記憶庫視覺化瀏覽/搜尋/CRUD、Story Kanban 看板、CR Issue 追蹤、Session 時間軸。支援繁中/英文切換（i18n）。`localhost:5174`（前端）+ `localhost:3001`（API）
 
 5. **智能半自動化排程（BMAD Workflows）**
    Pipeline 自動化 + Token 安全閥 + Sprint 半自動推進。包含 batch-runner（批次執行）· story-pipeline（單 Story 全流程）· epic-auto-pilot（整個 Epic 自動推進）· batch-audit（批次 Code Review）。建議使用 **Claude Opus 4.6 作為中控**指揮官，搭配 Sonnet/Haiku 執行子任務。
@@ -219,6 +220,12 @@ claude-agent-toolkit/
 │   ├── Rovo Dev CLI Guide.md
 │   └── Copilot CLI Guide.md
 │
+├── tools/                                 # 開發者工具
+│   └── dev-console/                      # DevConsole Web UI（記憶庫視覺化）
+│       ├── server/                       #   Express 5 REST API（better-sqlite3）
+│       ├── src/                          #   React 18 SPA + i18n（zh-TW / en）
+│       └── package.json                  #   `npm run dev` 一鍵啟動前後端
+│
 ├── telegram-bridge/                       # Telegram 遠端控制 Claude CLI
 │   ├── src/                               # TypeScript 原始碼
 │   ├── PRD.md                             # 產品需求文檔（v2.0 持久進程模式）
@@ -294,11 +301,12 @@ claude mcp list  # 確認 MCP Server 已註冊
 
 1. **多引擎協作策略** — 四引擎分工矩陣、統一憲章、交接 SOP
 2. **Context Memory DB** — 四層遞進架構、9 個 MCP Tools（+CMI 對話記憶 3 Tool）、Hook 自動化、自動行為規則
-3. **BMAD Method 整合與強化** — dev-story / code-review / create-story Overlay + SDD-TDD Bridge + VSDD Simplified
-4. **Token 減量策略** — 五個層面的系統性優化
-5. **Pipeline 自動化** — batch-runner / epic-auto-pilot / Token 安全閥
-6. **多 Agent 並行執行** — Worktree / File Lock / Total Commit 三層策略
-7. **Telegram 遠端控制** — stream-json 持久進程模式、指令系統、快速部署
+3. **DevConsole Web UI** — 記憶庫視覺化瀏覽/搜尋/CRUD、Story Kanban 看板、CR Issue 追蹤、Session 時間軸（Express 5 + React 18 + i18n 繁中/英文）
+4. **BMAD Method 整合與強化** — dev-story / code-review / create-story Overlay + SDD-TDD Bridge + VSDD Simplified
+5. **Token 減量策略** — 五個層面的系統性優化
+6. **Pipeline 自動化** — batch-runner / epic-auto-pilot / Token 安全閥
+7. **多 Agent 並行執行** — Worktree / File Lock / Total Commit 三層策略
+8. **Telegram 遠端控制** — stream-json 持久進程模式、指令系統、快速部署
 
 ---
 
