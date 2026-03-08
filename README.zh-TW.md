@@ -1,4 +1,4 @@
-# Claude Agent Toolkit (v1.7.0)
+# Claude Agent Toolkit (v1.7.1)
 
 **多 Agent 協作策略 · 半自動化排程 · 規格驅動開發 · 跨對話知識累積**
 
