@@ -25,7 +25,7 @@
    建立向量記憶點資料庫（SQLite + FTS5 + MCP Server），多 Agent 協作共享同一個記憶庫、精準搜尋關鍵資料、可擴充記憶知識廣度。四層遞進架構 + **Epic CMI**（6 Stories）自動化生命週期記錄：
    - **L0 知識記憶層**：FTS5 全文搜尋 + 6 個 MCP Tools（search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context）
    - **L1 程式碼語意層**：Roslyn AST Symbol 提取 + 依賴圖譜
-   - **L2 向量語意層**：OpenAI Embedding + Cosine Similarity 語意搜尋
+   - **L2 向量語意層**：本地 ONNX Embedding（384D，零成本）或 OpenAI Embedding + Cosine Similarity 語意搜尋
    - **L3 動態注入層**：UserPromptSubmit Hook 每次提問自動注入相關上下文
    - **CMI 進階強化**：Session 生命週期自動記錄（Stop/SessionEnd/PreCompact Hook）、全量文檔 ETL（136 Story + 50 CR + 29 ADR）、對話級記憶（list_sessions / get_session_detail / search_conversations）、UTC+8 時區正規化、壓縮恢復防護機制、**文檔向量化語意搜尋**（Heading-aware Chunking + Hybrid Fusion Search: 0.7×Vector + 0.3×FTS5）、**本地 ONNX Embedding**（Xenova/all-MiniLM-L6-v2, 384D，取代 OpenAI API 零成本）
    - **DevConsole Web UI**：獨立 Node.js 應用（Express 5 + Vite + React 18），提供記憶庫視覺化瀏覽/搜尋/CRUD、Story Kanban 看板、CR Issue 追蹤、Session 時間軸、**文檔瀏覽與搜尋**（分類群組映射、FTS5 + LIKE fallback、關鍵字高亮、VS Code 一鍵開啟、相關文檔 API）。支援繁中/英文切換（i18n）。`localhost:5174`（前端）+ `localhost:3001`（API）
@@ -139,8 +139,9 @@ L1 程式碼語意層（選用 — 需 .NET SDK）
   ├── symbol_dependencies: calls / inherits / implements / uses
   └── MCP Tools: search_symbols / get_symbol_context
 
-L2 向量語意層（選用 — 需 OpenAI API Key）
-  ├── symbol_embeddings: text-embedding-3-small（1536 維）
+L2 向量語意層（選用 — 本地 ONNX 或 OpenAI API）
+  ├── symbol_embeddings: 本地 Xenova/all-MiniLM-L6-v2（384 維，零成本）
+  │   或 OpenAI text-embedding-3-small（1536 維，需 API Key）
   ├── Cosine Similarity 語意搜尋
   └── MCP Tool: semantic_search
 
@@ -350,7 +351,7 @@ claude mcp list  # 確認 MCP Server 已註冊
 | **Gemini CLI** | Latest | 選用 | 大上下文開發 |
 | **Antigravity IDE** | Latest | 選用 | E2E 測試、UI 開發 |
 | **.NET SDK** | 8+ | 選用 | L1 Code RAG（Roslyn AST） |
-| **OpenAI API Key** | — | 選用 | L2 向量語意搜尋 |
+| **OpenAI API Key** | — | 選用 | L2 向量語意搜尋（若不使用本地 ONNX） |
 
 ---
 

@@ -24,7 +24,7 @@
    SQLite + FTS5 + MCP Server — multi-agent shared memory, precise knowledge retrieval, expandable breadth. 4-layer progressive architecture + **CMI Epic** (6 stories) for auto-lifecycle recording:
    - **L0 Knowledge Memory**: FTS5 full-text search + 6 MCP Tools (search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context)
    - **L1 Code Semantic**: Roslyn AST symbol extraction + dependency graph
-   - **L2 Vector Semantic**: OpenAI Embedding + Cosine Similarity search
+   - **L2 Vector Semantic**: Local ONNX Embedding (384D, zero-cost) or OpenAI Embedding + Cosine Similarity search
    - **L3 Dynamic Injection**: UserPromptSubmit Hook auto-injects relevant context per prompt
    - **CMI Enhancements**: Auto session lifecycle (Stop/SessionEnd/PreCompact Hooks), full document ETL (136 stories + 50 CRs + 29 ADRs), conversation-level memory (list_sessions / get_session_detail / search_conversations), UTC+8 timezone normalization, compaction recovery guard, **document vectorization semantic search** (Heading-aware Chunking + Hybrid Fusion Search: 0.7×Vector + 0.3×FTS5), **local ONNX Embedding** (Xenova/all-MiniLM-L6-v2, 384D — zero-cost replacement for OpenAI API)
    - **DevConsole Web UI**: Standalone Node.js app (Express 5 + Vite + React 18) for visual memory DB browsing/search/CRUD, Story Kanban board, CR Issue tracking, Session timeline, **Documents browser** (category group mapping, FTS5 + LIKE fallback for short CJK queries, keyword highlighting, VS Code one-click open, related documents API). i18n support (zh-TW / en). `localhost:5174` (frontend) + `localhost:3001` (API)
@@ -145,8 +145,9 @@ L1 Code Semantic Layer (Optional — requires .NET SDK)
   ├── symbol_dependencies: calls / inherits / implements / uses
   └── MCP Tools: search_symbols / get_symbol_context
 
-L2 Vector Semantic Layer (Optional — requires OpenAI API Key)
-  ├── symbol_embeddings: text-embedding-3-small (1536 dimensions)
+L2 Vector Semantic Layer (Optional — local ONNX or OpenAI API)
+  ├── symbol_embeddings: local Xenova/all-MiniLM-L6-v2 (384D, zero-cost)
+  │   or OpenAI text-embedding-3-small (1536D, requires API Key)
   ├── Cosine Similarity semantic search
   └── MCP Tool: semantic_search
 
@@ -334,7 +335,7 @@ Solves the fundamental problem of AI agents "starting from zero every conversati
 |:-----:|------|----------|-----------|
 | **L0** | Knowledge Memory | FTS5 full-text search + 6 MCP Tools | Node.js 18+ |
 | **L1** | Code Semantic | Roslyn AST symbol extraction + dependency graph | .NET SDK 8+ |
-| **L2** | Vector Semantic | OpenAI Embedding + Cosine Similarity | OpenAI API Key |
+| **L2** | Vector Semantic | Local ONNX (384D) or OpenAI Embedding + Cosine Similarity | Optional (local ONNX = zero-cost) |
 | **L3** | Dynamic Injection | UserPromptSubmit Hook auto-injects context | L2 complete |
 
 **MCP Tools (L0 Base)**:
@@ -582,7 +583,7 @@ All strategies were cross-validated across multiple engines and models:
 | **Antigravity IDE** | Latest | Optional | E2E testing, UI development |
 | **Rovo Dev CLI** | Latest | Optional | Non-mainline tasks |
 | **.NET SDK** | 8+ | Optional | L1 Code RAG (Roslyn AST) |
-| **OpenAI API Key** | — | Optional | L2 vector semantic search |
+| **OpenAI API Key** | — | Optional | L2 vector semantic search (not needed if using local ONNX) |
 
 ---
 
