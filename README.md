@@ -26,8 +26,8 @@
    - **L1 Code Semantic**: Roslyn AST symbol extraction + dependency graph
    - **L2 Vector Semantic**: OpenAI Embedding + Cosine Similarity search
    - **L3 Dynamic Injection**: UserPromptSubmit Hook auto-injects relevant context per prompt
-   - **CMI Enhancements**: Auto session lifecycle (Stop/SessionEnd/PreCompact Hooks), full document ETL (136 stories + 50 CRs + 29 ADRs), conversation-level memory (list_sessions / get_session_detail / search_conversations), UTC+8 timezone normalization, compaction recovery guard
-   - **DevConsole Web UI**: Standalone Node.js app (Express 5 + Vite + React 18) for visual memory DB browsing/search/CRUD, Story Kanban board, CR Issue tracking, Session timeline. i18n support (zh-TW / en). `localhost:5174` (frontend) + `localhost:3001` (API)
+   - **CMI Enhancements**: Auto session lifecycle (Stop/SessionEnd/PreCompact Hooks), full document ETL (136 stories + 50 CRs + 29 ADRs), conversation-level memory (list_sessions / get_session_detail / search_conversations), UTC+8 timezone normalization, compaction recovery guard, **document vectorization semantic search** (Heading-aware Chunking + Hybrid Fusion Search: 0.7×Vector + 0.3×FTS5), **local ONNX Embedding** (Xenova/all-MiniLM-L6-v2, 384D — zero-cost replacement for OpenAI API)
+   - **DevConsole Web UI**: Standalone Node.js app (Express 5 + Vite + React 18) for visual memory DB browsing/search/CRUD, Story Kanban board, CR Issue tracking, Session timeline, **Documents browser** (category group mapping, FTS5 + LIKE fallback for short CJK queries, keyword highlighting, VS Code one-click open, related documents API). i18n support (zh-TW / en). `localhost:5174` (frontend) + `localhost:3001` (API)
 
 5. **Semi-Automated Sprint Pipeline (BMAD Workflows)**
    Pipeline automation + Token safety valve + Sprint semi-auto execution. Includes batch-runner (batch execution), story-pipeline (single story end-to-end), epic-auto-pilot (entire epic auto-push), batch-audit (batch code review). Recommend **Claude Opus 4.6 as the controller**, with Sonnet/Haiku for sub-tasks.
@@ -373,13 +373,21 @@ A standalone visual interface for browsing and managing Context Memory DB data, 
 
 | Page | Function |
 |------|----------|
-| **Dashboard** | Story status KPI distribution + recent activity |
+| **Dashboard** | Story status KPI distribution + recent activity + Embedding stats |
 | **Stories** | Kanban board + Epic filter + Story detail (Markdown rendering) |
 | **Memory** | Memory DB browse/search + category filter + manual CRUD |
 | **Sessions** | Session work log timeline |
 | **CR Issues** | Code Review issue tracking + severity/resolution stats |
+| **Documents** | Document browser with 6 category groups, FTS5 + LIKE fallback search, keyword highlighting, VS Code one-click open, related documents API |
 
 **Tech Stack**: Express 5 (API, port 3001) + Vite + React 18 (SPA, port 5174) + better-sqlite3 + i18n (zh-TW default / en)
+
+**Documents Page Features**:
+- **Category Group Mapping**: 14 fine-grained DB categories aggregated into 6 UI groups (Requirements, Technical, Analysis, Knowledge, Workflow, Other) with card navigation
+- **Dual-Path Search**: FTS5 trigram MATCH for queries >= 3 chars, LIKE `%keyword%` fallback for 2-char CJK queries (e.g., short Chinese keywords)
+- **Keyword Highlighting**: Search terms highlighted with `<mark>` in results
+- **VS Code Integration**: `vscode://file/{path}` URI scheme opens documents directly in VS Code
+- **Related Documents API**: `GET /api/documents/related` — Epic-first exact match, then FTS5 keyword fallback
 
 ```bash
 cd tools/dev-console && npm run dev
@@ -555,7 +563,7 @@ All strategies were cross-validated across multiple engines and models:
 | **3** | TRS-20 ~ TRS-29 | 4-engine unification: Gemini MD alignment, Antigravity Skills |
 | **4** | TRS-30 ~ TRS-33 | Parallel execution: File Lock mechanism, Worktree SOP |
 | **5** | TRS-34 ~ TRS-40 | Advanced: Tech debt registry, YAML index optimization |
-| **CMI** | CMI-1 ~ CMI-6 | Context Memory Improvement: auto session lifecycle, document ETL, conversation memory, timezone fix, compaction guard, quality enhancement |
+| **CMI** | CMI-1 ~ CMI-6 | Context Memory Improvement: auto session lifecycle, document ETL, conversation memory, document vectorization semantic search (Hybrid Fusion), compaction guard, local ONNX Embedding + session quality enhancement |
 | **FLOW** | FLOW-OPT-001 | SDD+ATDD+TDD methodology integration: BDD demotion, spec-gen auto-trigger, AC-BR traceability, VSDD simplified |
 
 > Each story contains: problem definition, execution details, file change list, quantified benefits.

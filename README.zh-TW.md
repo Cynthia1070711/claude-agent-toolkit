@@ -27,8 +27,8 @@
    - **L1 程式碼語意層**：Roslyn AST Symbol 提取 + 依賴圖譜
    - **L2 向量語意層**：OpenAI Embedding + Cosine Similarity 語意搜尋
    - **L3 動態注入層**：UserPromptSubmit Hook 每次提問自動注入相關上下文
-   - **CMI 進階強化**：Session 生命週期自動記錄（Stop/SessionEnd/PreCompact Hook）、全量文檔 ETL（136 Story + 50 CR + 29 ADR）、對話級記憶（list_sessions / get_session_detail / search_conversations）、UTC+8 時區正規化、壓縮恢復防護機制
-   - **DevConsole Web UI**：獨立 Node.js 應用（Express 5 + Vite + React 18），提供記憶庫視覺化瀏覽/搜尋/CRUD、Story Kanban 看板、CR Issue 追蹤、Session 時間軸。支援繁中/英文切換（i18n）。`localhost:5174`（前端）+ `localhost:3001`（API）
+   - **CMI 進階強化**：Session 生命週期自動記錄（Stop/SessionEnd/PreCompact Hook）、全量文檔 ETL（136 Story + 50 CR + 29 ADR）、對話級記憶（list_sessions / get_session_detail / search_conversations）、UTC+8 時區正規化、壓縮恢復防護機制、**文檔向量化語意搜尋**（Heading-aware Chunking + Hybrid Fusion Search: 0.7×Vector + 0.3×FTS5）、**本地 ONNX Embedding**（Xenova/all-MiniLM-L6-v2, 384D，取代 OpenAI API 零成本）
+   - **DevConsole Web UI**：獨立 Node.js 應用（Express 5 + Vite + React 18），提供記憶庫視覺化瀏覽/搜尋/CRUD、Story Kanban 看板、CR Issue 追蹤、Session 時間軸、**文檔瀏覽與搜尋**（分類群組映射、FTS5 + LIKE fallback、關鍵字高亮、VS Code 一鍵開啟、相關文檔 API）。支援繁中/英文切換（i18n）。`localhost:5174`（前端）+ `localhost:3001`（API）
 
 5. **智能半自動化排程（BMAD Workflows）**
    Pipeline 自動化 + Token 安全閥 + Sprint 半自動推進。包含 batch-runner（批次執行）· story-pipeline（單 Story 全流程）· epic-auto-pilot（整個 Epic 自動推進）· batch-audit（批次 Code Review）。建議使用 **Claude Opus 4.6 作為中控**指揮官，搭配 Sonnet/Haiku 執行子任務。
@@ -301,7 +301,7 @@ claude mcp list  # 確認 MCP Server 已註冊
 
 1. **多引擎協作策略** — 四引擎分工矩陣、統一憲章、交接 SOP
 2. **Context Memory DB** — 四層遞進架構、9 個 MCP Tools（+CMI 對話記憶 3 Tool）、Hook 自動化、自動行為規則
-3. **DevConsole Web UI** — 記憶庫視覺化瀏覽/搜尋/CRUD、Story Kanban 看板、CR Issue 追蹤、Session 時間軸（Express 5 + React 18 + i18n 繁中/英文）
+3. **DevConsole Web UI** — 記憶庫視覺化瀏覽/搜尋/CRUD、Story Kanban 看板、CR Issue 追蹤、Session 時間軸、文檔瀏覽與語意搜尋（6 分類群組 + FTS5/LIKE 雙路搜尋 + 關鍵字高亮 + VS Code 開啟 + 相關文檔 API）（Express 5 + React 18 + i18n 繁中/英文）
 4. **BMAD Method 整合與強化** — dev-story / code-review / create-story Overlay + SDD-TDD Bridge + VSDD Simplified
 5. **Token 減量策略** — 五個層面的系統性優化
 6. **Pipeline 自動化** — batch-runner / epic-auto-pilot / Token 安全閥
@@ -334,7 +334,7 @@ claude mcp list  # 確認 MCP Server 已註冊
 | **3** | TRS-20 ~ TRS-29 | 四引擎統一配置 |
 | **4** | TRS-30 ~ TRS-33 | 並行執行策略 |
 | **5** | TRS-34 ~ TRS-40 | 進階優化 |
-| **CMI** | CMI-1 ~ CMI-6 | 記憶庫進階優化：Session 自動記錄、全量文檔 ETL、對話記憶、時區修正、壓縮防護、品質強化 |
+| **CMI** | CMI-1 ~ CMI-6 | 記憶庫進階優化：Session 自動記錄、全量文檔 ETL、對話記憶、文檔向量化語意搜尋（Hybrid Fusion）、壓縮防護、本地 ONNX Embedding + Session 品質強化 |
 | **FLOW** | FLOW-OPT-001 | SDD+ATDD+TDD 方法論整合：BDD 降級、spec-gen 自動觸發、AC-BR 追溯、VSDD 簡化版 |
 
 ---
