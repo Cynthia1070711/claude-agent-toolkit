@@ -1,0 +1,13 @@
+# MEMORY.md
+
+> 本專案有 Context Memory DB（MCP Tools: search_context / search_tech / add_context）。
+> 任務開始前先查 DB，完成後寫入新發現。詳見 `.claude/rules/context-memory-db.md`。
+
+## 核心規則速查（一行摘要）
+
+- **雙重狀態更新**：dev-story 完成後同時更新 Story 文件狀態欄 + sprint-status.yaml
+- **CR 延後路由**：延後項目留原 Epic，禁止路由至 Epic TD
+- **五項同步**：每個 workflow 後更新 Story 狀態 + YAML + Tracking + Agent 時間 + H1 emoji
+- **CR 技術債**：全修復原則，WON'T FIX 僅限風格偏好；非 FIXED 項目須展示 Q1-Q5 自檢
+- **語言規則**：Workflow 指令用英文，報告/Story 用繁中
+- **Pipeline**：>=2 Story 用 batch-runner.ps1 + IntervalSec 12，結果讀 YAML 非 exit code

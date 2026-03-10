@@ -315,6 +315,181 @@
       <action>Write note: "此 Story 無需特定技術規範 Skill。"</action>
     </check>
 
+    <!-- DATABASE CHANGE DETECTION — AC-3/AC-4/AC-5 of TD-18 -->
+    <critical>🗄️ DATABASE CHANGE DETECTION — Scan story for database schema changes</critical>
+    <action>Scan story tasks, acceptance criteria, and technical requirements for database-related keywords:
+      Migration, Entity, DbSet, DbContext, 欄位, 欄位新增, 欄位調整, 欄位刪除, ALTER TABLE,
+      新增資料表, 資料表, FK, Foreign Key, 外鍵, 索引, Index, EF Core, ApplicationUser 屬性,
+      ApplicationUser 新增, Model 變更, Schema, Navigation Property, HasOne, WithMany, DeleteBehavior</action>
+    <action>Set {{has_db_changes}} = true if ANY database-related keyword is found in story content</action>
+
+    <check if="{{has_db_changes}} == true AND phycool-sqlserver NOT in {{required_skills}}">
+      <action>Auto-add /phycool-sqlserver to {{required_skills}} with reason "Story 涉及資料庫 Schema 變更"</action>
+      <action>Append to Required Skills section in story file</action>
+      <output>🗄️ 偵測到資料庫變更 — 自動加入 /phycool-sqlserver Skill</output>
+    </check>
+
+    <!-- AC-4: Auto-inject Dev Notes reminder for DB changes -->
+    <check if="{{has_db_changes}} == true">
+      <action>Write the following block into the story Dev Notes section:
+        ```markdown
+        ### ⚠️ 資料庫變更注意事項
+
+        本 Story 涉及資料庫 Schema 變更，dev-story 執行時需注意：
+        1. **建立 Migration 後**，執行 `dotnet ef database update` 套用至本機 DB
+        2. **完成前驗證**：`dotnet ef migrations has-pending-model-changes` 返回 "No changes"
+        3. 參考 `/phycool-sqlserver` Skill 的 Migration 規範
+        ```
+      </action>
+      <output>📋 已注入資料庫變更 Dev Notes 提醒</output>
+    </check>
+
+    <!-- AC-5: Auto-inject AC for DB migration verification -->
+    <check if="{{has_db_changes}} == true">
+      <action>Append the following AC block to the story Acceptance Criteria section (use next available AC number):
+        ```markdown
+        ### AC-N: 資料庫 Migration 驗證
+        - [ ] EF Core Migration 已建立並命名符合規範（`{EpicStoryId}_{描述}`）
+        - [ ] `dotnet ef database update` 執行成功
+        - [ ] `dotnet ef migrations has-pending-model-changes` 返回 "No changes"
+        - [ ] ModelSnapshot 正確反映所有 Model 變更
+        ```
+      </action>
+      <output>✅ 已注入資料庫 Migration 驗證 AC</output>
+    </check>
+    <!-- END DATABASE CHANGE DETECTION -->
+
+    <!-- DOCUMENT IMPACT DETECTION — TD-29 — Scan story for documentation that may need updating -->
+    <critical>📄 DOCUMENT IMPACT DETECTION — Identify which architecture/spec docs may need updating after story implementation</critical>
+
+    <!-- Doc Impact Rule Table (extensible — add a new Rule block to extend):
+         Rule #1: DB Schema         → database-schema.md       (reuses {{has_db_changes}} flag, no redundant keyword scan)
+         Rule #2: Service/Hub       → platform-services.md
+         Rule #3: Auth/Payment      → auth-payment.md
+         Rule #4: PDF Engine        → pdf-worker.md
+         Rule #5: Canvas/Editor     → editor-canvas.md
+         Rule #6: Security          → security-spec.md
+         Rule #7: Error Codes       → error-codes.md
+         Rule #8: Testing Strategy  → testing-strategy.md
+    -->
+
+    <action>Initialize {{doc_impact_list}} = empty list</action>
+
+    <!-- Rule #1: DB Schema — reuse TD-18 has_db_changes flag (shared keyword set, no duplication) -->
+    <check if="{{has_db_changes}} == true">
+      <action>Add to {{doc_impact_list}}: path="docs/project-planning-artifacts/technical-specs/database-schema.md" reason="新增 Entity/欄位/Migration"</action>
+    </check>
+
+    <!-- Rule #2: New Service / Controller / Hub -->
+    <action>Scan story tasks, acceptance criteria, and technical requirements for keywords:
+      Service, Controller, Hub, Middleware, DI 註冊, AddScoped, AddTransient, AddSingleton</action>
+    <check if="any Rule-2 keyword found in story content">
+      <action>Add to {{doc_impact_list}}: path="docs/project-planning-artifacts/architecture/platform-services.md" reason="新增 Service/Controller/Hub"</action>
+    </check>
+
+    <!-- Rule #3: Auth / Payment / Subscription -->
+    <action>Scan story content for keywords: OAuth, JWT, Identity, ECPay, Payment, Subscription, 退款, Webhook</action>
+    <check if="any Rule-3 keyword found">
+      <action>Add to {{doc_impact_list}}: path="docs/project-planning-artifacts/architecture/auth-payment.md" reason="認證/金流/訂閱機制變更"</action>
+    </check>
+
+    <!-- Rule #4: PDF Engine -->
+    <action>Scan story content for keywords: PDF, QuestPDF, PdfWorker, PdfGenerator, 佇列, Circuit Breaker</action>
+    <check if="any Rule-4 keyword found">
+      <action>Add to {{doc_impact_list}}: path="docs/project-planning-artifacts/architecture/pdf-worker.md" reason="PDF 引擎架構變更"</action>
+    </check>
+
+    <!-- Rule #5: Canvas / Editor -->
+    <action>Scan story content for keywords: Canvas, Fabric.js, CanvasJson, EditorStore, Zustand, 畫布</action>
+    <check if="any Rule-5 keyword found">
+      <action>Add to {{doc_impact_list}}: path="docs/project-planning-artifacts/architecture/editor-canvas.md" reason="Canvas/Editor 架構變更"</action>
+    </check>
+
+    <!-- Rule #6: Security Hardening -->
+    <action>Scan story content for keywords: CSP, CSRF, XSS, Auth, SecurityHeaders, RBAC, 權限</action>
+    <check if="any Rule-6 keyword found">
+      <action>Add to {{doc_impact_list}}: path="docs/project-planning-artifacts/technical-specs/security-spec.md" reason="安全策略/權限設定變更"</action>
+    </check>
+
+    <!-- Rule #7: Error Codes -->
+    <action>Scan story content for keywords: ErrorCode, error_code, 錯誤碼, PhyCoolException</action>
+    <check if="any Rule-7 keyword found">
+      <action>Add to {{doc_impact_list}}: path="docs/project-planning-artifacts/technical-specs/error-codes.md" reason="新增/修改錯誤碼定義"</action>
+    </check>
+
+    <!-- Rule #8: Testing Strategy -->
+    <action>Scan story content for keywords: Playwright, E2E, TestFixture, WebApplicationFactory, 測試策略</action>
+    <check if="any Rule-8 keyword found">
+      <action>Add to {{doc_impact_list}}: path="docs/project-planning-artifacts/technical-specs/testing-strategy.md" reason="測試架構/策略變更"</action>
+    </check>
+
+    <!-- Inject Dev Notes reminder block — only when docs were collected (silent skip if empty) -->
+    <check if="{{doc_impact_list}} is NOT empty">
+      <action>Append the following block to the story Dev Notes section:
+        ```markdown
+        ### 文檔影響提醒
+
+        > 本 Story 的變更可能影響以下文檔，開發完成後建議確認是否需同步更新：
+
+        {{#each doc_impact_list}}
+        - [ ] `{{path}}` — {{reason}}
+        {{/each}}
+        ```
+      </action>
+      <output>📄 已注入文檔影響提醒至 Dev Notes（{{doc_impact_list.length}} 份文檔）</output>
+    </check>
+    <check if="{{doc_impact_list}} is empty">
+      <!-- Silent skip — no document impact detected, do not add any block -->
+    </check>
+    <!-- END DOCUMENT IMPACT DETECTION -->
+
+    <!-- ═══ KNOWLEDGE BASE SCAN — TD-31 (AC-5 Injection Point 1) ═══ -->
+    <!-- Scan KB for known issues related to this story's skills/domain; inject links into Dev Notes -->
+    <action>Set {{kb_troubleshooting_path}} = "{project-root}/docs/knowledge-base/troubleshooting"</action>
+    <check if="{{kb_troubleshooting_path}} directory exists">
+      <action>Extract Required Skills from story content (format: /skill-name)</action>
+      <action>Map skills to KB domains using:
+        /phycool-editor-arch      → frontend/, database/
+        /phycool-zustand-patterns → frontend/
+        /phycool-admin-module     → backend/
+        /phycool-sqlserver        → database/
+        /phycool-pdf-engine       → backend/
+        /phycool-testing-patterns → (all domains)
+        /phycool-auth-identity    → backend/
+        /phycool-payment-subscription → backend/
+        /phycool-business-api     → backend/
+        /phycool-i18n-seo         → frontend/, backend/
+        /phycool-signalr-realtime → backend/
+        /phycool-background-services → backend/
+        (no skills or unknown) → workflow/ only
+      </action>
+      <action>For EACH mapped domain:
+        - Glob-scan docs/knowledge-base/troubleshooting/{domain}/*.md (exclude _template.md)
+        - For each file, read frontmatter: keywords, related_skills, occurrences, severity, status, id, title
+        - If status == "resolved-by-skill" → skip (already promoted to Skill rule)
+        - Compare keywords against story AC/Tasks/title text
+        - If ≥2 keywords match → mark as relevant
+      </action>
+      <check if="relevant KB entries found">
+        <action>Append the following block to story Dev Notes:
+          ```markdown
+          ### 已知問題參考 (Knowledge Base)
+
+          開發前建議閱讀以下已知問題，避免重複踩坑：
+
+          {{#each relevant_kb_entries}}
+          - [{{id}}: {{title}}](../../../knowledge-base/troubleshooting/{{domain}}/{{filename}}) — occurrences: {{occurrences}}, severity: {{severity}}
+          {{/each}}
+          ```
+        </action>
+        <output>📚 已注入 {{relevant_kb_entries.length}} 個知識庫已知問題連結至 Dev Notes</output>
+      </check>
+      <check if="no relevant KB entries">
+        <!-- Silent skip — no matches -->
+      </check>
+    </check>
+    <!-- END KNOWLEDGE BASE SCAN -->
+
     <!-- SECTION-LEVEL REFERENCE RULE for Dev Notes -->
     <critical>📂 PATH REFERENCE RULE: All file references in Dev Notes MUST use full relative paths from project root.
       Functional spec references MUST include section number (e.g., §5.1) and mark "僅讀此節" to limit read scope.
@@ -373,6 +548,39 @@
       <action>Write note: "程式碼分析未發現相關現有實作，此為全新功能開發。"</action>
     </check>
 
+    <!-- ═══ DEBT REGISTRY PULL — Auto-inject pre-existing tech debt into story ═══ -->
+    <critical>📋 DEBT REGISTRY PULL: Scan registry.yaml for pending debt targeting this story</critical>
+    <action>Read {implementation_artifacts}/tech-debt/registry.yaml</action>
+    <action>Filter entries where: status == "pending" AND target_story == "{{story_key}}"</action>
+    <check if="matching entries found">
+      <action>For EACH matching entry, read its sidecar file from entry.sidecar path</action>
+      <action>Write "### ⚠️ 前置技術債（自動注入 by /phycool-debt-registry Pull）" to story Dev Notes:
+        ```markdown
+        ### ⚠️ 前置技術債（自動注入 by /phycool-debt-registry Pull）
+
+        | 來源 | ID | 嚴重度 | 摘要 | 側車文件 |
+        |------|-----|--------|------|---------|
+        {{#each matching_entries}}
+        | {{source_story}} | {{id}} | {{severity}} | {{summary}} | {{sidecar}} |
+        {{/each}}
+
+        > ⚠️ 以上技術債源自先前 Story 的 CR 延後項目，本 Story 開發時應一併修復。
+        > 詳細修復指引見各側車文件。
+        ```
+      </action>
+      <action>For EACH matching entry, add a repair Task/Subtask to story Tasks section:
+        ```markdown
+        ### Task N: 修復前置技術債 (自動注入)
+
+        - [ ] **N.1** 修復 {{entry.id}}: {{entry.summary}} — 參考 {{entry.sidecar}}
+        ```
+      </action>
+      <output>📋 **前置技術債注入:** {{matching_count}} 個 pending entries 已注入 Dev Notes + Tasks</output>
+    </check>
+    <check if="no matching entries found">
+      <action>No pre-existing tech debt for this story — skip injection</action>
+    </check>
+
     <!-- Previous story intelligence -->
     <check
       if="previous story learnings available">
@@ -402,6 +610,9 @@
     <action>Set story Status to: "ready-for-dev"</action>
     <action>Add completion note: "Ultimate
     context engine analysis completed - comprehensive developer guide created"</action>
+
+    <!-- MANDATORY: Sync H1 heading emoji -->
+    <critical>Invoke /story-status-emoji skill Mode A on this story file (status: ready-for-dev)</critical>
   </step>
 
   <step n="7" goal="Update sprint status and finalize">

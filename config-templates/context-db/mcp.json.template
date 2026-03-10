@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "{{PROJECT_NAME}}-context": {
+      "type": "stdio",
+      "command": "node",
+      "args": [".context-db/server.js"]
+    }
+  }
+}

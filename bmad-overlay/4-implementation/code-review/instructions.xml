@@ -33,11 +33,12 @@
       Compliance(CRITICAL): 個資保護, 資料保留, 存取審計, 授權
     </review-dimensions>
 
-    <!-- 🆕 Production Gate 閾值 -->
+    <!-- 🆕 Production Gate 閾值 (registry-driven per /phycool-debt-registry §5) -->
     <production-gates>
       <gate name="zero-critical" rule="CRITICAL issues == 0">Story 不可標記 done</gate>
       <gate name="high-resolved" rule="HIGH issues all fixed OR justified">需要明確理由</gate>
-      <gate name="tech-debt-limit" rule="累積 LOW/MEDIUM &lt;= 10">超過則阻止新功能開發</gate>
+      <gate name="tech-debt-limit" rule="registry.yaml pending entries &lt;= 15">Count from tech-debt/registry.yaml, NOT from sprint-status comments</gate>
+      <gate name="zero-critical-debt" rule="registry.yaml pending + severity=CRITICAL == 0">No critical debt allowed in registry</gate>
       <gate name="coverage-minimum" rule="測試覆蓋 >= 70%">否則為 HIGH 問題</gate>
     </production-gates>
   </saas-standards>
@@ -88,14 +89,21 @@
     <invoke-protocol name="discover_inputs" />
     <action>Load {project_context} for coding standards (if exists)</action>
 
-    <!-- 載入累積技術債統計 -->
+    <!-- 載入累積技術債統計 (from registry.yaml per /phycool-debt-registry §5) -->
     <action>Set {{tech_debt_count}} = 0</action>
+    <action>Set {{registry_path}} = "{implementation_artifacts}/tech-debt/registry.yaml"</action>
+    <check if="{{registry_path}} exists">
+      <action>Read {{registry_path}}, store as {{registry_cache}}, and count entries where status == "pending" → {{tech_debt_count}}</action>
+      <action>Count entries where status == "pending" AND severity == "CRITICAL" → {{critical_debt_count}}</action>
+      <check if="{{critical_debt_count}} > 0">
+        <output>🚨 **CRITICAL 技術債**: {{critical_debt_count}} 個 CRITICAL pending entries in registry!</output>
+      </check>
+      <check if="{{tech_debt_count}} >= 15">
+        <output>⚠️ **技術債警告**: 累積 {{tech_debt_count}} 個待處理項目 (閾值: 15)！建議先處理技術債。</output>
+      </check>
+    </check>
     <check if="{sprint_status} file exists">
       <action>Load FULL {sprint_status} file and store as {{sprint_status_cache}} — do NOT re-read the file in subsequent steps</action>
-      <action>From {{sprint_status_cache}}, extract tech_debt_backlog section, count pending → {{tech_debt_count}}</action>
-      <check if="{{tech_debt_count}} >= 10">
-        <output>⚠️ **技術債警告**: 累積 {{tech_debt_count}} 個待處理項目！建議先處理技術債。</output>
-      </check>
     </check>
   </step>
 
@@ -257,6 +265,16 @@
       <action>Update {{fixed_count}}</action>
     </check>
 
+    <!-- ═══ DEBT REGISTRY: Mandatory Three-Way Classification (replaces abolished "retained") ═══ -->
+    <critical>🚫 ABOLISHED: The "retained" / "保留" classification is PERMANENTLY REMOVED.
+      Every non-FIXED issue MUST be classified as one of:
+      - DEFERRED: Has downstream impact, needs future Story to fix → registry.yaml entry + sidecar .debt.md
+      - WON'T FIX: No practical risk, purely style/preference → registry.yaml entry + written reason (no sidecar)
+      If uncertain → default to DEFERRED (track more, not less).
+      Any issue left without FIXED/DEFERRED/WON'T FIX classification is a workflow violation.
+      Invoke /phycool-debt-registry Push mode for all non-FIXED entries.
+    </critical>
+
     <!-- ═══ 延後項目 → 側車文件寫入（Sidecar Architecture） ═══ -->
     <check if="{{action_count}} > 0">
       <critical>📝 寫入技術債側車文件 — 不讀取目標 Story，直接蒸餾上下文到 .debt.md</critical>
@@ -272,20 +290,19 @@
         Store in {{analyzed_deferred_issues}}
       </action>
 
-      <!-- Phase 2: 按目標 Story 分組，寫入側車文件 -->
-      <action>Group {{analyzed_deferred_issues}} by {{target_story_id}} → {{grouped_deferrals}}</action>
-      <action>For EACH target_story_id in {{grouped_deferrals}}:
-        Write sidecar file at {implementation_artifacts}/tech-debt/{{target_story_id}}.debt.md
-        with three-layer context:
+      <!-- Phase 2: Write sidecar file (named by SOURCE story per /phycool-debt-registry §3) -->
+      <action>Write sidecar file at {implementation_artifacts}/tech-debt/{{story_key}}.debt.md
+        containing ALL DEFERRED items from this CR (one sidecar per source story):
 
         ```yaml
         ---
-        source_story: {{story_key}}
-        source_review_date: {{system_date}}
-        severity: {{max_severity_in_group}}
-        dimension: {{primary_dimension}}
+        source_story: "{{story_key}}"
+        source_review_date: "{{system_date}}"
+        severity: "{{max_severity_across_all_items}}"
+        dimension: "{{primary_dimension}}"
         items:
-          - problem_location: {{file}}:{{line}}
+          - id: "{{registry_id}}"
+            problem_location: "{{file}}:{{line}}"
             problem_description: |
               {{description}}
             fix_guidance: |
@@ -293,10 +310,11 @@
             affected_acceptance_criteria: |
               {{related_ac_from_source_story}}
             related_modules:
-              - {{affected_file_1}}
-              - {{affected_file_2}}
-            root_cause_category: {{root_cause_category}}
-            root_cause_detail: {{root_cause_detail}}
+              - "{{affected_file_1}}"
+              - "{{affected_file_2}}"
+            root_cause_category: "{{root_cause_category}}"
+            root_cause_detail: |
+              {{root_cause_detail}}
         routing_reason: "{{routing_reason}}"
         ---
         ```
@@ -304,6 +322,57 @@
         **Case B (需建新 Story)**:
           Also create Story stub at {implementation_artifacts}/stories/epic-{epic}/{{target_story_id}}.md
           with: Story ID, title, priority, status: backlog, link to .debt.md for full context
+      </action>
+
+      <!-- Phase 2.5: DEBT REGISTRY PUSH — Write entries to registry.yaml -->
+      <critical>📋 REGISTRY PUSH: Write ALL non-FIXED issues to tech-debt/registry.yaml</critical>
+      <action>Acquire registry lock before writing:
+        Run: powershell -File scripts/file-lock-acquire.ps1 -AgentId {{agent_id}} -StoryId {{story_key}} -FilePath "docs/implementation-artifacts/tech-debt/registry.yaml"
+        (Registers exclusive write lock in .agent-locks.json; prevents parallel CR agents from concurrent writes)
+      </action>
+      <action>Use {{registry_cache}} from Step 1 — do NOT re-read registry.yaml</action>
+      <action>For EACH DEFERRED issue in {{analyzed_deferred_issues}}:
+        Append entry to registry.yaml entries list:
+        ```yaml
+        - id: "{{story_short}}-{{issue_id}}"        # e.g., "BA-9-L2" — globally unique
+          classification: deferred
+          status: pending
+          severity: "{{severity}}"                   # CRITICAL | HIGH | MEDIUM | LOW
+          dimension: "{{dimension}}"
+          source_story: "{{story_key}}"
+          source_review_date: "{{system_date}}"
+          summary: "{{one_line_summary}}"
+          target_story: "{{target_story_id}}"
+          sidecar: "tech-debt/{{story_key}}.debt.md"
+          wont_fix_reason: null
+          resolved_date: null
+          resolved_by: null
+          resolved_in_story: null
+        ```
+      </action>
+      <action>For EACH WON'T FIX issue:
+        Append entry to registry.yaml entries list:
+        ```yaml
+        - id: "{{story_short}}-{{issue_id}}"
+          classification: wont_fix
+          status: wont_fix
+          severity: "{{severity}}"
+          dimension: "{{dimension}}"
+          source_story: "{{story_key}}"
+          source_review_date: "{{system_date}}"
+          summary: "{{one_line_summary}}"
+          target_story: null
+          sidecar: null
+          wont_fix_reason: "{{2_3_sentence_justification}}"
+          resolved_date: null
+          resolved_by: null
+          resolved_in_story: null
+        ```
+      </action>
+      <action>Update registry.yaml header: last_updated = {{system_date}}, last_updated_by = {{agent_id}}</action>
+      <action>Save registry.yaml preserving ALL existing entries and comments</action>
+      <action>Release registry lock after write:
+        Run: powershell -File scripts/file-lock-release.ps1 -FilePath "docs/implementation-artifacts/tech-debt/registry.yaml"
       </action>
 
       <!-- Phase 3: 更新當前 Story Tech Debt Reference（精簡版） -->
@@ -329,6 +398,18 @@
         - 📄 {{target_story_id}}.debt.md ({{item_count}} items, {{max_severity}})
         {{/each}}
       </output>
+
+      <!-- Phase 6: DEBT REGISTRY PUSH CHECKLIST — Mandatory verification -->
+      <critical>📋 PUSH CHECKLIST — All items MUST pass before proceeding</critical>
+      <action>Verify Push Checklist:
+        □ All non-FIXED issues classified as DEFERRED or WON'T FIX (zero "retained")
+        □ registry.yaml updated with all new entries
+        □ DEFERRED items have sidecar .debt.md at tech-debt/{{story_key}}.debt.md
+        □ WON'T FIX items have written justification in registry.yaml
+        □ Source Story Tech Debt Reference section updated
+        □ sprint-status.yaml tech_debt_backlog synced
+        If ANY item fails → HALT and fix before continuing.
+      </action>
     </check>
   </step>
 
@@ -336,7 +417,8 @@
     <critical>🔄 PRODUCTION GATE CHECK - 此步驟不可跳過！</critical>
 
     <action>Calculate final metrics:
-      {{critical_remaining}}, {{high_remaining}}, {{acs_incomplete}}, {{final_tech_debt}} = {{tech_debt_count}} + {{action_count}}
+      {{critical_remaining}}, {{high_remaining}}, {{acs_incomplete}}
+      {{final_tech_debt}} = {{tech_debt_count}} + count of new DEFERRED entries pushed in Step 4 (do NOT re-read registry.yaml)
     </action>
 
     <!-- 🆕 Production Gate 檢查 -->
@@ -379,6 +461,10 @@
       - Review完成時間: Execute `powershell -Command "Get-Date -Format 'yyyy-MM-dd HH:mm'"` to get current time
     </action>
     <action>Verify Status field was updated correctly</action>
+
+    <!-- MANDATORY: Sync H1 heading emoji -->
+    <critical>Invoke /story-status-emoji skill Mode A on this story file (status: {{new_status}}, check tech debt for compound marker)</critical>
+
     <action>Save story file</action>
 
     <!-- 同步 sprint-status.yaml -->
@@ -441,7 +527,32 @@
       | HIGH/MEDIUM | {{count}} | 下個 Sprint |
       | LOW | {{count}} | Backlog |
       {{else}}無延後項目。{{/if}}
+
+      ## 文檔同步狀態 (TD-31)
+      {{#if cr_doc_drift_items}}
+      **狀態**: ⚠️ Drift Detected
+
+      | 受影響文檔 | 變更類型 | 嚴重度 | 觸發變更 |
+      |-----------|---------|:------:|---------|
+      {{#each cr_doc_drift_items}}
+      | {{affected_doc}} | {{change_type}} | {{severity}} | {{changed_file}} |
+      {{/each}}
+
+      **需更新文檔清單 + 目標 Story**:
+      {{#each cr_must_sync_docs}}
+      - `{{doc_path}}` → Target Story: {{target_story}}
+      {{/each}}
+      {{else}}
+      **狀態**: ✅ N/A — No documentation drift detected from CR fixes
+      {{/if}}
       ```
+    </action>
+    <!-- CR Doc Drift Detection — TD-31 (AC-2) -->
+    <action>Run doc drift detection for CR fixes (TD-31):
+      Execute: powershell -ExecutionPolicy Bypass -File "{project-root}/scripts/check-doc-drift.ps1" -DiffRange "HEAD~1..HEAD" -JsonOutput -Quiet
+      Parse output JSON to populate {{cr_doc_drift_items}}
+      Severity "must-sync" items → populate {{cr_must_sync_docs}} with target_story from sprint-status (backlog/ready-for-dev)
+      This is Warn-Only — never blocks review completion.
     </action>
     <action>Update {implementation_artifacts}/reviews/README.md to include new report</action>
 

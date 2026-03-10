@@ -84,3 +84,13 @@ Seeder: `{{seeder_path}}`
 執行任務前，主動讀取：
 - `docs/project-context.md` — Epic 進度、當前工作、架構決策
 - `docs/implementation-artifacts/sprint-status.yaml` — Story 層級狀態
+
+---
+
+## 7. BMAD Workflow Commands
+
+```
+Format: /bmad:module:type:name
+常用: workflow-status, create-story, dev-story, code-review, sprint-planning
+Agents: analyst, pm, architect, sm, dev, tea, ux-designer
+```

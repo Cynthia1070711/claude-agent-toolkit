@@ -114,27 +114,98 @@
       <action>Consider referencing {project-root}/.claude/skills/skills_list.md for relevant skills</action>
     </check>
 
-    <!-- 技術債側車文件載入 — 檢查是否有 code-review 留下的修復指引 -->
-    <action>Set {{sidecar_path}} = "{implementation_artifacts}/tech-debt/{{story_key}}.debt.md"</action>
-    <check if="{{sidecar_path}} exists">
-      <action>Read {{sidecar_path}} — extract items[].fix_guidance, items[].problem_location, severity, routing_reason</action>
-      <action>Store as {{incoming_tech_debt}} for Step 5 implementation context</action>
-      <output>📋 **Tech Debt Sidecar Loaded:** {{sidecar_path}}
-        Severity: {{severity}} | Items: {{item_count}}
-        {{#each items}}
-        - 📍 {{problem_location}}: {{problem_description_summary}}
-        {{/each}}
-        These will be addressed during task implementation.
-      </output>
+    <!-- ═══ DEBT REGISTRY PULL — Scan registry for debt targeting this story ═══ -->
+    <critical>📋 DEBT REGISTRY PULL: Check registry.yaml for pending debt assigned to this story</critical>
+    <action>Set {{registry_path}} = "{implementation_artifacts}/tech-debt/registry.yaml"</action>
+    <check if="{{registry_path}} exists">
+      <action>Read {{registry_path}}</action>
+      <action>Filter entries where: status == "pending" AND target_story == "{{story_key}}"</action>
+      <check if="matching entries found">
+        <action>For EACH matching entry:
+          - Read the sidecar file from entry.sidecar path (named by source story)
+          - Extract items[].fix_guidance, items[].problem_location, severity
+          - Accumulate into {{incoming_tech_debt}} list
+        </action>
+        <output>⚠️ **前置技術債 (Registry Pull):**
+          {{#each matching_entries}}
+          - [{{severity}}] {{id}}: {{summary}} — 來源: {{source_story}} — 側車: {{sidecar}}
+          {{/each}}
+          These MUST be addressed during task implementation.
+        </output>
+      </check>
+      <check if="no matching entries">
+        <action>Set {{incoming_tech_debt}} = empty</action>
+      </check>
     </check>
-    <check if="{{sidecar_path}} does NOT exist">
-      <action>Set {{incoming_tech_debt}} = empty</action>
+    <check if="{{registry_path}} does NOT exist">
+      <!-- Fallback: legacy sidecar-only mode (no registry) -->
+      <action>Set {{sidecar_path}} = "{implementation_artifacts}/tech-debt/{{story_key}}.debt.md"</action>
+      <check if="{{sidecar_path}} exists">
+        <action>Read {{sidecar_path}} — extract items[].fix_guidance, items[].problem_location, severity</action>
+        <action>Store as {{incoming_tech_debt}} for Step 5 implementation context</action>
+        <output>📋 **Tech Debt Sidecar Loaded (legacy):** {{sidecar_path}}</output>
+      </check>
+      <check if="{{sidecar_path}} does NOT exist">
+        <action>Set {{incoming_tech_debt}} = empty</action>
+      </check>
     </check>
 
     <output>✅ **Context Loaded**
       Story and project context available for implementation
       {{#if incoming_tech_debt}}📋 Tech debt sidecar: {{item_count}} items to address{{/if}}
     </output>
+  </step>
+
+  <!-- ═══ STEP 2.5: KNOWLEDGE BASE PRE-CHECK — TD-31 ═══ -->
+  <step n="2.5" goal="Knowledge Base pre-check — scan for known issues before implementation">
+    <critical>TD-31: Scan knowledge-base for known problems matching this story's domain/skills</critical>
+
+    <!-- Skill → Domain mapping -->
+    <action>Map {{story_required_skills}} to KB domains using this table:
+      /phycool-editor-arch      → frontend/, database/
+      /phycool-admin-module     → backend/
+      /phycool-sqlserver        → database/
+      /phycool-pdf-engine       → backend/
+      /phycool-zustand-patterns → frontend/
+      /phycool-testing-patterns → (all: frontend/ backend/ database/ devops/ workflow/)
+      /phycool-auth-identity    → backend/
+      /phycool-payment-subscription → backend/
+      /phycool-business-api     → backend/
+      /phycool-i18n-seo         → frontend/ backend/
+      /phycool-signalr-realtime → backend/
+      /phycool-background-services → backend/
+      (default, no skills)      → (all domains)
+    </action>
+
+    <action>Set {{kb_base_path}} = "{project-root}/docs/knowledge-base/troubleshooting"</action>
+    <check if="{{kb_base_path}} directory exists">
+      <action>For EACH mapped domain:
+        - Use Glob to find all *.md files in docs/knowledge-base/troubleshooting/{domain}/
+        - Exclude _template.md
+        - Read frontmatter (title, keywords, error_patterns, related_skills, status, occurrences, severity)
+        - Compare keywords against current story's AC/Tasks text
+        - If ≥2 keyword matches AND status != "resolved-by-skill" → mark as relevant
+      </action>
+      <check if="relevant entries found">
+        <action>Read full content of each relevant entry</action>
+        <action>Store as {{kb_relevant_entries}} list</action>
+        <output>📚 **Knowledge Base Pre-Check Results:**
+          {{#each kb_relevant_entries}}
+          - [{{severity}}] {{id}}: {{title}} (occurrences: {{occurrences}})
+            Keywords matched: {{matched_keywords}}
+          {{/each}}
+          ⚠️ Review these known issues BEFORE implementing related tasks.
+        </output>
+      </check>
+      <check if="no relevant entries found">
+        <action>Set {{kb_relevant_entries}} = empty</action>
+        <output>✅ No relevant KB entries found — proceeding with implementation</output>
+      </check>
+    </check>
+    <check if="{{kb_base_path}} does NOT exist">
+      <action>Set {{kb_relevant_entries}} = empty</action>
+      <output>ℹ️ Knowledge base not yet initialized — skipping KB pre-check</output>
+    </check>
   </step>
 
   <step n="3" goal="Detect review continuation and extract review context">
@@ -257,6 +328,18 @@
     <action>Run tests to confirm they now pass</action>
     <action>Handle error conditions and edge cases as specified in task/subtask</action>
 
+    <!-- KB ERROR LOOKUP — TD-31: Consult knowledge base on build/test failure BEFORE attempting fix -->
+    <check if="Build or Test fails">
+      <action>BEFORE attempting to fix, consult Knowledge Base:
+        1. Extract key fragment from error message (error code, class name, exception type, 2-4 words)
+        2. Set {{kb_troubleshooting_path}} = "{project-root}/docs/knowledge-base/troubleshooting"
+        3. If directory exists: use Grep to search for error fragment in {{kb_troubleshooting_path}}/**/*.md (search error_patterns fields)
+        4. If KB entry found → read full entry, prioritize the "解決方案" section approach
+        5. If not found → proceed with normal debugging
+        6. After successful fix → trigger KB write-back check (see Step 5 KB write-back below)
+      </action>
+    </check>
+
     <!-- REFACTOR PHASE -->
     <action>Improve code structure while keeping tests green</action>
     <action>Ensure code follows architecture patterns and coding standards from Dev Notes</action>
@@ -271,6 +354,41 @@
     <critical>NEVER proceed to next task until current task/subtask is complete AND tests pass</critical>
     <critical>Execute continuously without pausing until all tasks/subtasks are complete or explicit HALT condition</critical>
     <critical>Do NOT propose to pause for review until Step 9 completion gates are satisfied</critical>
+  </step>
+
+  <step n="5b" goal="Apply database migrations if new migration files were created">
+    <critical>CONDITIONAL STEP: Only execute if new EF Core Migration files were created in Step 5</critical>
+
+    <action>Check if any new or modified Migration files exist in Data/Migrations/*.cs (look for files created during Step 5 implementation)</action>
+
+    <check if="new or modified Migration files detected">
+      <action>Log to Dev Agent Record: "Migration files detected: {{migration_file_list}}"</action>
+      <action>Run: dotnet ef database update --project src/PhyCool.Platform/PhyCool.Web</action>
+
+      <check if="dotnet ef database update succeeds">
+        <action>Log to Dev Agent Record: "✅ Database migrations applied successfully: {{migration_names}}"</action>
+      </check>
+
+      <check if="dotnet ef database update FAILS">
+        <critical>HALT: "Database migration failed — fix migration errors before continuing"</critical>
+        <action>Log error details to Dev Agent Record → Debug Log</action>
+        <action>Common fixes:
+          1. Check for FK constraint violations in migration
+          2. Verify Model changes match migration expectations
+          3. Check for conflicting migrations from parallel Story branches
+          4. Run: dotnet ef migrations has-pending-model-changes to diagnose
+        </action>
+      </check>
+
+      <action>Verify schema consistency: dotnet ef migrations has-pending-model-changes --project src/PhyCool.Platform/PhyCool.Web</action>
+      <check if="has-pending-model-changes reports changes remain">
+        <action>Log warning: "⚠️ Model changes still pending after migration — may need additional migration"</action>
+      </check>
+    </check>
+
+    <check if="no new Migration files detected">
+      <action>Skip — no database migrations to apply</action>
+    </check>
   </step>
 
   <step n="6" goal="Author comprehensive tests">
@@ -333,6 +451,33 @@
       <action>Count total resolved review items in this session</action>
       <action>Add Change Log entry: "Addressed code review findings - {{resolved_count}} items resolved (Date: {{date}})"</action>
     </check>
+
+    <!-- ═══ KB WRITE-BACK CHECK — TD-31 (AC-6) ═══ -->
+    <!-- Trigger: any task that required ≥2 fix attempts OR had build/test failure before success -->
+    <check if="current task required ≥2 fix attempts OR had build/test failure before green">
+      <action>Check if KB already has an entry for this type of error:
+        1. Extract core error description (2-5 words) from the debugging session
+        2. Grep docs/knowledge-base/troubleshooting/ for matching error_patterns
+        3. If EXISTING entry found:
+           - Update: increment occurrences count, update last_seen date
+           - Append new solution approach to "解決方案" section if different
+           - If occurrences now ≥ 3: append upgrade suggestion block (see AC-7 template)
+        4. If NO existing entry:
+           - Determine domain category (frontend/backend/database/devops/workflow)
+           - Generate new KB ID: KB-{domain}-{next_sequential_number}
+           - Create new file from _template.md with auto-filled frontmatter:
+             * title: core error description
+             * keywords: from error message + affected files + tech stack
+             * error_patterns: exact error message fragments from build/test output
+             * related_skills: copy from story Required Skills
+             * first_seen/last_seen: current date
+             * occurrences: 1
+           - Fill "症狀", "根因分析", "解決方案" from debugging session
+           - Update docs/knowledge-base/README.md index table with new entry
+      </action>
+      <output>📝 **KB Write-Back:** {{kb_action}} — {{kb_entry_id}}: {{kb_entry_title}}</output>
+    </check>
+    <!-- END KB WRITE-BACK -->
 
     <action>Save the story file</action>
     <action>Determine if more incomplete tasks remain</action>
@@ -403,6 +548,9 @@
     <action if="File List is incomplete">HALT - Update File List with all changed files</action>
     <action if="definition-of-done validation fails">HALT - Address DoD failures before completing</action>
 
+    <!-- MANDATORY: Sync H1 heading emoji -->
+    <critical>Invoke /story-status-emoji skill Mode A on this story file (status: review)</critical>
+
     <!-- Update tracking file -->
     <action>Set {{tracking_active_path}} = "{output_folder}/tracking/active/{{story_key}}.track.md"</action>
     <check if="{{tracking_active_path}} exists">
@@ -412,6 +560,53 @@
         - 檔案變更紀錄
       </action>
       <output>📝 追蹤檔案已更新: active/{{story_key}}.track.md</output>
+    </check>
+
+    <!-- DOC IMPACT HOOK — TD-29: Warn-Only reminder for documentation that may need updating -->
+    <action>Run doc impact reminder hook:
+      Execute: powershell -ExecutionPolicy Bypass -File "{project-root}/scripts/post-dev-story-doc-reminder.ps1" -StoryFile "{{story_path}}"
+      This is Warn-Only — output is informational only, never blocks workflow completion.
+    </action>
+
+    <!-- ═══ STEP 9.5: DOC DRIFT DETECTION — TD-31 ═══ -->
+    <!-- Scan git diff for changes that require documentation updates -->
+    <action>Run doc drift detection (TD-31):
+      Execute: powershell -ExecutionPolicy Bypass -File "{project-root}/scripts/check-doc-drift.ps1" -DiffRange "HEAD~1..HEAD" -JsonOutput -OutputFile "{project-root}/docs/tracking/doc-drift-latest.json" -Quiet
+      This is Warn-Only — never blocks workflow completion.
+    </action>
+    <action>Parse drift results from doc-drift-latest.json (if it exists):
+      - Read the JSON file
+      - Extract drift_items where severity == "must-sync" or "warning"
+      - Store as {{drift_affected_docs}} list
+    </action>
+    <check if="{{drift_affected_docs}} is not empty">
+      <action>Add or update "## 文檔影響評估" section in the story file with:
+        ```
+        ## 文檔影響評估
+
+        > 由 dev-story Step 9.5 自動偵測（TD-31 Doc Drift Detection）
+
+        | 受影響文檔 | 變更類型 | 嚴重度 | 觸發檔案 |
+        |-----------|---------|:------:|---------|
+        {{#each drift_affected_docs}}
+        | {{affected_doc}} | {{change_type}} | {{severity}} | {{changed_file}} |
+        {{/each}}
+
+        **處理建議**: 在本 Story 完成後，應同步更新上述文檔。
+        參閱 `/phycool-doc-sync` Skill 的文檔更新 Checklist。
+        ```
+      </action>
+      <action>Update tracking file with drift summary:
+        - 追加日誌: "Doc drift detected: {{must_sync_count}} must-sync, {{warning_count}} warnings"
+      </action>
+      <output>⚠️ **文檔 Drift 偵測結果:**
+        Must-Sync: {{must_sync_count}} 個文檔需立即更新
+        Warnings: {{warning_count}} 個文檔建議更新
+        詳見 Story 文件「文檔影響評估」區塊
+      </output>
+    </check>
+    <check if="{{drift_affected_docs}} is empty OR check-doc-drift.ps1 not found">
+      <output>✅ No documentation drift detected (or drift check unavailable)</output>
     </check>
   </step>
 

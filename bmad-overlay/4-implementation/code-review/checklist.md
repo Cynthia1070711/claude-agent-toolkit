@@ -25,11 +25,24 @@
 - [ ] **Scalability (HIGH)**: N+1, Pagination, Async, Caching
 - [ ] **Observability (MEDIUM)**: Logging, Metrics, Tracing
 - [ ] **Data Consistency (HIGH)**: Transactions, Concurrency, Validation
+- [ ] **Migration Integrity (HIGH)**: If story includes new migrations, verify: (a) Migration files are well-formed and match Model changes, (b) `dotnet ef database update` applies without errors, (c) No orphaned shadow FK properties in ModelSnapshot, (d) `has-pending-model-changes` returns "No changes"
 - [ ] **Error Handling (HIGH)**: Exceptions, Retry, Graceful Degradation
 - [ ] **Compliance (CRITICAL)**: GDPR, Data Retention, Audit Logs
 - [ ] **Test Quality**: Coverage >= 70%, Real assertions
 - [ ] Skill FORBIDDEN rules checked (violations → HIGH)
 - [ ] SaaS Readiness Score calculated (0-100, threshold >= 70)
+
+## 📐 Spec Alignment Verification — VSDD Simplified (M/L/XL Story Only)
+
+> 僅當 Story 資訊表中 SDD Spec 欄位非 N/A 時啟用。以全新乾淨視角比對 Spec vs Code。
+
+- [ ] **Spec Loaded**: 讀取 SDD Spec `{spec_path}` 的 Business Rules + Boundary Conditions + API Spec
+- [ ] **BR Coverage**: 每條 Business Rule 在程式碼中有對應實作（附 file:line 證據）
+- [ ] **Boundary Compliance**: Spec Boundary Conditions（§5）有對應測試覆蓋
+- [ ] **API Contract Match**: 實作的 API route/request/response 與 Spec §4 一致
+- [ ] **Error Code Alignment**: 實作的錯誤碼與 Spec §5 Error Handling 一致
+- [ ] **No Spec Drift**: 實作未引入 Spec 未定義的功能（防止 over-engineering / 架構漂移）
+- [ ] **Test-BR Traceability**: 測試命名含 BR ID，可直接追溯至 Spec
 
 ## 🔥 Issue Resolution — 全自動修復 (By Severity)
 - [ ] All CRITICAL issues auto-fixed (security, data corruption, arch bugs, false claims)
@@ -50,6 +63,7 @@
 ## 📝 Status Update
 - [ ] Story Status updated to {{new_status}} (done/in-progress/blocked)
 - [ ] Sprint status synced
+- [ ] H1 Emoji synced: Invoke /story-status-emoji Mode A (🟢 done / 🟢🚧 done+debt / 🟡 in-progress)
 
 ## 📋 Post-Review Documentation
 - [ ] CR Report generated: `reviews/epic-{{epic_num}}/{{story_key}}-code-review-report.md`
