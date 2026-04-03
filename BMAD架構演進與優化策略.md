@@ -1,9 +1,10 @@
 # BMAD 架構演進與優化策略指南
 
-**版本**: 1.1.0
+**版本**: 2.0.0
 **建立日期**: 2026-02-27
+**最後更新**: 2026-04-03（Epic BU 完成 + ECC 計畫確立）
 **適用範圍**: BMAD Method 架構版本遷移決策 + Token 優化策略 + ECC 整合評估 + Code-Review 客製化分析
-**來源**: Party Mode 架構討論（CC-OPUS, 2026-02-27）
+**來源**: Party Mode 架構討論（CC-OPUS, 2026-02-27 初版 → 2026-04-03 Epic BU 升級）
 
 ---
 
@@ -12,10 +13,11 @@
 本文件記錄以下分析結果，供**新專案初始化**或**舊專案升級評估**時參考：
 
 1. 當前 BMAD 架構的 Token 靜態消耗量化數據
-2. 最新 BMAD v6.0.3 與舊版架構的結構性差異
-3. everything-claude-code (ECC) 功能覆蓋分析
-4. 遷移策略決策框架
-5. 多引擎協作架構相容性考量
+2. BMAD v6.2.2 最新架構與 PhyCool 自訂系統的差異
+3. everything-claude-code (ECC) v1.9.0 功能覆蓋分析
+4. Epic BU 升級成果（2026-04-03）
+5. 遷移策略決策框架
+6. 多引擎協作架構相容性考量
 
 ---
 
@@ -51,7 +53,9 @@
 | **PhyCool 專案（TRS 後）** | **~2,607** | 經 35 個 TRS Story 優化 |
 | 理論最低 | ~1,500 | 僅保留 CLAUDE.md + 1 條 Rule |
 
-**結論**：2,607 tokens 佔 200K context window 的 **1.3%**，已無進一步壓縮的必要。
+**結論（v1.1.0 時）**：2,607 tokens 佔 200K context window 的 **1.3%**，已無進一步壓縮的必要。
+
+> **v2.0.0 更新（2026-04-03）**：經過 Epic 系列擴展，Always-On 已升至 ~19,090 tokens（63 Skills × ~84 tok + 15 Rules/497L + MEMORY.md ~1,300 tok）。但 Opus 4.6 使用 1M context window，佔比僅 ~1.9%。Token 減量仍在監控中（見 `claude-token-decrease` Skill §6 ROI Ranking）。
 
 ---
 
@@ -146,7 +150,44 @@
 
 ### 3.3 結論
 
-> **不需要額外引入 ECC 套件。** 我們的 BMAD + TRS 組合已覆蓋 ECC 80%+ 的核心功能，且 Token 靜態消耗（2,607）比 ECC 優化後的水準（10,000）還低 74%。
+> **v1.1.0（2026-02-27）**：不需要額外引入 ECC 套件。BMAD + TRS 組合已覆蓋 ECC 80%+ 核心功能。
+>
+> **v2.0.0（2026-04-03）**：經六輪 Party Mode 深度分析 ECC v1.9.0，確認 5 項值得引入的 Hook 基礎設施強化已全部落地（Epic ECC 5/5 done）。13 項不適用（已有更好方案）。ECC 整體採用度從 85% 提升至 **92%**。
+
+### 3.4 ECC v1.9.0 更新分析（v2.0.0, 2026-04-03）
+
+> 六輪 Party Mode 深度分析 ECC v1.9.0 後，確認 7 項可引入優化，建立 **Epic ECC**（5 Stories）：
+
+| 項目 | 優先級 | 說明 | CR Score | 狀態 |
+|------|:------:|------|:--------:|:----:|
+| Pre-Commit 品質 Hook | P0 | Bash PreToolUse 攔截 git commit（secrets/console.log/msg） | 92 | ✅ done |
+| Config Protection Hook | P0 | PreToolUse 保護 settings/pipeline/config | 92 | ✅ done |
+| RAG Pipeline 模式 | P1 | Pipeline 中省 ~3,500 tok/prompt（PIPELINE_PHASE env var） | — | ✅ done |
+| suggest-compact Hook | P1 | Stop hook 工具計數 + 閾值提醒 | 95 | ✅ done |
+| MCP Health Check Hook | P1 | PreToolUse 探測 + PostToolUseFailure 重連 | 94 | ✅ done |
+
+**Epic ECC 完成（2026-04-03）**：5/5 done, avg CR 93.8, 72 tests 全部通過。
+新增 4 個 hook 腳本 + 1 個現有 hook 修改，覆蓋 5 個 hook event。
+Hook 檔案位置：`.claude/hooks/`（pre-commit-quality, config-protection, suggest-compact, mcp-health-check）。
+
+> P2 長期項目（CL v2 Instinct 閉環 + Safety Guard）暫未建 Story，視需求再啟動。
+
+---
+
+## 3.5 Epic BU — BMAD Upgrade 成果（2026-04-03）
+
+> BMAD 安裝版 v6.0.0-alpha.21 → v6.2.2 概念升級完成（6 Stories, avg CR 95.2）
+
+| 升級項 | Story | 交付物 | 核心價值 |
+|--------|-------|--------|---------|
+| Workflow XML→MD 遷移 | bu-02 (L, CR:88) | 3 workflow.md + 34 step 文件 | 維護性提升，子視窗只載入當前 step |
+| 三層平行 Review | bu-01 (M, CR:100) | Blind+Edge+Acceptance+Triage | 與 SaaS 9 維正交，bug 發現率提升 |
+| Skill Validator | bu-03 (S, CR:94) | 14 規則 + check-hygiene 整合 | 92 Skill 品質自動防線 |
+| Quick Dev oneshot | bu-04 (S, CR:94) | step-oneshot + self-check + XS 路徑 | 微任務零 overhead |
+| Edge Case Hunter | bu-05 (S, done) | 獨立 Skill（5 維 + DB 映射） | Pipeline 外單獨調用 |
+| Review Trail | bu-06 (S, CR:100) | path:line 導覽 + blast-radius 排序 | 結構化人工 review |
+
+> **關鍵架構決策**：Pipeline（story-pipeline-interactive.ps1）是 DB-first 架構，不直接載入 workflow 文件。格式遷移對 Pipeline 零影響。BMAD standalone 模式透過 workflow.yaml → workflow.md 路由。
 
 ---
 
@@ -176,20 +217,21 @@
 
 ### 4.2 PhyCool 專案決策
 
-**決策：維持舊版架構，不遷移至 v6.0.3。**
+**決策 v1.1.0（2026-02-27）**：維持舊版架構，不遷移至 v6.0.3。
+**決策 v2.0.0（2026-04-03）**：已完成 Epic BU 概念升級，保留安裝基底但遷移 Workflow 格式。
 
-| 考量因素 | 評估 |
-|----------|------|
-| Token 壓力 | 無（2,607 tokens = 200K 的 1.3%） |
-| 客製化程度 | 高（code-review 2.1x、Zustand 驗證、CR 路由規則） |
-| 專案階段 | Phase 4 Implementation（不適合重建腳手架） |
-| 遷移工具 | 無（需手動遷移 652 → 225 檔案） |
-| 風險 | 高（auto-pilot 串接、多引擎路徑、tracking 引用） |
-| ROI | 低（工作流邏輯不變，僅檔案格式變更） |
+| 考量因素 | v1.1.0 評估 | v2.0.0 更新 |
+|----------|------------|------------|
+| Token 壓力 | 無（2,607 tok） | 上升至 19,090 tok（Opus 1M 佔 1.9%，監控中） |
+| 客製化程度 | 高（2.1x） | 更高（Workflow 2,202 行，含三層平行 + 34 step 文件） |
+| 專案階段 | Phase 4 | Phase 4（Epic BU 證明可安全遷移 Workflow 格式） |
+| 遷移工具 | 無 | 不需要（Epic BU 已手動遷移 + 保留 XML 備份） |
+| 風險 | 高 | 低（Pipeline DB-first 不依賴 Workflow 格式） |
+| ROI | 低 | **已實現**（三層平行 + Skill Validator + Quick Dev） |
 
 ### 4.3 新專案建議
 
-**新專案應直接使用最新 BMAD v6.0.3：**
+**新專案應安裝最新 BMAD v6.2.2 後套用 Epic BU overlay：**
 
 ```bash
 # Step 1: 安裝最新版 BMAD
@@ -198,16 +240,17 @@ npx bmad-method install
 # Step 2: 複製本範本包
 Copy-Item -Path "原始專案\docs\專案部屬必讀" -Destination "新專案\docs\專案部屬必讀" -Recurse
 
-# Step 3: 套用 TRS overlay（需先確認與最新版的相容性）
-# ⚠️ 注意：overlay 是基於舊版 instructions.xml 格式製作的
-# 新專案應 diff 後決定是否需要調整 overlay
-diff "docs/專案部屬必讀/bmad-overlay/4-implementation/code-review/instructions.xml" \
-     "_bmad/bmm/workflows/4-implementation/code-review/instructions.xml"
+# Step 3: 套用 Epic BU overlay（Markdown step 分檔 + PhyCool 自訂功能）
+# overlay 已使用 v6.2.2 相容的 workflow.md + steps/ 格式
+Copy-Item -Path "docs\專案部屬必讀\bmad-overlay\4-implementation\*" `
+          -Destination "_bmad\bmm\workflows\4-implementation\" -Recurse -Force
 
 # Step 4: 配置各引擎（同 README.md Step 4）
 ```
 
-> **重要提醒**：最新版的 `instructions.xml` 已比舊版原廠版精簡（code-review 226 行 vs 舊版原廠 923 行）。套用 overlay 前**必須先 diff**，確認是否仍需要覆蓋，或者最新原廠版已足夠精簡。
+> **v2.0.0 變更**：overlay 已從 XML instructions.xml 格式升級為 Markdown workflow.md + steps/ 格式。
+> 包含 PhyCool 自訂：DB-first、三層平行 Review、SaaS Production Gates、Skill 整合、KB 查詢等。
+> 舊 instructions.xml 保留為 DEPRECATED 備份，可在遷移完成確認後刪除。
 
 ---
 

@@ -1,8 +1,9 @@
 # 專案部署必讀 — 多引擎協作環境一鍵初始化範本 (v1.7.0)
 
-**版本**: 1.7.1
+**版本**: 1.9.0
 **建立日期**: 2026-02-27
-**適用範圍**: BMAD Method v6.0.0-alpha.21 + Claude Code CLI + Gemini CLI + Antigravity IDE + Rovo Dev CLI
+**最後更新**: 2026-04-03（Epic BU: BMAD v6.2.2 升級 + Epic ECC: Hook 基礎設施強化）
+**適用範圍**: BMAD Method v6.0.0-alpha.21（已升級 v6.2.2 概念）+ Claude Code CLI（含 ECC Hook 強化）+ Gemini CLI + Antigravity IDE + Rovo Dev CLI
 
 ---
 
@@ -123,21 +124,50 @@ docs/專案部屬必讀/
 │   ├── antigravity-guide.md
 │   └── rovo-dev-guide.md
 │
-├── bmad-overlay/                          ← TRS 優化後的 BMAD Workflow 覆蓋包
+├── bmad-overlay/                          ← BMAD Workflow 覆蓋包（Epic BU v1.8.0 升級）
 │   └── 4-implementation/
-│       ├── code-review/                   ← instructions.xml (471行, 原廠923行, -49%)
-│       │   ├── instructions.xml              checklist.md (+VSDD Simplified)
-│       │   ├── checklist.md                  workflow.yaml
-│       │   └── workflow.yaml
-│       ├── create-story/                  ← instructions.xml (449行, 原廠542行, -20%)
-│       │   ├── instructions.xml              checklist.md (+AC-BR Traceability + SDD Pre-check)
-│       │   ├── checklist.md                  template.md (+SDD Spec 欄位 + ATDD 格式)
-│       │   ├── template.md               ← [NEW] SDD+ATDD Story 模板
-│       │   └── workflow.yaml
-│       └── dev-story/                     ← instructions.xml (436行, 原廠480行, -15%)
-│           ├── instructions.xml              checklist.md (+SDD-TDD Bridge)
-│           ├── checklist.md                  workflow.yaml
-│           └── workflow.yaml
+│       ├── code-review/                   ← [BU] workflow.md + 13 step 分檔 + 三層平行架構
+│       │   ├── workflow.md                   主工作流（95行, 取代 instructions.xml）
+│       │   ├── workflow.yaml                 BMAD 配置（指向 workflow.md）
+│       │   ├── checklist.md                  品質檢查清單（+VSDD Simplified）
+│       │   ├── saas-standards.md          ← [NEW] SaaS 9 維 Production Readiness 標準
+│       │   ├── instructions.xml           ← [DEPRECATED] 舊 XML 備份（697行）
+│       │   └── steps/                     ← [NEW] 13 step 分檔
+│       │       ├── step-01-load-discover.md     載入 Story + 探索 codebase
+│       │       ├── step-01b-generate-trail.md   [BU-06] Review Trail path:line 生成
+│       │       ├── step-02-review-plan.md       審查計畫 + 三層分派
+│       │       ├── step-03-triple-layer-dispatch.md  [BU-01] 三層平行調度
+│       │       ├── step-03a-blind-hunter.md     Layer A: 功能正確性盲測
+│       │       ├── step-03b-edge-case-hunter.md Layer B: 邊界條件窮舉
+│       │       ├── step-03c-acceptance-auditor.md Layer C: AC 符合性驗證
+│       │       ├── step-03d-triage-merge.md     Findings 合併 + 分類
+│       │       ├── step-04-present-autofix.md   呈現 + 自動修復
+│       │       ├── step-04b-skill-staleness.md  Skill 過時偵測
+│       │       ├── step-05-production-gate.md   Production 品質閘門
+│       │       ├── step-05b-tasks-backfill.md   Tasks 回填驗證
+│       │       └── step-06-report-archive.md    報告 + 歸檔
+│       ├── create-story/                  ← [BU] workflow.md + 8 step 分檔
+│       │   ├── workflow.md                   主工作流（76行, 取代 instructions.xml）
+│       │   ├── workflow.yaml                 BMAD 配置
+│       │   ├── checklist.md                  品質檢查清單
+│       │   ├── template.md                   SDD+ATDD Story 模板
+│       │   ├── instructions.xml           ← [DEPRECATED] 舊 XML 備份（746行）
+│       │   └── steps/                     ← [NEW] 8 step 分檔
+│       │       ├── step-00-db-first-query.md    DB-first 查詢
+│       │       ├── step-01-target-story.md      目標 Story 解析
+│       │       ├── step-02-artifact-analysis.md 產物分析
+│       │       ├── step-03-codebase-analysis.md 程式碼分析
+│       │       ├── step-04-architecture-analysis.md 架構分析
+│       │       ├── step-05-web-research.md      Web 研究
+│       │       ├── step-06-create-story-file.md Story 檔案建立
+│       │       └── step-07-finalize.md          完成 + DB 同步
+│       └── dev-story/                     ← [BU] workflow.md + 13 step 分檔
+│           ├── workflow.md                   主工作流（76行, 取代 instructions.xml）
+│           ├── workflow.yaml                 BMAD 配置
+│           ├── checklist.md                  品質檢查清單
+│           ├── instructions.xml           ← [DEPRECATED] 舊 XML 備份（759行）
+│           └── steps/                     ← [NEW] 13 step 分檔（含 KB/Migration/Review Continuation）
+│               ├── step-00-db-first-query.md ~ step-10-communication.md
 │
 ├── config-templates/                      ← 各引擎配置範本
 │   ├── claude/                            ← [必要] Claude Code CLI
@@ -192,10 +222,11 @@ docs/專案部屬必讀/
 ### Step 0: 閱讀架構演進策略（首次部署建議）
 
 > 首次部署前，建議先閱讀 **`BMAD架構演進與優化策略.md`**，了解：
-> - 最新 BMAD v6.0.3 與舊版的結構差異（檔案數 225 vs 652、Agent YAML vs MD）
-> - Token 靜態消耗基準數據（PhyCool 實測 ~2,607 tokens）
+> - BMAD v6.2.2 最新架構（Skills-based + Markdown step 分檔）
+> - PhyCool 自訂系統已超越 BMAD 2.1 倍（Workflow 2,202 行 vs source 885 行）
+> - Token 靜態消耗基準數據（v3.0 ~19,090 tokens — 含 63 Skills + 15 Rules）
+> - Epic BU 升級成果（三層平行 Review + Skill Validator + Quick Dev oneshot + Edge Case Hunter）
 > - 新專案 vs 舊專案的遷移決策樹
-> - TRS overlay 與最新版的相容性對照
 
 ### Step 1: 安裝 BMAD Method
 
@@ -216,7 +247,7 @@ npx bmad-method install
 Copy-Item -Path "原始專案\docs\專案部屬必讀" -Destination "新專案\docs\專案部屬必讀" -Recurse
 ```
 
-### Step 3: 覆蓋 BMAD Workflow（TRS 優化版）
+### Step 3: 覆蓋 BMAD Workflow（Epic BU 升級版）
 
 ```powershell
 # 將 bmad-overlay 覆蓋到 BMAD 安裝目錄
@@ -226,9 +257,13 @@ Copy-Item -Path "docs\專案部屬必讀\bmad-overlay\4-implementation\*" `
 ```
 
 > **為什麼需要這一步？**
-> `npx bmad-method@alpha install` 安裝的是原廠版 Workflow。
-> TRS Epic 優化了 code-review (-49%)、create-story checklist (-83%)、dev-story (-15%)，
-> 這些壓縮版本需要手動覆蓋回去，否則每次執行 Workflow 會多消耗 ~14,200 tokens/Sprint。
+> `npx bmad-method install` 安裝的是原廠版 Workflow。
+> Epic BU（2026-04-03）將 Workflow 從 XML 遷移到 Markdown step 分檔架構：
+> - code-review: 三層平行（Blind Hunter + Edge Case Hunter + Acceptance Auditor）+ SaaS 9 維
+> - create-story: 8 step 分檔（含 DB-first + Skill 自動發現 + KB 掃描）
+> - dev-story: 13 step 分檔（含 Skill staleness + Migration Cascade + KB 錯誤查詢）
+> 覆蓋後同時安裝 PhyCool 自訂功能（Production Gates、Tech Debt Registry 等）。
+> 舊 instructions.xml 保留為 DEPRECATED 備份。
 
 ### Step 4: 部署配置檔案（依安裝狀態條件部署）
 
