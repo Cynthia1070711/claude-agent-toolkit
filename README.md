@@ -1,9 +1,9 @@
 # 專案部署必讀 — 多引擎協作環境一鍵初始化範本 (v1.7.0)
 
-**版本**: 1.9.0
+**版本**: 2.0.0
 **建立日期**: 2026-02-27
-**最後更新**: 2026-04-03（Epic BU: BMAD v6.2.2 升級 + Epic ECC: Hook 基礎設施強化）
-**適用範圍**: BMAD Method v6.0.0-alpha.21（已升級 v6.2.2 概念）+ Claude Code CLI（含 ECC Hook 強化）+ Gemini CLI + Antigravity IDE + Rovo Dev CLI
+**最後更新**: 2026-04-04（Epic CCI: Subagent 整合 + Hook 升級 + Pipeline Bug#14 UTF-8 BOM 修復 + 9-Layer RAG）
+**適用範圍**: BMAD Method v6.0.0-alpha.21（已升級 v6.2.2 概念）+ Claude Code CLI（含 ECC Hook 強化 + WFQ 配額管理 + CCI 環境整合）+ Gemini CLI + Antigravity IDE + Rovo Dev CLI
 
 ---
 
@@ -567,6 +567,52 @@ Set-Content ".mcp.json" -Value $mcp -Encoding UTF8
 > 詳細決策紀錄：`ATDD-SDD-TDD-BDD/決策總覽-SDD-ATDD-TDD整合方案.md`
 > Spec 輸出目錄：`docs/implementation-artifacts/specs/epic-{X}/`
 
+### Epic WFQ: Workflow Quality — Pipeline 配額管理 + Token 追蹤（2026-04-04 新增）
+
+> **核心理念**：Pipeline 子視窗因 token 配額耗盡靜默卡死 → 需要偵測、防護、恢復、預測四層機制。
+> 禁止 Opus→Sonnet 自動降級（Model Purity Rule）— 會嚴重汙染 code-review 品質。
+
+| 優化項目 | 效果 | Story |
+|----------|------|-------|
+| BMAD Workflow 定義補強 | 4 個 GAP 修復（upsert-story.js 顯式呼叫、Skill Sync Gate 命名、useState vs Zustand 檢查、skills_list.md 引用） | wfq-01 |
+| Phase Target Map 集中化 | `pipeline-config.json` 取代 6 處 inline 重複定義（JS+PS1 共讀一份） | wfq-02 |
+| DB Schema + MCP Tool 補全 | `workflow_executions` +4 欄位（cache_read/creation_tokens, cost_usd, model）；`log_workflow` MCP +4 參數 | wfq-05 |
+| -p 模式 Truth Table | Claude Code v2.1.92 實測：-p 模式（無 --bare）= 互動模式 context（唯一限制：/slash-command 不可用）；17 Feature × 3 Mode 驗證矩陣 | wfq-06 |
+| Pipeline Heartbeat (L5) | Stop hook 寫入 heartbeat timestamp；watchdog 8 分鐘無更新 → 判定卡死 | wfq-03 |
+| Pipeline 429/Model Purity (L6) | 每 30 秒掃描 stderr；偵測 429 → QUOTA_EXHAUSTED；偵測模型降級 → MODEL_DEGRADED → 立即 kill | wfq-03 |
+| Phase Timeout 分級 | 依 phase × complexity 差異化 timeout（S: 15-20min, M: 25-35min, L: 35-50min） | wfq-03 |
+| Recovery Script + SOP | `pipeline-recovery.js`：新 Session 掃描非 done Story + debug log 分析 → 恢復建議 | wfq-03 |
+| Token 追蹤（OTel） | `CLAUDE_CODE_ENABLE_TELEMETRY=1` + `OTEL_METRICS_EXPORTER=console` → `pipeline-log-tokens.js` 擷取真實 token | wfq-04 |
+| Quota 預測 | `pipeline-quota-check.js` 基於 benchmark 基線 → GO/WARN/BLOCK 決策 | wfq-04 |
+| ModelPricing 配置 | `pipeline-config.json` 含 Haiku/Sonnet/Opus/FastOpus 四級定價（$/MTok） | wfq-05 |
+
+**新增檔案清單**：
+
+| 檔案 | 用途 |
+|------|------|
+| `.claude/hooks/pipeline-heartbeat.js` | Stop hook heartbeat（三引擎同步） |
+| `scripts/pipeline-config.json` | 集中化配置（phaseTargetStatus + modelPricing + quota + phaseTimeouts + model_purity） |
+| `scripts/pipeline-recovery.js` | 新 Session 恢復腳本（掃描 + 診斷 + 建議） |
+| `scripts/pipeline-log-tokens.js` | OTel token 擷取 + DB 寫入 |
+| `scripts/pipeline-quota-check.js` | 配額預測 GO/WARN/BLOCK |
+| `docs/implementation-artifacts/specs/pipeline-recovery-sop.md` | 恢復 SOP 文件 |
+| `docs/implementation-artifacts/specs/wfq-06-pipeline-mode-truth-table.md` | -p 模式能力 Truth Table |
+
+**真實數據來源**（非猜測）：
+
+| 數據 | 來源 | 可靠度 |
+|------|------|:------:|
+| per-request token (4 欄位) | OTel `claude_code.token.usage` | ✅ 真實 |
+| 429 rate_limit_error | Debug log `~/.claude/debug/{session-id}.txt` | ✅ 真實 |
+| Plan type / Rate limit tier | `.credentials.json` subscriptionType + rateLimitTier | ✅ 真實 |
+| Extra usage 狀態 | `.claude.json` cachedExtraUsageDisabledReason | ✅ 快取 |
+| Current Session / All Models 剩餘% | 伺服器端，無法程式化取得 | ❌ |
+
+> **claw-code 參考**：TokenUsage 四欄位（input/output/cache_create/cache_read）+ ModelPricing + UsageTracker 累積器。
+> 來源：`claude token減量策略研究分析/工作流/claw-code-main/rust/crates/runtime/src/usage.rs`
+
+---
+
 ### TD-15~19 資料庫/Skill 維護（2026-03-03 新增）
 
 | 優化項目 | 效果 | Story |
@@ -634,9 +680,11 @@ cd tools/dev-console && npm run dev
 5. **腳本為 PowerShell 格式**：macOS/Linux 環境需改寫為 bash
 6. **Gemini Hooks 需要 Node.js 腳本**：`secret-guard.js` 和 `git-safety.js` 需另外建立於 `.gemini/hooks/`
 7. **只安裝 Claude Code 也能正常工作**：其他引擎配置會被自動跳過，不影響 BMAD Workflow 執行
-8. **Pipeline 自動化腳本需配合 Claude Max 方案**：`story-pipeline.ps1` 使用 `claude -p` 模式 + `--dangerously-skip-permissions`，僅適用於可信環境
-9. **Token 安全閥需手動設定日配額**：Claude Max 無公開 API 查詢配額，需設定 `-DailyTokenLimit` 參數（基於方案等級估算）
-10. **Pipeline 批次並行上限 5 個**：超過 5 個並行 Story 會導致 rate-limiting，建議 `-IntervalSec 12` 錯開啟動
+8. **Pipeline 自動化腳本需配合 Claude Max 方案**：`story-pipeline-interactive.ps1` 使用互動模式（完整 MCP/Hooks/Skills），`story-pipeline.ps1` 使用 `-p` 模式。兩者均需 `--dangerously-skip-permissions`，僅適用於可信環境
+9. **Token 配額管理（Epic WFQ 新增）**：Pipeline 配額無法程式化查詢（伺服器端），改用 OTel 累計消耗 + 429 頻率 + benchmark 基線做間接預測。`pipeline-quota-check.js` 提供 GO/WARN/BLOCK 決策
+10. **Pipeline 批次並行上限 3 個**：動態排程模式（Epic FIX6 驗證），slot 空出即補位。Phase 間隔 12s 防 rate-limit
+11. **禁止自動模型降級（Model Purity Rule）**：Claude Code 內建 Opus→Sonnet fallback 會嚴重汙染 code-review 品質。Pipeline Layer 6 偵測到降級立即 kill，DB status 不前進，等配額恢復重跑
+12. **-p 模式能力更新（v2.1.92 實測）**：`-p`（不加 `--bare`）支援 Hooks/MCP/Skills（唯一限制：/slash-command 不可用）。`--bare` 將成為未來 `-p` 預設，屆時需顯式載入配置
 11. **Context Memory DB 需要 Node.js 18+**：MCP Server 使用 ES Module + better-sqlite3 native addon，需確認 Node.js 版本
 12. **Auto-memory 檔案必須精簡**：`~/.claude/projects/<hash>/memory/` 下的檔案每次新對話全量載入。詳細內容存 DB，MEMORY.md 只保留一行摘要（TD-36 教訓）
 13. **Context Memory DB 是增量式的**：DB 檔案 `.context-db/context-memory.db` 隨專案累積知識越來越有價值，建議納入備份但不納入 Git（已列入 .gitignore）
@@ -647,6 +695,8 @@ cd tools/dev-console && npm run dev
 
 | 版本 | 日期 | 變更 |
 |------|------|------|
+| 2.0.0 | 2026-04-04 | **Epic WFQ: Pipeline 配額管理系統**。新增 Pipeline Heartbeat (L5) + 429/Model Purity 偵測 (L6) + Recovery Script/SOP + OTel Token 追蹤 + Quota Prediction (GO/WARN/BLOCK) + Phase Timeout 分級 + ModelPricing 配置 + Model Purity Rule（禁止 Opus→Sonnet 降級）。-p 模式 Truth Table（v2.1.92 實測）。DB Schema 擴展 workflow_executions +4 欄位 + log_workflow MCP +4 參數。BMAD Workflow 定義補強（4 GAP 修復）+ Phase Target Map 集中化。6 Stories, avg CR 93.5, 落地驗證 34/34 通過 |
+| 1.9.0 | 2026-04-03 | Epic BU (BMAD v6.2.2 升級 6/6) + Epic ECC (Hook 基礎設施強化 5/5) |
 | 1.7.1 | 2026-03-08 | 新增 DevConsole Web UI 使用說明章節；記錄 5 項 Bug 修復（CRLF/Epic ID/路徑/Schema/預設模式）+ i18n 國際化 + SDD Spec 徽章 |
 | 1.7.0 | 2026-03-08 | 整合 G類 SDD+ATDD+TDD 方法論（FLOW-OPT-001）+ Epic CMI 記憶庫進階優化（CMI-1~6）；同步 bmad-overlay 5 檔；新增 `sdd-spec-generator` Skill；`context-memory-db-strategy.md` v1.0→v1.1（+CMI 章節）；反向同步 Pipeline 檔案；更新 TRS 成果摘要 |
 | 1.6.0 | 2026-03-07 | 整合 Context Memory DB 策略（TD-32~36）；新增 `config-templates/context-db/`（MCP Server + init-db + package.json）；新增 `deploy-context-db.ps1` 一鍵部署腳本；新增 `context-memory-db.md` 規則檔、`MEMORY.md.template` 精簡範本；更新 README 資料夾結構、部署步驟（Step 4.6）、TRS 成果（TD-15~36）；補全 TD-15~19 資料庫/Skill 維護策略 |
