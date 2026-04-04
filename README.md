@@ -2,8 +2,8 @@
 
 **版本**: 2.0.0
 **建立日期**: 2026-02-27
-**最後更新**: 2026-04-04（Epic CCI: Subagent 整合 + Hook 升級 + Pipeline Bug#14 UTF-8 BOM 修復 + 9-Layer RAG）
-**適用範圍**: BMAD Method v6.0.0-alpha.21（已升級 v6.2.2 概念）+ Claude Code CLI（含 ECC Hook 強化 + WFQ 配額管理 + CCI 環境整合）+ Gemini CLI + Antigravity IDE + Rovo Dev CLI
+**最後���新**: 2026-04-04（Epic CCI + WFQ-08: OTel Micro OTLP Collector — Pipeline Token 資料流修復 + Skill 封裝）
+**適用範圍**: BMAD Method v6.0.0-alpha.21（已升級 v6.2.2 概念���+ Claude Code CLI（含 ECC Hook 強�� + WFQ 配額管理 + CCI 環境整合 + OTel OTLP Token 追蹤）+ Gemini CLI + Antigravity IDE + Rovo Dev CLI
 
 ---
 
@@ -112,8 +112,11 @@ docs/專案部屬必讀/
 ├── multi-agent-parallel-execution-strategy.md ← 多 Agent 並行策略（Worktree + File Lock + Total Commit + Debt Registry §10）
 │
 ├── Claude智能中控自動化排程/              ← Pipeline 中控調度 + Token 安全閥
-│   ├── pipeline-audit-token-safety.md     ← 完整需求分析 + 根因分析 + Bug 修正紀錄
+│   ├── pipeline-audit-token-safety.md     ← ���整需求分析 + 根因分析 + Bug 修正紀錄
 │   └── pipeline-audit-token-safety.track.md ← 實作追蹤檔
+│
+├── Agent-User/Claude-Docs/               ← Claude API/用量文檔（中文翻譯）
+│   └── 用量與成本API.md                   ← Anthropic Usage & Cost API（Admin API, 組織帳戶用）
 │
 ├── context-memory-db-strategy.md          ← Context Memory DB 策略全文（TD-32~36）
 │
@@ -212,8 +215,16 @@ docs/專案部屬必讀/
     ├── batch-runner.ps1                  ← [Pipeline] 批次並行（最多 5 Story，間隔 12s）
     ├── batch-audit.ps1                   ← [Pipeline] 批次後驗證 + AutoFix（7 Check）
     ├── epic-auto-pilot.ps1              ← [Pipeline] 整個 Epic 迴圈自動化
-    └── deploy-context-db.ps1            ← [NEW] Context Memory DB 一鍵部署
+    ├── deploy-context-db.ps1            ← [NEW] Context Memory DB 一鍵部署
+    └── otel-micro-collector.js          ← [WFQ-08] OTel OTLP HTTP Micro Collector（Token 追蹤）
 ```
+
+> **OTel Token 追蹤說明**（wfq-08, 2026-04-04）：
+> Pipeline 執行時自動啟動 `otel-micro-collector.js`（Node.js HTTP server, port 49152-65535）。
+> Claude CLI 透過 `OTEL_LOGS_EXPORTER=otlp` + `OTEL_EXPORTER_OTLP_ENDPOINT` 將 per-request token 數據
+> 發送至 collector → 寫入 JSONL 檔案 → Pipeline watchdog 即時讀取累加 → 寫入 `workflow_executions` 表。
+> 完全繞過 stdout（解決 Bug #17 isatty 衝突），Dashboard 可顯示真實 Token 消耗 + Cost。
+> Skill: `.claude/skills/phycool-otel-micro-collector/`
 
 ---
 
