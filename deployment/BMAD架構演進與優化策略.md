@@ -1,9 +1,10 @@
 # BMAD 架構演進與優化策略指南
 
-**版本**: 1.1.0
+**版本**: 2.0.0
 **建立日期**: 2026-02-27
+**最後更新**: 2026-04-03（Epic BU 完成 + ECC 計畫確立）
 **適用範圍**: BMAD Method 架構版本遷移決策 + Token 優化策略 + ECC 整合評估 + Code-Review 客製化分析
-**來源**: Party Mode 架構討論（CC-OPUS, 2026-02-27）
+**來源**: Party Mode 架構討論（CC-OPUS, 2026-02-27 初版 → 2026-04-03 Epic BU 升級）
 
 ---
 
@@ -12,16 +13,17 @@
 本文件記錄以下分析結果，供**新專案初始化**或**舊專案升級評估**時參考：
 
 1. 當前 BMAD 架構的 Token 靜態消耗量化數據
-2. 最新 BMAD v6.0.3 與舊版架構的結構性差異
-3. everything-claude-code (ECC) 功能覆蓋分析
-4. 遷移策略決策框架
-5. 多引擎協作架構相容性考量
+2. BMAD v6.2.2 最新架構與 PCPT 自訂系統的差異
+3. everything-claude-code (ECC) v1.9.0 功能覆蓋分析
+4. Epic BU 升級成果（2026-04-03）
+5. 遷移策略決策框架
+6. 多引擎協作架構相容性考量
 
 ---
 
 ## 1. Token 靜態消耗量化基準
 
-### 1.1 Always-Loaded 靜態消耗（MyProject 專案實測）
+### 1.1 Always-Loaded 靜態消耗（PCPT 專案實測）
 
 > 計算規則：CJK 字元 ÷ 1.5 = tokens、英文字元 ÷ 4 = tokens
 
@@ -48,10 +50,12 @@
 |------|-------:|------|
 | Claude Code 預設 | ~18,000 | 無任何框架，純 System Prompt + 工具定義 |
 | ECC 優化後 | ~10,000 | everything-claude-code 瘦身版 |
-| **MyProject 專案（TRS 後）** | **~2,607** | 經 35 個 TRS Story 優化 |
+| **PCPT 專案（TRS 後）** | **~2,607** | 經 35 個 TRS Story 優化 |
 | 理論最低 | ~1,500 | 僅保留 CLAUDE.md + 1 條 Rule |
 
-**結論**：2,607 tokens 佔 200K context window 的 **1.3%**，已無進一步壓縮的必要。
+**結論（v1.1.0 時）**：2,607 tokens 佔 200K context window 的 **1.3%**，已無進一步壓縮的必要。
+
+> **v2.0.0 更新（2026-04-03）**：經過 Epic 系列擴展，Always-On 已升至 ~19,090 tokens（63 Skills × ~84 tok + 15 Rules/497L + MEMORY.md ~1,300 tok）。但 Opus 4.6 使用 1M context window，佔比僅 ~1.9%。Token 減量仍在監控中（見 `claude-token-decrease` Skill §6 ROI Ranking）。
 
 ---
 
@@ -59,7 +63,7 @@
 
 ### 2.1 版本識別
 
-| 維度 | 舊版（MyProject 使用中） | 最新版 v6.0.3 |
+| 維度 | 舊版（PCPT 使用中） | 最新版 v6.0.3 |
 |------|----------------------|--------------|
 | 安裝方式 | `npx bmad-method@alpha install` (alpha) | `npx bmad-method install` (stable) |
 | 安裝時間 | 2026-01-01 | 2026-02-23 release |
@@ -88,7 +92,7 @@
 | `code-review/instructions.xml` | 483 行 / 26KB | 226 行 / 10KB | **最新小 53%** |
 | `create-story/instructions.xml` | 449 行 / 25KB | 346 行 / 19KB | 最新小 23% |
 
-> **重要**：舊版的 code-review 比最新版大 2.1 倍，原因是包含 MyProject 專案客製化規則（Zustand/useState 驗證、CR 延後項目路由等）。這些客製化必須在遷移時保留。
+> **重要**：舊版的 code-review 比最新版大 2.1 倍，原因是包含 PCPT 專案客製化規則（Zustand/useState 驗證、CR 延後項目路由等）。這些客製化必須在遷移時保留。
 
 ### 2.4 最新版新增的 Agent 角色（Party Mode 專用）
 
@@ -112,7 +116,7 @@
 | `bmad-os-release-module` | NPM 發版管理 |
 | `bmad-os-review-pr` | 對抗式 PR 審查 |
 
-> 注意：這些是 BMAD 開源專案自身的運維 Skills，**不是**使用者專案的業務 Skills。使用者專案的 Skills（如 `myproject-*`）由團隊自行建立。
+> 注意：這些是 BMAD 開源專案自身的運維 Skills，**不是**使用者專案的業務 Skills。使用者專案的 Skills（如 `pcpt-*`）由團隊自行建立。
 
 ---
 
@@ -123,7 +127,7 @@
 | ECC 功能 | 我們的對應實作 | 覆蓋率 |
 |----------|--------------|--------|
 | TDD 工作流 | `/tdd` command + `tdd-workflow` Skill + `rules/testing.md` | 90% |
-| Code Review | `/code-review` BMAD Workflow（含 MyProject 客製化） | 100%+ |
+| Code Review | `/code-review` BMAD Workflow（含 PCPT 客製化） | 100%+ |
 | Security Review | `/security-review` Skill + `rules/security.md` | 70% |
 | Build Error Fix | `/build-fix` command + `build-error-resolver` agent | 80% |
 | Plan Mode | `/plan` command + `planner` agent | 85% |
@@ -146,7 +150,44 @@
 
 ### 3.3 結論
 
-> **不需要額外引入 ECC 套件。** 我們的 BMAD + TRS 組合已覆蓋 ECC 80%+ 的核心功能，且 Token 靜態消耗（2,607）比 ECC 優化後的水準（10,000）還低 74%。
+> **v1.1.0（2026-02-27）**：不需要額外引入 ECC 套件。BMAD + TRS 組合已覆蓋 ECC 80%+ 核心功能。
+>
+> **v2.0.0（2026-04-03）**：經六輪 Party Mode 深度分析 ECC v1.9.0，確認 5 項值得引入的 Hook 基礎設施強化已全部落地（Epic ECC 5/5 done）。13 項不適用（已有更好方案）。ECC 整體採用度從 85% 提升至 **92%**。
+
+### 3.4 ECC v1.9.0 更新分析（v2.0.0, 2026-04-03）
+
+> 六輪 Party Mode 深度分析 ECC v1.9.0 後，確認 7 項可引入優化，建立 **Epic ECC**（5 Stories）：
+
+| 項目 | 優先級 | 說明 | CR Score | 狀態 |
+|------|:------:|------|:--------:|:----:|
+| Pre-Commit 品質 Hook | P0 | Bash PreToolUse 攔截 git commit（secrets/console.log/msg） | 92 | ✅ done |
+| Config Protection Hook | P0 | PreToolUse 保護 settings/pipeline/config | 92 | ✅ done |
+| RAG Pipeline 模式 | P1 | Pipeline 中省 ~3,500 tok/prompt（PIPELINE_PHASE env var） | — | ✅ done |
+| suggest-compact Hook | P1 | Stop hook 工具計數 + 閾值提醒 | 95 | ✅ done |
+| MCP Health Check Hook | P1 | PreToolUse 探測 + PostToolUseFailure 重連 | 94 | ✅ done |
+
+**Epic ECC 完成（2026-04-03）**：5/5 done, avg CR 93.8, 72 tests 全部通過。
+新增 4 個 hook 腳本 + 1 個現有 hook 修改，覆蓋 5 個 hook event。
+Hook 檔案位置：`.claude/hooks/`（pre-commit-quality, config-protection, suggest-compact, mcp-health-check）。
+
+> P2 長期項目（CL v2 Instinct 閉環 + Safety Guard）暫未建 Story，視需求再啟動。
+
+---
+
+## 3.5 Epic BU — BMAD Upgrade 成果（2026-04-03）
+
+> BMAD 安裝版 v6.0.0-alpha.21 → v6.2.2 概念升級完成（6 Stories, avg CR 95.2）
+
+| 升級項 | Story | 交付物 | 核心價值 |
+|--------|-------|--------|---------|
+| Workflow XML→MD 遷移 | bu-02 (L, CR:88) | 3 workflow.md + 34 step 文件 | 維護性提升，子視窗只載入當前 step |
+| 三層平行 Review | bu-01 (M, CR:100) | Blind+Edge+Acceptance+Triage | 與 SaaS 9 維正交，bug 發現率提升 |
+| Skill Validator | bu-03 (S, CR:94) | 14 規則 + check-hygiene 整合 | 92 Skill 品質自動防線 |
+| Quick Dev oneshot | bu-04 (S, CR:94) | step-oneshot + self-check + XS 路徑 | 微任務零 overhead |
+| Edge Case Hunter | bu-05 (S, done) | 獨立 Skill（5 維 + DB 映射） | Pipeline 外單獨調用 |
+| Review Trail | bu-06 (S, CR:100) | path:line 導覽 + blast-radius 排序 | 結構化人工 review |
+
+> **關鍵架構決策**：Pipeline（story-pipeline-interactive.ps1）是 DB-first 架構，不直接載入 workflow 文件。格式遷移對 Pipeline 零影響。BMAD standalone 模式透過 workflow.yaml → workflow.md 路由。
 
 ---
 
@@ -163,7 +204,7 @@
 └─ 否（舊專案）→ 評估遷移必要性
     │
     ├─ 目前 Token 消耗是否造成問題？
-    │   └─ 否（如 MyProject: 2,607 tokens）→ 不遷移，維持現狀
+    │   └─ 否（如 PCPT: 2,607 tokens）→ 不遷移，維持現狀
     │
     ├─ BMAD 官方是否提供 in-place migration 工具？
     │   ├─ 是 → 評估自動遷移風險後決定
@@ -171,25 +212,26 @@
     │
     └─ 是否有大量未客製化的 Workflow？
         ├─ 是 → 可考慮選擇性更新（cherry-pick）
-        └─ 否（如 MyProject: code-review 高度客製化）→ 不遷移
+        └─ 否（如 PCPT: code-review 高度客製化）→ 不遷移
 ```
 
-### 4.2 MyProject 專案決策
+### 4.2 PCPT 專案決策
 
-**決策：維持舊版架構，不遷移至 v6.0.3。**
+**決策 v1.1.0（2026-02-27）**：維持舊版架構，不遷移至 v6.0.3。
+**決策 v2.0.0（2026-04-03）**：已完成 Epic BU 概念升級，保留安裝基底但遷移 Workflow 格式。
 
-| 考量因素 | 評估 |
-|----------|------|
-| Token 壓力 | 無（2,607 tokens = 200K 的 1.3%） |
-| 客製化程度 | 高（code-review 2.1x、Zustand 驗證、CR 路由規則） |
-| 專案階段 | Phase 4 Implementation（不適合重建腳手架） |
-| 遷移工具 | 無（需手動遷移 652 → 225 檔案） |
-| 風險 | 高（auto-pilot 串接、多引擎路徑、tracking 引用） |
-| ROI | 低（工作流邏輯不變，僅檔案格式變更） |
+| 考量因素 | v1.1.0 評估 | v2.0.0 更新 |
+|----------|------------|------------|
+| Token 壓力 | 無（2,607 tok） | 上升至 19,090 tok（Opus 1M 佔 1.9%，監控中） |
+| 客製化程度 | 高（2.1x） | 更高（Workflow 2,202 行，含三層平行 + 34 step 文件） |
+| 專案階段 | Phase 4 | Phase 4（Epic BU 證明可安全遷移 Workflow 格式） |
+| 遷移工具 | 無 | 不需要（Epic BU 已手動遷移 + 保留 XML 備份） |
+| 風險 | 高 | 低（Pipeline DB-first 不依賴 Workflow 格式） |
+| ROI | 低 | **已實現**（三層平行 + Skill Validator + Quick Dev） |
 
 ### 4.3 新專案建議
 
-**新專案應直接使用最新 BMAD v6.0.3：**
+**新專案應安裝最新 BMAD v6.2.2 後套用 Epic BU overlay：**
 
 ```bash
 # Step 1: 安裝最新版 BMAD
@@ -198,16 +240,17 @@ npx bmad-method install
 # Step 2: 複製本範本包
 Copy-Item -Path "原始專案\docs\專案部屬必讀" -Destination "新專案\docs\專案部屬必讀" -Recurse
 
-# Step 3: 套用 TRS overlay（需先確認與最新版的相容性）
-# ⚠️ 注意：overlay 是基於舊版 instructions.xml 格式製作的
-# 新專案應 diff 後決定是否需要調整 overlay
-diff "docs/專案部屬必讀/bmad-overlay/4-implementation/code-review/instructions.xml" \
-     "_bmad/bmm/workflows/4-implementation/code-review/instructions.xml"
+# Step 3: 套用 Epic BU overlay（Markdown step 分檔 + PCPT 自訂功能）
+# overlay 已使用 v6.2.2 相容的 workflow.md + steps/ 格式
+Copy-Item -Path "docs\專案部屬必讀\bmad-overlay\4-implementation\*" `
+          -Destination "_bmad\bmm\workflows\4-implementation\" -Recurse -Force
 
 # Step 4: 配置各引擎（同 README.md Step 4）
 ```
 
-> **重要提醒**：最新版的 `instructions.xml` 已比舊版原廠版精簡（code-review 226 行 vs 舊版原廠 923 行）。套用 overlay 前**必須先 diff**，確認是否仍需要覆蓋，或者最新原廠版已足夠精簡。
+> **v2.0.0 變更**：overlay 已從 XML instructions.xml 格式升級為 Markdown workflow.md + steps/ 格式。
+> 包含 PCPT 自訂：DB-first、三層平行 Review、SaaS Production Gates、Skill 整合、KB 查詢等。
+> 舊 instructions.xml 保留為 DEPRECATED 備份，可在遷移完成確認後刪除。
 
 ---
 
@@ -273,7 +316,7 @@ _bmad/
 
 | Overlay 檔案 | 與 v6.0.3 相容性 | 處理方式 |
 |-------------|-----------------|---------|
-| `code-review/instructions.xml` | 🟡 需 diff | 最新原廠 226 行 vs overlay 471 行；overlay 含 MyProject 客製化規則，通用專案可能不需要 |
+| `code-review/instructions.xml` | 🟡 需 diff | 最新原廠 226 行 vs overlay 471 行；overlay 含 PCPT 客製化規則，通用專案可能不需要 |
 | `code-review/checklist.md` | 🟡 需 diff | 確認最新版是否已內含壓縮後的項目 |
 | `create-story/instructions.xml` | 🟡 需 diff | 最新原廠 346 行 vs overlay 449 行；overlay 含 Skills 自動化邏輯 |
 | `create-story/checklist.md` | 🟢 可用 | 通用壓縮版，不含專案特定邏輯 |
@@ -283,16 +326,16 @@ _bmad/
 ### 5.4 新專案的 Overlay 策略建議
 
 ```
-通用策略（非 MyProject 專案）：
+通用策略（非 PCPT 專案）：
 1. 安裝最新 BMAD v6.0.3
 2. 先不套用 overlay，直接使用最新原廠版
 3. 僅複製 config-templates/ 和 scripts/
 4. 開發過程中若發現 Workflow 需要客製化，再建立專案專屬 overlay
 
-MyProject 衍生專案：
+PCPT 衍生專案：
 1. 安裝最新 BMAD v6.0.3
 2. diff overlay vs 最新原廠版
-3. MyProject 特有規則僅 44 行（17%），直接保留在 instructions.xml 即可（見 §7.3）
+3. PCPT 特有規則僅 44 行（17%），直接保留在 instructions.xml 即可（見 §7.3）
 4. 套用壓縮版 checklist（通用部分）
 ```
 
@@ -324,14 +367,14 @@ MyProject 衍生專案：
 
 ## 7. Code-Review Workflow 客製化深度分析
 
-> 來源：Party Mode 架構討論 2026-02-27，逐行比對 upstream vs MyProject 版本。
+> 來源：Party Mode 架構討論 2026-02-27，逐行比對 upstream vs PCPT 版本。
 
 ### 7.1 差異量化
 
 | 版本 | Steps | 行數 | 大小 |
 |------|-------|------|------|
 | 最新 v6.0.3 upstream | 5 | 226 | 10KB |
-| MyProject 版本 | 6 | 483 | 26KB |
+| PCPT 版本 | 6 | 483 | 26KB |
 | **差異** | +1 Step | **+257 行** | +16KB |
 
 ### 7.2 超出 upstream 的 257 行分類
@@ -339,26 +382,26 @@ MyProject 衍生專案：
 | 客製化區塊 | 行數 | 分類 | 說明 |
 |-----------|------|------|------|
 | SaaS Production Standards（嚴重度分級 + 審查維度 + Production Gates） | ~30 | 通用增強 | 任何 SaaS 專案都適用 |
-| Required Skills 動態載入機制 | ~20 | MyProject 特有 | 讀取 Story 的 `## Required Skills` 並載入 Skill 的 FORBIDDEN 規則 |
+| Required Skills 動態載入機制 | ~20 | PCPT 特有 | 讀取 Story 的 `## Required Skills` 並載入 Skill 的 FORBIDDEN 規則 |
 | Tech Debt 累積統計（從 sprint-status 讀取） | ~10 | 通用增強 | 技術債預警機制 |
 | 強制完整讀取協議（禁止 Grep 推斷） | ~8 | 通用增強 | 品質保證 |
 | SaaS 六維度深度審查（Security/Scalability/Observability/DataConsistency/ErrorHandling/TestCoverage） | ~15 | 通用增強 | 企業級審查標準 |
-| Skill FORBIDDEN 規則檢查 | ~8 | MyProject 特有 | 檢查 Base64/Zustand/BackOffice namespace 等 |
+| Skill FORBIDDEN 規則檢查 | ~8 | PCPT 特有 | 檢查 Base64/Zustand/BackOffice namespace 等 |
 | 自動修復流程（CRITICAL → HIGH → MEDIUM → LOW） | ~40 | 通用增強 | upstream 是詢問使用者，我們改為自動修復 |
-| 架構 Bug 強制修復（useState/Zustand 重複檢測） | ~16 | MyProject 特有 | CLAUDE.md §1 的架構規則 |
+| 架構 Bug 強制修復（useState/Zustand 重複檢測） | ~16 | PCPT 特有 | CLAUDE.md §1 的架構規則 |
 | 技術債側車文件寫入（Sidecar Architecture, .debt.md） | ~70 | 通用增強 | 延後項目根因分析 + 路由 + 側車文件 |
 | Production Gate 驗證（Zero Critical / High Resolved / Debt Limit / SaaS Score） | ~30 | 通用增強 | 品質閘門 |
-| Review Agent 追蹤欄位填寫 | ~6 | MyProject 特有 | 多引擎追蹤 |
+| Review Agent 追蹤欄位填寫 | ~6 | PCPT 特有 | 多引擎追蹤 |
 | 審查報告生成 + 追蹤歸檔（Step 6 全新） | ~70 | 通用增強 | CR report + tracking archive |
 
-### 7.3 結論：「抽離 MyProject 規則到 Skill」的 ROI 不足
+### 7.3 結論：「抽離 PCPT 規則到 Skill」的 ROI 不足
 
 | 分類 | 行數 | 佔比 |
 |------|------|------|
 | **通用增強**（任何專案都適用的品質提升） | ~213 行 | 83% |
-| **MyProject 特有**（僅此專案需要的規則） | ~44 行 | 17% |
+| **PCPT 特有**（僅此專案需要的規則） | ~44 行 | 17% |
 
-MyProject 特有的 44 行中，大部分已透過 Skills 機制間接處理：
+PCPT 特有的 44 行中，大部分已透過 Skills 機制間接處理：
 - Required Skills 載入 = 載入 **機制**，規則本身在各 Skill 的 SKILL.md 中
 - Skill FORBIDDEN 檢查 = 讀取 Skill 清單，不是硬編碼
 - useState/Zustand 檢查 = 已寫在 CLAUDE.md §1 觸發規則中
@@ -372,14 +415,14 @@ MyProject 特有的 44 行中，大部分已透過 Skills 機制間接處理：
 場景 A：通用新專案
   1. 使用最新 v6.0.3 原廠版（226 行）
   2. 逐步添加需要的通用增強（SaaS Standards、Production Gates 等）
-  3. 不需要 MyProject 特有的 44 行
+  3. 不需要 PCPT 特有的 44 行
 
-場景 B：MyProject 衍生專案
+場景 B：PCPT 衍生專案
   1. 直接套用 bmad-overlay/ 中的完整版（483 行）
   2. diff 確認與最新原廠版的相容性
-  3. 修改 MyProject 特有規則為新專案的規則
+  3. 修改 PCPT 特有規則為新專案的規則
 
-場景 C：想要通用增強但不要 MyProject 規則
+場景 C：想要通用增強但不要 PCPT 規則
   1. 基於 bmad-overlay/ 版本
   2. 刪除 Required Skills 載入（20 行）、Skill FORBIDDEN 檢查（8 行）、
      useState/Zustand 架構 Bug 檢查（16 行）
@@ -465,10 +508,10 @@ Write-Host "  - Architecture decisions made"
 
 ### 9.1 短期（維持現狀）
 
-- MyProject 專案：不遷移，繼續使用舊版架構 + TRS 優化
+- PCPT 專案：不遷移，繼續使用舊版架構 + TRS 優化
 - 新專案：直接 `npx bmad-method install` 使用最新版
 - overlay 套用前先 diff 確認相容性
-- code-review 的客製化**不抽離**（MyProject 特有部分僅 44 行）
+- code-review 的客製化**不抽離**（PCPT 特有部分僅 44 行）
 
 ### 9.2 中期（觀察 BMAD 官方動態）
 
@@ -491,8 +534,8 @@ Write-Host "  - Architecture decisions made"
 | 報告 | 路徑 |
 |------|------|
 | BMAD-METHOD 與 ECC 完整比較 | `claude token減量策略研究分析/BMAD-METHOD 與 everything-claude-code 比較.md` |
-| Token 減量策略深度分析 | `claude token減量策略研究分析/PHYCOOL_Claude_Code_Token_減量策略_深度分析報告.md` |
-| Token 減量最終彙整 | `claude token減量策略研究分析/MyProject_Claude_Code_Token減量策略_最終彙整報告.md` |
+| Token 減量策略深度分析 | `claude token減量策略研究分析/PCPT_Claude_Code_Token_減量策略_深度分析報告.md` |
+| Token 減量最終彙整 | `claude token減量策略研究分析/PCPT_Claude_Code_Token減量策略_最終彙整報告.md` |
 | 多 Agent 協作策略 | `claude token減量策略研究分析/web_claude多agnet協作策略.md` |
 | 最新 BMAD v6.0.3 原始碼 | `claude token減量策略研究分析/BMAD-METHOD-main/` |
 
@@ -500,7 +543,7 @@ Write-Host "  - Architecture decisions made"
 
 | 元件 | 版本 | 備註 |
 |------|------|------|
-| BMAD Method（MyProject 安裝版） | v6.0.0-alpha.21 | 2026-01-01 安裝 |
+| BMAD Method（PCPT 安裝版） | v6.0.0-alpha.21 | 2026-01-01 安裝 |
 | BMAD Method（最新 stable） | v6.0.3 | 2026-02-23 release |
 | Claude Code CLI | Opus 4.6 / Sonnet 4.6 / Haiku 4.5 | 主線開發引擎 |
 | 部署手冊 | v3.0.0 | 本文件為補充附件 |

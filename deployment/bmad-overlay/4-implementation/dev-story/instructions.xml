@@ -1,3 +1,4 @@
+<!-- DEPRECATED: 已遷移至 workflow.md + steps/ 目錄。本檔案保留作為備份參考。 -->
 <workflow>
   <critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
   <critical>You MUST have already loaded and processed: {installed_path}/workflow.yaml</critical>
@@ -11,6 +12,35 @@
     other instruction.</critical>
   <critical>Do NOT schedule a "next session" or request review pauses unless a HALT condition applies. Only Step 6 decides completion.</critical>
   <critical>User skill level ({user_skill_level}) affects conversation style ONLY, not code updates.</critical>
+
+  <!-- ═══ STEP 0: DB-FIRST — Query Context Memory DB before reading .md files ═══ -->
+  <step n="0" goal="Query Context Memory DB for story context (DB-first principle)">
+    <critical>🗄️ DB-FIRST PRINCIPLE: Context Memory DB is the SINGLE SOURCE OF TRUTH.
+      Query DB BEFORE reading .md files. If system prompt already contains DB-injected context, use it directly.</critical>
+
+    <action>Check if system prompt already contains [MEMORY DB STORY CONTEXT] block (pipeline mode)</action>
+    <check if="system prompt has DB-injected story context">
+      <action>Use injected context as primary source — skip .md file search in Step 1</action>
+      <action>Set {{db_context_available}} = true</action>
+    </check>
+    <check if="system prompt does NOT have DB-injected context (manual mode)">
+      <action>Query story from DB via MCP tool:
+        Tool: mcp__pcpt-context__search_stories
+        Parameters: { story_id: "{{story_key}}", include_details: true }
+      </action>
+      <action>If DB has enriched data (AC, tasks, dev_notes non-empty) → use as primary source</action>
+      <action>Set {{db_context_available}} = true if DB has data, false otherwise</action>
+    </check>
+
+    <action>Query related decisions and patterns:
+      Tool: mcp__pcpt-context__search_context
+      Parameters: { query: "{{story_key}}", filters: { include_content: true, limit: 3 } }
+    </action>
+    <action>Query tech knowledge for this domain:
+      Tool: mcp__pcpt-context__search_tech
+      Parameters: { query: "domain keywords", limit: 3 }
+    </action>
+  </step>
 
   <step n="1" goal="Find next ready story and load it" tag="sprint-status">
     <check if="{{story_path}} is provided">
@@ -101,7 +131,7 @@
       <action>Store as {{story_required_skills}} list</action>
       <action>For EACH skill in {{story_required_skills}}:
         - Invoke the Skill tool to load the skill
-        - Example: /example-editor-arch, /example-zustand-patterns
+        - Example: /pcpt-editor-arch, /pcpt-zustand-patterns
       </action>
       <output>📚 **Required Skills Loaded:**
         {{#each story_required_skills}}
@@ -114,27 +144,153 @@
       <action>Consider referencing {project-root}/.claude/skills/skills_list.md for relevant skills</action>
     </check>
 
-    <!-- 技術債側車文件載入 — 檢查是否有 code-review 留下的修復指引 -->
-    <action>Set {{sidecar_path}} = "{implementation_artifacts}/tech-debt/{{story_key}}.debt.md"</action>
-    <check if="{{sidecar_path}} exists">
-      <action>Read {{sidecar_path}} — extract items[].fix_guidance, items[].problem_location, severity, routing_reason</action>
-      <action>Store as {{incoming_tech_debt}} for Step 5 implementation context</action>
-      <output>📋 **Tech Debt Sidecar Loaded:** {{sidecar_path}}
-        Severity: {{severity}} | Items: {{item_count}}
-        {{#each items}}
-        - 📍 {{problem_location}}: {{problem_description_summary}}
-        {{/each}}
-        These will be addressed during task implementation.
-      </output>
+    <!-- ═══ SKILL STALENESS DETECTION — BR-03, BR-06 (fix-50) ═══ -->
+    <critical>🔍 SKILL STALENESS CHECK: Compare file_list against loaded Skills' watches patterns</critical>
+    <check if="{{story_required_skills}} is not empty AND story has file_list">
+      <action>Extract {{file_list}} from story (files changed/added in this story's implementation scope)</action>
+      <action>Set {{staleness_hits}} = empty list</action>
+      <action>Set {{domain_fallback_candidates}} = empty list</action>
+      <action>Extract {{story_domain}} from story metadata (e.g., auth, editor, payment, admin, etc.)</action>
+      <action>For EACH skill in {{story_required_skills}}:
+        1. Read the skill's SKILL.md frontmatter to extract the `watches` field (YAML list of {glob, domain?})
+        2. If `watches` field is absent or empty → skip this skill (no error, per BR-01)
+        3. Set {{skill_glob_matched}} = false
+        4. For EACH entry in watches:
+           a. Extract entry.glob (required) and entry.domain (optional)
+           b. For EACH file in {{file_list}}:
+              - Test if file path matches entry.glob pattern (treat as minimatch-style glob)
+              - If match found:
+                * Append to {{staleness_hits}}: {skill: skill_name, file: file_path, glob: entry.glob}
+                * Set {{skill_glob_matched}} = true
+           c. If entry.domain is set AND entry.domain == {{story_domain}}:
+              - Add to {{domain_fallback_candidates}}: {skill: skill_name, domain: entry.domain}
+        5. If {{skill_glob_matched}} is false AND skill appears in {{domain_fallback_candidates}}:
+           - This is a domain-only match → record as fallback (severity=INFO, NOT a tech_debt_items entry)
+      </action>
+      <check if="{{staleness_hits}} is not empty">
+        <action>For EACH unique skill in {{staleness_hits}}:
+          - Collect all matched files for that skill
+          - Append to tracking file:
+            `skill-staleness({{skill_name}}): {{matched_files joined by ", "}}`
+        </action>
+        <output>⚠️ **Skill Staleness Detected:**
+          {{#each staleness_hits grouped by skill}}
+          - skill-staleness({{skill}}): {{files}}
+          {{/each}}
+          These will be validated by code-review and written to tech_debt_items (type=SKILL_STALE).
+        </output>
+      </check>
+      <check if="{{domain_fallback_candidates}} has entries with no glob match (fallback only)">
+        <action>For EACH fallback-only skill:
+          - Append to tracking file:
+            `skill-staleness-fallback({{skill_name}}): domain match only, severity=INFO`
+        </action>
+        <output>ℹ️ **Skill Domain Fallback (INFO only, no tech_debt_items):**
+          {{#each fallback_only}}
+          - skill-staleness-fallback({{skill}}): domain={{domain}}, severity=INFO
+          {{/each}}
+        </output>
+      </check>
+      <check if="{{staleness_hits}} is empty AND {{domain_fallback_candidates}} is empty">
+        <output>✅ No skill staleness detected — all watches patterns checked, no matches found</output>
+      </check>
     </check>
-    <check if="{{sidecar_path}} does NOT exist">
-      <action>Set {{incoming_tech_debt}} = empty</action>
+    <check if="{{story_required_skills}} is empty OR story has no file_list">
+      <output>ℹ️ Skill staleness check skipped — no Required Skills loaded or no file_list available</output>
+    </check>
+
+    <!-- ═══ DEBT REGISTRY PULL — Scan registry for debt targeting this story ═══ -->
+    <critical>📋 DEBT REGISTRY PULL: Check registry.yaml for pending debt assigned to this story</critical>
+    <action>Set {{registry_path}} = "{implementation_artifacts}/tech-debt/registry.yaml"</action>
+    <check if="{{registry_path}} exists">
+      <action>Read {{registry_path}}</action>
+      <action>Filter entries where: status == "pending" AND target_story == "{{story_key}}"</action>
+      <check if="matching entries found">
+        <action>For EACH matching entry:
+          - Read the sidecar file from entry.sidecar path (named by source story)
+          - Extract items[].fix_guidance, items[].problem_location, severity
+          - Accumulate into {{incoming_tech_debt}} list
+        </action>
+        <output>⚠️ **前置技術債 (Registry Pull):**
+          {{#each matching_entries}}
+          - [{{severity}}] {{id}}: {{summary}} — 來源: {{source_story}} — 側車: {{sidecar}}
+          {{/each}}
+          These MUST be addressed during task implementation.
+        </output>
+      </check>
+      <check if="no matching entries">
+        <action>Set {{incoming_tech_debt}} = empty</action>
+      </check>
+    </check>
+    <check if="{{registry_path}} does NOT exist">
+      <!-- Fallback: legacy sidecar-only mode (no registry) -->
+      <action>Set {{sidecar_path}} = "{implementation_artifacts}/tech-debt/{{story_key}}.debt.md"</action>
+      <check if="{{sidecar_path}} exists">
+        <action>Read {{sidecar_path}} — extract items[].fix_guidance, items[].problem_location, severity</action>
+        <action>Store as {{incoming_tech_debt}} for Step 5 implementation context</action>
+        <output>📋 **Tech Debt Sidecar Loaded (legacy):** {{sidecar_path}}</output>
+      </check>
+      <check if="{{sidecar_path}} does NOT exist">
+        <action>Set {{incoming_tech_debt}} = empty</action>
+      </check>
     </check>
 
     <output>✅ **Context Loaded**
       Story and project context available for implementation
       {{#if incoming_tech_debt}}📋 Tech debt sidecar: {{item_count}} items to address{{/if}}
     </output>
+  </step>
+
+  <!-- ═══ STEP 2.5: KNOWLEDGE BASE PRE-CHECK — TD-31 ═══ -->
+  <step n="2.5" goal="Knowledge Base pre-check — scan for known issues before implementation">
+    <critical>TD-31: Scan knowledge-base for known problems matching this story's domain/skills</critical>
+
+    <!-- Skill → Domain mapping -->
+    <action>Map {{story_required_skills}} to KB domains using this table:
+      /pcpt-editor-arch      → frontend/, database/
+      /pcpt-admin-module     → backend/
+      /pcpt-sqlserver        → database/
+      /pcpt-pdf-engine       → backend/
+      /pcpt-zustand-patterns → frontend/
+      /pcpt-testing-patterns → (all: frontend/ backend/ database/ devops/ workflow/)
+      /pcpt-auth-identity    → backend/
+      /pcpt-payment-subscription → backend/
+      /pcpt-business-api     → backend/
+      /pcpt-i18n-seo         → frontend/ backend/
+      /pcpt-signalr-realtime → backend/
+      /pcpt-background-services → backend/
+      (default, no skills)      → (all domains)
+    </action>
+
+    <action>Set {{kb_base_path}} = "{project-root}/docs/knowledge-base/troubleshooting"</action>
+    <check if="{{kb_base_path}} directory exists">
+      <action>For EACH mapped domain:
+        - Use Glob to find all *.md files in docs/knowledge-base/troubleshooting/{domain}/
+        - Exclude _template.md
+        - Read frontmatter (title, keywords, error_patterns, related_skills, status, occurrences, severity)
+        - Compare keywords against current story's AC/Tasks text
+        - If ≥2 keyword matches AND status != "resolved-by-skill" → mark as relevant
+      </action>
+      <check if="relevant entries found">
+        <action>Read full content of each relevant entry</action>
+        <action>Store as {{kb_relevant_entries}} list</action>
+        <output>📚 **Knowledge Base Pre-Check Results:**
+          {{#each kb_relevant_entries}}
+          - [{{severity}}] {{id}}: {{title}} (occurrences: {{occurrences}})
+            Keywords matched: {{matched_keywords}}
+          {{/each}}
+          ⚠️ Review these known issues BEFORE implementing related tasks.
+        </output>
+      </check>
+      <check if="no relevant entries found">
+        <action>Set {{kb_relevant_entries}} = empty</action>
+        <output>✅ No relevant KB entries found — proceeding with implementation</output>
+      </check>
+    </check>
+    <check if="{{kb_base_path}} does NOT exist">
+      <action>Set {{kb_relevant_entries}} = empty</action>
+      <output>ℹ️ Knowledge base not yet initialized — skipping KB pre-check</output>
+    </check>
   </step>
 
   <step n="3" goal="Detect review continuation and extract review context">
@@ -257,6 +413,18 @@
     <action>Run tests to confirm they now pass</action>
     <action>Handle error conditions and edge cases as specified in task/subtask</action>
 
+    <!-- KB ERROR LOOKUP — TD-31: Consult knowledge base on build/test failure BEFORE attempting fix -->
+    <check if="Build or Test fails">
+      <action>BEFORE attempting to fix, consult Knowledge Base:
+        1. Extract key fragment from error message (error code, class name, exception type, 2-4 words)
+        2. Set {{kb_troubleshooting_path}} = "{project-root}/docs/knowledge-base/troubleshooting"
+        3. If directory exists: use Grep to search for error fragment in {{kb_troubleshooting_path}}/**/*.md (search error_patterns fields)
+        4. If KB entry found → read full entry, prioritize the "解決方案" section approach
+        5. If not found → proceed with normal debugging
+        6. After successful fix → trigger KB write-back check (see Step 5 KB write-back below)
+      </action>
+    </check>
+
     <!-- REFACTOR PHASE -->
     <action>Improve code structure while keeping tests green</action>
     <action>Ensure code follows architecture patterns and coding standards from Dev Notes</action>
@@ -271,6 +439,54 @@
     <critical>NEVER proceed to next task until current task/subtask is complete AND tests pass</critical>
     <critical>Execute continuously without pausing until all tasks/subtasks are complete or explicit HALT condition</critical>
     <critical>Do NOT propose to pause for review until Step 9 completion gates are satisfied</critical>
+  </step>
+
+  <step n="5b" goal="Apply database migrations if new migration files were created">
+    <critical>CONDITIONAL STEP: Only execute if new EF Core Migration files were created in Step 5</critical>
+
+    <action>Check if any new or modified Migration files exist in Data/Migrations/*.cs (look for files created during Step 5 implementation)</action>
+
+    <check if="new or modified Migration files detected">
+      <action>Log to Dev Agent Record: "Migration files detected: {{migration_file_list}}"</action>
+      <action>Run: dotnet ef database update --project src/Platform/App.Web</action>
+
+      <check if="dotnet ef database update succeeds">
+        <action>Log to Dev Agent Record: "✅ Database migrations applied successfully: {{migration_names}}"</action>
+      </check>
+
+      <check if="dotnet ef database update FAILS">
+        <critical>HALT: "Database migration failed — fix migration errors before continuing"</critical>
+        <action>Log error details to Dev Agent Record → Debug Log</action>
+        <action>Common fixes:
+          1. Check for FK constraint violations in migration
+          2. Verify Model changes match migration expectations
+          3. Check for conflicting migrations from parallel Story branches
+          4. Run: dotnet ef migrations has-pending-model-changes to diagnose
+        </action>
+      </check>
+
+      <action>Verify schema consistency: dotnet ef migrations has-pending-model-changes --project src/Platform/App.Web</action>
+      <check if="has-pending-model-changes reports changes remain">
+        <action>Log warning: "⚠️ Model changes still pending after migration — may need additional migration"</action>
+      </check>
+
+      <!-- FIX-P0-02: Migration Cascade Checklist (ADR-DB-001) -->
+      <output>📋 **Migration Cascade Checklist** (ADR-DB-001 — 每次 Migration 後必須逐項確認)
+
+        1. [ ] **UI 層** — 新欄位/移除欄位是否需要更新顯示邏輯？（View / Razor / React 組件）
+        2. [ ] **Service 層** — 業務邏輯是否需要更新過濾條件或查詢行為？
+        3. [ ] **Repository / Query** — 是否需要更新 Repository 查詢或加入 IgnoreQueryFilters()？
+        4. [ ] **測試資料 / Seeder** — TestAccountSeeder 或其他 Seeder 是否需要補充新欄位的種子資料？
+        5. [ ] **Global Query Filter** — 含 IsDeleted 的實體是否已在 OnModelCreating 配置 HasQueryFilter(e => !e.IsDeleted)？
+        6. [ ] **ModelSnapshot 一致性** — dotnet ef migrations has-pending-model-changes 回報 No 且 ModelSnapshot 已更新？
+
+        ⚠️ 未勾選項目須在本 Story 完成前處理或記錄為技術債。
+      </output>
+    </check>
+
+    <check if="no new Migration files detected">
+      <action>Skip — no database migrations to apply</action>
+    </check>
   </step>
 
   <step n="6" goal="Author comprehensive tests">
@@ -333,6 +549,33 @@
       <action>Count total resolved review items in this session</action>
       <action>Add Change Log entry: "Addressed code review findings - {{resolved_count}} items resolved (Date: {{date}})"</action>
     </check>
+
+    <!-- ═══ KB WRITE-BACK CHECK — TD-31 (AC-6) ═══ -->
+    <!-- Trigger: any task that required ≥2 fix attempts OR had build/test failure before success -->
+    <check if="current task required ≥2 fix attempts OR had build/test failure before green">
+      <action>Check if KB already has an entry for this type of error:
+        1. Extract core error description (2-5 words) from the debugging session
+        2. Grep docs/knowledge-base/troubleshooting/ for matching error_patterns
+        3. If EXISTING entry found:
+           - Update: increment occurrences count, update last_seen date
+           - Append new solution approach to "解決方案" section if different
+           - If occurrences now ≥ 3: append upgrade suggestion block (see AC-7 template)
+        4. If NO existing entry:
+           - Determine domain category (frontend/backend/database/devops/workflow)
+           - Generate new KB ID: KB-{domain}-{next_sequential_number}
+           - Create new file from _template.md with auto-filled frontmatter:
+             * title: core error description
+             * keywords: from error message + affected files + tech stack
+             * error_patterns: exact error message fragments from build/test output
+             * related_skills: copy from story Required Skills
+             * first_seen/last_seen: current date
+             * occurrences: 1
+           - Fill "症狀", "根因分析", "解決方案" from debugging session
+           - Update docs/knowledge-base/README.md index table with new entry
+      </action>
+      <output>📝 **KB Write-Back:** {{kb_action}} — {{kb_entry_id}}: {{kb_entry_title}}</output>
+    </check>
+    <!-- END KB WRITE-BACK -->
 
     <action>Save the story file</action>
     <action>Determine if more incomplete tasks remain</action>
@@ -403,6 +646,32 @@
     <action if="File List is incomplete">HALT - Update File List with all changed files</action>
     <action if="definition-of-done validation fails">HALT - Address DoD failures before completing</action>
 
+    <!-- ═══ STEP 9.3: BUG FIX VERIFICATION ═══ -->
+    <critical>MANDATORY BUG VERIFICATION — Must verify related Bug fix status before promoting to review</critical>
+    <action>Invoke the Skill tool: /bug-fix-verification {{story_key}}</action>
+    <critical>Verification criteria:
+      1. Query review_findings for Bugs related to this Story (fix_story_id or module_code)
+      2. Each Bug MUST be verified by Reading actual source code (FIXED/OPEN/NOT_APPLICABLE)
+      3. FIXED Bugs → update review_findings (fix_status=fixed + file:line evidence)
+      4. OPEN P0/P1 Bugs → HALT, cannot promote to review
+      5. Record results in tracking file
+    </critical>
+
+    <!-- MANDATORY: Sync H1 heading emoji -->
+    <critical>Invoke /story-status-emoji skill Mode A on this story file (status: review)</critical>
+
+    <!-- ═══ STEP 9.4: MANDATORY TASKS DB BACKFILL ═══ -->
+    <critical>🔴 MANDATORY DB BACKFILL — 完成所有實作和測試後，必須執行以下步驟</critical>
+    <action>Invoke the Skill tool: /tasks-backfill-verify {{story_key}}</action>
+    <critical>逐項驗證標準：
+      1. 每個 ✅ 必須有 Read 程式碼的 file:line 證據
+      2. 每個 ⬜ 必須附有未完成原因
+      3. 禁止 [x]/[ ] 格式（必須用 ✅/⬜）
+      4. tasks 是 Markdown 字串，非 JSON array
+      5. 不可因「已全部完成」就跳過逐項驗證
+    </critical>
+    <action>After /tasks-backfill-verify completes: confirm DB tasks field updated with ✅/⬜ markers</action>
+
     <!-- Update tracking file -->
     <action>Set {{tracking_active_path}} = "{output_folder}/tracking/active/{{story_key}}.track.md"</action>
     <check if="{{tracking_active_path}} exists">
@@ -413,11 +682,66 @@
       </action>
       <output>📝 追蹤檔案已更新: active/{{story_key}}.track.md</output>
     </check>
+
+    <!-- DOC IMPACT HOOK — TD-29: Warn-Only reminder for documentation that may need updating -->
+    <action>Run doc impact reminder hook:
+      Execute: powershell -ExecutionPolicy Bypass -File "{project-root}/scripts/post-dev-story-doc-reminder.ps1" -StoryFile "{{story_path}}"
+      This is Warn-Only — output is informational only, never blocks workflow completion.
+    </action>
+
+    <!-- ═══ STEP 9.5: DOC DRIFT DETECTION — TD-31 ═══ -->
+    <!-- Scan git diff for changes that require documentation updates -->
+    <action>Run doc drift detection (TD-31):
+      Execute: powershell -ExecutionPolicy Bypass -File "{project-root}/scripts/check-doc-drift.ps1" -DiffRange "HEAD~1..HEAD" -JsonOutput -OutputFile "{project-root}/docs/tracking/doc-drift-latest.json" -Quiet
+      This is Warn-Only — never blocks workflow completion.
+    </action>
+    <action>Parse drift results from doc-drift-latest.json (if it exists):
+      - Read the JSON file
+      - Extract drift_items where severity == "must-sync" or "warning"
+      - Store as {{drift_affected_docs}} list
+    </action>
+    <check if="{{drift_affected_docs}} is not empty">
+      <action>Add or update "## 文檔影響評估" section in the story file with:
+        ```
+        ## 文檔影響評估
+
+        > 由 dev-story Step 9.5 自動偵測（TD-31 Doc Drift Detection）
+
+        | 受影響文檔 | 變更類型 | 嚴重度 | 觸發檔案 |
+        |-----------|---------|:------:|---------|
+        {{#each drift_affected_docs}}
+        | {{affected_doc}} | {{change_type}} | {{severity}} | {{changed_file}} |
+        {{/each}}
+
+        **處理建議**: 在本 Story 完成後，應同步更新上述文檔。
+        參閱 `/pcpt-doc-sync` Skill 的文檔更新 Checklist。
+        ```
+      </action>
+      <action>Update tracking file with drift summary:
+        - 追加日誌: "Doc drift detected: {{must_sync_count}} must-sync, {{warning_count}} warnings"
+      </action>
+      <output>⚠️ **文檔 Drift 偵測結果:**
+        Must-Sync: {{must_sync_count}} 個文檔需立即更新
+        Warnings: {{warning_count}} 個文檔建議更新
+        詳見 Story 文件「文檔影響評估」區塊
+      </output>
+    </check>
+    <check if="{{drift_affected_docs}} is empty OR check-doc-drift.ps1 not found">
+      <output>✅ No documentation drift detected (or drift check unavailable)</output>
+    </check>
   </step>
 
   <step n="10" goal="Completion communication and user support">
     <action>Execute the enhanced definition-of-done checklist using the validation framework</action>
     <action>Prepare a concise summary in Dev Agent Record → Completion Notes</action>
+
+    <action>Log workflow execution to Context Memory DB:
+      Call mcp__pcpt-context__log_workflow with:
+        workflow_type: "dev-story"
+        story_id: current story key
+        agent_id: current Agent ID (CC-OPUS / CC-SONNET)
+        status: "completed"
+    </action>
 
     <action>Communicate to {user_name} that story implementation is complete and ready for review</action>
     <action>Summarize key accomplishments: story ID, story key, title, key changes made, tests added, files modified</action>

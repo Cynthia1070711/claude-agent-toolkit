@@ -1,8 +1,9 @@
-# 專案部署必讀 — 多引擎協作環境一鍵初始化範本
+# 專案部署必讀 — 多引擎協作環境一鍵初始化範本 (v1.7.0)
 
-**版本**: 1.6.0
+**版本**: 2.0.0
 **建立日期**: 2026-02-27
-**適用範圍**: BMAD Method v6.0.0-alpha.21 + Claude Code CLI + Gemini CLI + Antigravity IDE + Rovo Dev CLI
+**最後更新**: 2026-05-01（v2.1.0：新增 9 篇深度補全 — Skills/Rules/IDD/Hooks/Memory/MCP/BMAD Workflows/Commands + SANITIZATION-POLICY）
+**適用範圍**: BMAD Method v6.0.0-alpha.21（已升級 v6.2.2 概念）+ Claude Code CLI（含 ECC Hook 強化 + WFQ 配額管理 + CCI 環境整合 + OTel OTLP Token 追蹤）+ Gemini CLI + Antigravity IDE + Rovo Dev CLI
 
 ---
 
@@ -114,7 +115,21 @@ docs/專案部屬必讀/
 │   ├── pipeline-audit-token-safety.md     ← 完整需求分析 + 根因分析 + Bug 修正紀錄
 │   └── pipeline-audit-token-safety.track.md ← 實作追蹤檔
 │
+├── Agent-User/Claude-Docs/               ← Claude API/用量文檔（中文翻譯）
+│   └── 用量與成本API.md                   ← Anthropic Usage & Cost API（Admin API, 組織帳戶用）
+│
 ├── context-memory-db-strategy.md          ← Context Memory DB 策略全文（TD-32~36）
+│
+│  ─────── 2026-05-01 新增 9 篇深度補全（v2.1.0）───────
+├── SANITIZATION-POLICY.md                 ← 脫敏政策 SSoT（7 類映射 + 7 條 grep 終審）
+├── skills-deep-dive.md                    ← 74 Skills 全景 + 17 Domain Profile + 三引擎 + 三層 Sync Gates
+├── rules-deep-dive.md                     ← 20 Rules 完整索引 + 5 SUPREME Mandate + 9 Lifecycle Invariants + 3-Tier Boundary
+├── idd-framework.md                       ← IDD 4 層標註（Code/ADR/DB/Memory）+ COM/STR/REG/USR + forbidden_changes
+├── hooks-events-deep-dive.md              ← 14 Hooks + 11 層 RAG 注入 + 10 Hook event 矩陣 + Block vs Advisory
+├── memory-system-deep-dive.md             ← Context Memory DB 30+ tables schema + 23 MCP tools + 82 scripts + DevConsole + agent-memory
+├── mcp-ecosystem.md                       ← pcpt-context + chrome-devtools + claude-in-chrome + Google MCP + 內部 RAG 優先 6 步
+├── bmad-workflows-evolution.md            ← create-story 8 step + 7 Depth Gates / dev-story 13 step / code-review 13 step + 三層平行 + SaaS 9 維 + Phase A-D
+├── commands-reference.md                  ← 13 專案 + 3 全域 commands + 10 subagents + 25+ Skill 偽 commands
 │
 ├── agent-cli-guides/                      ← 四引擎入門指南
 │   ├── README.md                          ← 索引 + 功能比較表 + 新引擎接入 SOP
@@ -123,20 +138,50 @@ docs/專案部屬必讀/
 │   ├── antigravity-guide.md
 │   └── rovo-dev-guide.md
 │
-├── bmad-overlay/                          ← TRS 優化後的 BMAD Workflow 覆蓋包
+├── bmad-overlay/                          ← BMAD Workflow 覆蓋包（Epic BU v1.8.0 升級）
 │   └── 4-implementation/
-│       ├── code-review/                   ← instructions.xml (471行, 原廠923行, -49%)
-│       │   ├── instructions.xml              checklist.md (59行, 原廠129行, -55%)
-│       │   ├── checklist.md                  workflow.yaml
-│       │   └── workflow.yaml
-│       ├── create-story/                  ← instructions.xml (449行, 原廠542行, -20%)
-│       │   ├── instructions.xml              checklist.md (62行, 原廠358行, -83%)
-│       │   ├── checklist.md                  workflow.yaml
-│       │   └── workflow.yaml
-│       └── dev-story/                     ← instructions.xml (436行, 原廠480行, -15%)
-│           ├── instructions.xml              checklist.md (80行)
-│           ├── checklist.md                  workflow.yaml
-│           └── workflow.yaml
+│       ├── code-review/                   ← [BU] workflow.md + 13 step 分檔 + 三層平行架構
+│       │   ├── workflow.md                   主工作流（95行, 取代 instructions.xml）
+│       │   ├── workflow.yaml                 BMAD 配置（指向 workflow.md）
+│       │   ├── checklist.md                  品質檢查清單（+VSDD Simplified）
+│       │   ├── saas-standards.md          ← [NEW] SaaS 9 維 Production Readiness 標準
+│       │   ├── instructions.xml           ← [DEPRECATED] 舊 XML 備份（697行）
+│       │   └── steps/                     ← [NEW] 13 step 分檔
+│       │       ├── step-01-load-discover.md     載入 Story + 探索 codebase
+│       │       ├── step-01b-generate-trail.md   [BU-06] Review Trail path:line 生成
+│       │       ├── step-02-review-plan.md       審查計畫 + 三層分派
+│       │       ├── step-03-triple-layer-dispatch.md  [BU-01] 三層平行調度
+│       │       ├── step-03a-blind-hunter.md     Layer A: 功能正確性盲測
+│       │       ├── step-03b-edge-case-hunter.md Layer B: 邊界條件窮舉
+│       │       ├── step-03c-acceptance-auditor.md Layer C: AC 符合性驗證
+│       │       ├── step-03d-triage-merge.md     Findings 合併 + 分類
+│       │       ├── step-04-present-autofix.md   呈現 + 自動修復
+│       │       ├── step-04b-skill-staleness.md  Skill 過時偵測
+│       │       ├── step-05-production-gate.md   Production 品質閘門
+│       │       ├── step-05b-tasks-backfill.md   Tasks 回填驗證
+│       │       └── step-06-report-archive.md    報告 + 歸檔
+│       ├── create-story/                  ← [BU] workflow.md + 8 step 分檔
+│       │   ├── workflow.md                   主工作流（76行, 取代 instructions.xml）
+│       │   ├── workflow.yaml                 BMAD 配置
+│       │   ├── checklist.md                  品質檢查清單
+│       │   ├── template.md                   SDD+ATDD Story 模板
+│       │   ├── instructions.xml           ← [DEPRECATED] 舊 XML 備份（746行）
+│       │   └── steps/                     ← [NEW] 8 step 分檔
+│       │       ├── step-00-db-first-query.md    DB-first 查詢
+│       │       ├── step-01-target-story.md      目標 Story 解析
+│       │       ├── step-02-artifact-analysis.md 產物分析
+│       │       ├── step-03-codebase-analysis.md 程式碼分析
+│       │       ├── step-04-architecture-analysis.md 架構分析
+│       │       ├── step-05-web-research.md      Web 研究
+│       │       ├── step-06-create-story-file.md Story 檔案建立
+│       │       └── step-07-finalize.md          完成 + DB 同步
+│       └── dev-story/                     ← [BU] workflow.md + 13 step 分檔
+│           ├── workflow.md                   主工作流（76行, 取代 instructions.xml）
+│           ├── workflow.yaml                 BMAD 配置
+│           ├── checklist.md                  品質檢查清單
+│           ├── instructions.xml           ← [DEPRECATED] 舊 XML 備份（759行）
+│           └── steps/                     ← [NEW] 13 step 分檔（含 KB/Migration/Review Continuation）
+│               ├── step-00-db-first-query.md ~ step-10-communication.md
 │
 ├── config-templates/                      ← 各引擎配置範本
 │   ├── claude/                            ← [必要] Claude Code CLI
@@ -181,8 +226,16 @@ docs/專案部屬必讀/
     ├── batch-runner.ps1                  ← [Pipeline] 批次並行（最多 5 Story，間隔 12s）
     ├── batch-audit.ps1                   ← [Pipeline] 批次後驗證 + AutoFix（7 Check）
     ├── epic-auto-pilot.ps1              ← [Pipeline] 整個 Epic 迴圈自動化
-    └── deploy-context-db.ps1            ← [NEW] Context Memory DB 一鍵部署
+    ├── deploy-context-db.ps1            ← [NEW] Context Memory DB 一鍵部署
+    └── otel-micro-collector.js          ← [WFQ-08] OTel OTLP HTTP Micro Collector（Token 追蹤）
 ```
+
+> **OTel Token 追蹤說明**（wfq-08, 2026-04-04）：
+> Pipeline 執行時自動啟動 `otel-micro-collector.js`（Node.js HTTP server, port 49152-65535）。
+> Claude CLI 透過 `OTEL_LOGS_EXPORTER=otlp` + `OTEL_EXPORTER_OTLP_ENDPOINT` 將 per-request token 數據
+> 發送至 collector → 寫入 JSONL 檔案 → Pipeline watchdog 即時讀取累加 → 寫入 `workflow_executions` 表。
+> 完全繞過 stdout（解決 Bug #17 isatty 衝突），Dashboard 可顯示真實 Token 消耗 + Cost。
+> Skill: `.claude/skills/pcpt-otel-micro-collector/`
 
 ---
 
@@ -191,10 +244,11 @@ docs/專案部屬必讀/
 ### Step 0: 閱讀架構演進策略（首次部署建議）
 
 > 首次部署前，建議先閱讀 **`BMAD架構演進與優化策略.md`**，了解：
-> - 最新 BMAD v6.0.3 與舊版的結構差異（檔案數 225 vs 652、Agent YAML vs MD）
-> - Token 靜態消耗基準數據（MyProject 實測 ~2,607 tokens）
+> - BMAD v6.2.2 最新架構（Skills-based + Markdown step 分檔）
+> - PCPT 自訂系統已超越 BMAD 2.1 倍（Workflow 2,202 行 vs source 885 行）
+> - Token 靜態消耗基準數據（v3.0 ~19,090 tokens — 含 63 Skills + 15 Rules）
+> - Epic BU 升級成果（三層平行 Review + Skill Validator + Quick Dev oneshot + Edge Case Hunter）
 > - 新專案 vs 舊專案的遷移決策樹
-> - TRS overlay 與最新版的相容性對照
 
 ### Step 1: 安裝 BMAD Method
 
@@ -215,7 +269,7 @@ npx bmad-method install
 Copy-Item -Path "原始專案\docs\專案部屬必讀" -Destination "新專案\docs\專案部屬必讀" -Recurse
 ```
 
-### Step 3: 覆蓋 BMAD Workflow（TRS 優化版）
+### Step 3: 覆蓋 BMAD Workflow（Epic BU 升級版）
 
 ```powershell
 # 將 bmad-overlay 覆蓋到 BMAD 安裝目錄
@@ -225,9 +279,13 @@ Copy-Item -Path "docs\專案部屬必讀\bmad-overlay\4-implementation\*" `
 ```
 
 > **為什麼需要這一步？**
-> `npx bmad-method@alpha install` 安裝的是原廠版 Workflow。
-> TRS Epic 優化了 code-review (-49%)、create-story checklist (-83%)、dev-story (-15%)，
-> 這些壓縮版本需要手動覆蓋回去，否則每次執行 Workflow 會多消耗 ~14,200 tokens/Sprint。
+> `npx bmad-method install` 安裝的是原廠版 Workflow。
+> Epic BU（2026-04-03）將 Workflow 從 XML 遷移到 Markdown step 分檔架構：
+> - code-review: 三層平行（Blind Hunter + Edge Case Hunter + Acceptance Auditor）+ SaaS 9 維
+> - create-story: 8 step 分檔（含 DB-first + Skill 自動發現 + KB 掃描）
+> - dev-story: 13 step 分檔（含 Skill staleness + Migration Cascade + KB 錯誤查詢）
+> 覆蓋後同時安裝 PCPT 自訂功能（Production Gates、Tech Debt Registry 等）。
+> 舊 instructions.xml 保留為 DEPRECATED 備份。
 
 ### Step 4: 部署配置檔案（依安裝狀態條件部署）
 
@@ -407,7 +465,7 @@ Set-Content ".mcp.json" -Value $mcp -Encoding UTF8
 | **需修改** | `config.yml.template` | 填入專案名稱 | Rovo Dev |
 | 一鍵部署 | `context-db/*` | `deploy-context-db.ps1` 自動部署至 `.context-db/` | 通用 |
 | 直接複製 | `MEMORY.md.template` | 複製到 auto-memory 目錄（精簡版） | Claude |
-| **不複製** | 專案特定 Skills (`myproject-*`) | 每個專案自行建立 | — |
+| **不複製** | 專案特定 Skills (`pcpt-*`) | 每個專案自行建立 | — |
 
 ---
 
@@ -496,6 +554,87 @@ Set-Content ".mcp.json" -Value $mcp -Encoding UTF8
 
 > 詳細說明：`context-memory-db-strategy.md`
 
+### Epic CMI：Context Memory 進階優化（CMI-1~6，2026-03-07 新增）
+
+> **核心理念**：從「手動寫入」升級為「自動生命週期記錄 + 全量文檔 ETL + 對話級記憶 + 時區正規化 + 壓縮恢復防護」。
+
+| 優化項目 | 效果 | Story |
+|----------|------|-------|
+| Session 生命週期自動記錄 | Stop/SessionEnd/PreCompact Hook → 每次對話自動存檔，不再遺忘 | CMI-1 |
+| 全量文檔 ETL | 136 Story + 50 CR + 29 ADR 匯入 DB，三層分類 + 5 張表 | CMI-2 |
+| 對話級記憶 Schema | conversation_sessions + turns + 3 MCP Tool（list/get/search） | CMI-3 |
+| 時間戳 UTC+8 修正 | timezone.js 共用工具、19,727 筆歷史記錄批次修正 | CMI-4 |
+| 壓縮恢復防護 | Rules 硬注入 + 記憶庫 lesson + 三重防護矩陣 | CMI-5 |
+| Session 品質強化 | Regex 內容擷取 + 提問歷史注入 + Story ID 修正 | CMI-6 |
+
+> 詳細策略文件：`context-memory-db-strategy.md` §5
+
+### G類：SDD+ATDD+TDD 開發方法論優化（FLOW-OPT-001，2026-03-08 新增）
+
+> **核心理念**：BDD 降級為需求溝通輔助，改用 SDD（Spec Driven）+ ATDD + TDD 閉環，
+> 減少 Agent 架構漂移、降低 Debug Token 消耗。
+
+| 優化項目 | 效果 | 影響檔案 |
+|----------|------|----------|
+| BDD 降級 | 開發迴圈完全移除 BDD，消除語意自由度導致的架構漂移 | CLAUDE.md Triggers |
+| SDD Spec Generator | M/L/XL Story 自動產出 `{id}-spec.md`（BR + API + DB + Boundary） | `.claude/skills/sdd-spec-generator/` |
+| AC ATDD 格式 | 每個 AC 附 `[Verifies: BR-XXX]`，100% 可追溯 | create-story template + checklist |
+| SDD-TDD Bridge | 從 Spec BR 直接驅動 TDD（命名規則 `{BR_ID}_{Scenario}_{Expected}`） | dev-story checklist |
+| VSDD Simplified | code-review 增加 Spec vs Code 比對（M/L/XL Only） | code-review checklist |
+| 3-Round Debug Limit | 測試修復 ≤ 3 輪，超過強制上下文壓縮 | dev-story checklist |
+| 自動觸發 spec-gen | CLAUDE.md Triggers 自動判斷複雜度並觸發 `/sdd-spec-generator` | CLAUDE.md §1.3 |
+
+**預估 Token 降幅**：在現有 76.5% 基礎上再降 20%~35%（需實際 Story 驗證）
+
+> 詳細決策紀錄：`ATDD-SDD-TDD-BDD/決策總覽-SDD-ATDD-TDD整合方案.md`
+> Spec 輸出目錄：`docs/implementation-artifacts/specs/epic-{X}/`
+
+### Epic WFQ: Workflow Quality — Pipeline 配額管理 + Token 追蹤（2026-04-04 新增）
+
+> **核心理念**：Pipeline 子視窗因 token 配額耗盡靜默卡死 → 需要偵測、防護、恢復、預測四層機制。
+> 禁止 Opus→Sonnet 自動降級（Model Purity Rule）— 會嚴重汙染 code-review 品質。
+
+| 優化項目 | 效果 | Story |
+|----------|------|-------|
+| BMAD Workflow 定義補強 | 4 個 GAP 修復（upsert-story.js 顯式呼叫、Skill Sync Gate 命名、useState vs Zustand 檢查、skills_list.md 引用） | wfq-01 |
+| Phase Target Map 集中化 | `pipeline-config.json` 取代 6 處 inline 重複定義（JS+PS1 共讀一份） | wfq-02 |
+| DB Schema + MCP Tool 補全 | `workflow_executions` +4 欄位（cache_read/creation_tokens, cost_usd, model）；`log_workflow` MCP +4 參數 | wfq-05 |
+| -p 模式 Truth Table | Claude Code v2.1.92 實測：-p 模式（無 --bare）= 互動模式 context（唯一限制：/slash-command 不可用）；17 Feature × 3 Mode 驗證矩陣 | wfq-06 |
+| Pipeline Heartbeat (L5) | Stop hook 寫入 heartbeat timestamp；watchdog 8 分鐘無更新 → 判定卡死 | wfq-03 |
+| Pipeline 429/Model Purity (L6) | 每 30 秒掃描 stderr；偵測 429 → QUOTA_EXHAUSTED；偵測模型降級 → MODEL_DEGRADED → 立即 kill | wfq-03 |
+| Phase Timeout 分級 | 依 phase × complexity 差異化 timeout（S: 15-20min, M: 25-35min, L: 35-50min） | wfq-03 |
+| Recovery Script + SOP | `pipeline-recovery.js`：新 Session 掃描非 done Story + debug log 分析 → 恢復建議 | wfq-03 |
+| Token 追蹤（OTel） | `CLAUDE_CODE_ENABLE_TELEMETRY=1` + `OTEL_METRICS_EXPORTER=console` → `pipeline-log-tokens.js` 擷取真實 token | wfq-04 |
+| Quota 預測 | `pipeline-quota-check.js` 基於 benchmark 基線 → GO/WARN/BLOCK 決策 | wfq-04 |
+| ModelPricing 配置 | `pipeline-config.json` 含 Haiku/Sonnet/Opus/FastOpus 四級定價（$/MTok） | wfq-05 |
+
+**新增檔案清單**：
+
+| 檔案 | 用途 |
+|------|------|
+| `.claude/hooks/pipeline-heartbeat.js` | Stop hook heartbeat（三引擎同步） |
+| `scripts/pipeline-config.json` | 集中化配置（phaseTargetStatus + modelPricing + quota + phaseTimeouts + model_purity） |
+| `scripts/pipeline-recovery.js` | 新 Session 恢復腳本（掃描 + 診斷 + 建議） |
+| `scripts/pipeline-log-tokens.js` | OTel token 擷取 + DB 寫入 |
+| `scripts/pipeline-quota-check.js` | 配額預測 GO/WARN/BLOCK |
+| `docs/implementation-artifacts/specs/pipeline-recovery-sop.md` | 恢復 SOP 文件 |
+| `docs/implementation-artifacts/specs/wfq-06-pipeline-mode-truth-table.md` | -p 模式能力 Truth Table |
+
+**真實數據來源**（非猜測）：
+
+| 數據 | 來源 | 可靠度 |
+|------|------|:------:|
+| per-request token (4 欄位) | OTel `claude_code.token.usage` | ✅ 真實 |
+| 429 rate_limit_error | Debug log `~/.claude/debug/{session-id}.txt` | ✅ 真實 |
+| Plan type / Rate limit tier | `.credentials.json` subscriptionType + rateLimitTier | ✅ 真實 |
+| Extra usage 狀態 | `.claude.json` cachedExtraUsageDisabledReason | ✅ 快取 |
+| Current Session / All Models 剩餘% | 伺服器端，無法程式化取得 | ❌ |
+
+> **claw-code 參考**：TokenUsage 四欄位（input/output/cache_create/cache_read）+ ModelPricing + UsageTracker 累積器。
+> 來源：`claude token減量策略研究分析/工作流/claw-code-main/rust/crates/runtime/src/usage.rs`
+
+---
+
 ### TD-15~19 資料庫/Skill 維護（2026-03-03 新增）
 
 | 優化項目 | 效果 | Story |
@@ -508,6 +647,52 @@ Set-Content ".mcp.json" -Value $mcp -Encoding UTF8
 
 ---
 
+## 搭配 DevConsole Web UI 查看記憶庫資料
+
+> **適用場景**：想要以視覺化介面瀏覽/搜尋記憶庫內容，而非透過 Claude CLI MCP Tools 查詢。
+
+### 啟動方式
+
+```powershell
+# 方式一：手動 BAT 檔（推薦）
+# 啟動：雙擊執行
+claude token減量策略研究分析\記憶庫策略\手動開關Server\1.DevConsole啟動.bat
+
+# 關閉：雙擊執行
+claude token減量策略研究分析\記憶庫策略\手動開關Server\2.DevConsole關閉.bat
+
+# 方式二：命令列
+cd tools/dev-console && npm run dev
+```
+
+### 存取位址
+
+- 前端 UI：`http://localhost:5174`
+- 後端 API：`http://localhost:3001`
+
+### 功能總覽
+
+| 頁面 | 說明 |
+|------|------|
+| Dashboard | Story 狀態分佈 KPI + 最近活動 |
+| Stories | Kanban 看板 + Epic 篩選 + Story 詳情（Markdown 渲染） |
+| Memory | 記憶庫搜尋/瀏覽 + 分類篩選 + 手動 CRUD |
+| Sessions | Session 工作紀錄時間軸 |
+| CR Issues | Code Review 問題追蹤 + Severity/Resolution 統計 |
+
+### 語言切換
+
+- 預設繁體中文，Header 右上角按鈕切換英文
+- 設定儲存於瀏覽器 `localStorage`（key: `dvc-lang`）
+
+### 注意事項
+
+- DevConsole 為**唯讀查看工具**，不會修改記憶庫或 YAML 檔案的核心資料
+- 手動 CRUD（Memory 頁面）會直接寫入 SQLite，使用時請注意資料正確性
+- 需先確認 `.context-db/context-memory.db` 存在（即已完成 Context Memory DB 部署）
+
+---
+
 ## 注意事項
 
 1. **BMAD 版本升級時**：重新執行 `npx bmad-method install` 後，**必須再次執行 Step 3 覆蓋 overlay**，否則 TRS 優化會被原廠版覆蓋
@@ -517,9 +702,11 @@ Set-Content ".mcp.json" -Value $mcp -Encoding UTF8
 5. **腳本為 PowerShell 格式**：macOS/Linux 環境需改寫為 bash
 6. **Gemini Hooks 需要 Node.js 腳本**：`secret-guard.js` 和 `git-safety.js` 需另外建立於 `.gemini/hooks/`
 7. **只安裝 Claude Code 也能正常工作**：其他引擎配置會被自動跳過，不影響 BMAD Workflow 執行
-8. **Pipeline 自動化腳本需配合 Claude Max 方案**：`story-pipeline.ps1` 使用 `claude -p` 模式 + `--dangerously-skip-permissions`，僅適用於可信環境
-9. **Token 安全閥需手動設定日配額**：Claude Max 無公開 API 查詢配額，需設定 `-DailyTokenLimit` 參數（基於方案等級估算）
-10. **Pipeline 批次並行上限 5 個**：超過 5 個並行 Story 會導致 rate-limiting，建議 `-IntervalSec 12` 錯開啟動
+8. **Pipeline 自動化腳本需配合 Claude Max 方案**：`story-pipeline-interactive.ps1` 使用互動模式（完整 MCP/Hooks/Skills），`story-pipeline.ps1` 使用 `-p` 模式。兩者均需 `--dangerously-skip-permissions`，僅適用於可信環境
+9. **Token 配額管理（Epic WFQ 新增）**：Pipeline 配額無法程式化查詢（伺服器端），改用 OTel 累計消耗 + 429 頻率 + benchmark 基線做間接預測。`pipeline-quota-check.js` 提供 GO/WARN/BLOCK 決策
+10. **Pipeline 批次並行上限 3 個**：動態排程模式（Epic FIX6 驗證），slot 空出即補位。Phase 間隔 12s 防 rate-limit
+11. **禁止自動模型降級（Model Purity Rule）**：Claude Code 內建 Opus→Sonnet fallback 會嚴重汙染 code-review 品質。Pipeline Layer 6 偵測到降級立即 kill，DB status 不前進，等配額恢復重跑
+12. **-p 模式能力更新（v2.1.92 實測）**：`-p`（不加 `--bare`）支援 Hooks/MCP/Skills（唯一限制：/slash-command 不可用）。`--bare` 將成為未來 `-p` 預設，屆時需顯式載入配置
 11. **Context Memory DB 需要 Node.js 18+**：MCP Server 使用 ES Module + better-sqlite3 native addon，需確認 Node.js 版本
 12. **Auto-memory 檔案必須精簡**：`~/.claude/projects/<hash>/memory/` 下的檔案每次新對話全量載入。詳細內容存 DB，MEMORY.md 只保留一行摘要（TD-36 教訓）
 13. **Context Memory DB 是增量式的**：DB 檔案 `.context-db/context-memory.db` 隨專案累積知識越來越有價值，建議納入備份但不納入 Git（已列入 .gitignore）
@@ -530,6 +717,11 @@ Set-Content ".mcp.json" -Value $mcp -Encoding UTF8
 
 | 版本 | 日期 | 變更 |
 |------|------|------|
+| **2.1.0** | **2026-05-01** | **9 篇深度補全 + 數字校正 + 編碼修復**。新增 9 篇 deep-dive：SANITIZATION-POLICY（脫敏 SSoT 7 類映射）/ skills-deep-dive（74 Skills + 17 Domain + 三層 Sync Gates）/ rules-deep-dive（20 Rules + 5 SUPREME Mandate + 9 Lifecycle Invariants）/ idd-framework（4 層標註 + COM/STR/REG/USR + forbidden_changes）/ hooks-events-deep-dive（14 Hooks + 11 層 RAG + 10 Hook event）/ memory-system-deep-dive（30+ tables schema + 23 MCP tools + 82 scripts + DevConsole + agent-memory + ledger.jsonl）/ mcp-ecosystem（pcpt-context + chrome-devtools + claude-in-chrome + Google MCP + 內部 RAG 6 步）/ bmad-workflows-evolution（create 8 step + 7 Depth Gates / dev 13 step / review 13 step + 三層平行 + SaaS 9 維 + Phase A-D）/ commands-reference（13 + 3 + 10 subagents + 25+ Skill 偽 commands）。修復既有亂碼 4 處（最後更新 / 概念）/ 強化 / 完整需求分析）。Resolution: Plan v3.5 Party Mode 17 BMAD agents 整合 |
+| 2.0.0 | 2026-04-04 | **Epic WFQ: Pipeline 配額管理系統**。新增 Pipeline Heartbeat (L5) + 429/Model Purity 偵測 (L6) + Recovery Script/SOP + OTel Token 追蹤 + Quota Prediction (GO/WARN/BLOCK) + Phase Timeout 分級 + ModelPricing 配置 + Model Purity Rule（禁止 Opus→Sonnet 降級）。-p 模式 Truth Table（v2.1.92 實測）。DB Schema 擴展 workflow_executions +4 欄位 + log_workflow MCP +4 參數。BMAD Workflow 定義補強（4 GAP 修復）+ Phase Target Map 集中化。6 Stories, avg CR 93.5, 落地驗證 34/34 通過 |
+| 1.9.0 | 2026-04-03 | Epic BU (BMAD v6.2.2 升級 6/6) + Epic ECC (Hook 基礎設施強化 5/5) |
+| 1.7.1 | 2026-03-08 | 新增 DevConsole Web UI 使用說明章節；記錄 5 項 Bug 修復（CRLF/Epic ID/路徑/Schema/預設模式）+ i18n 國際化 + SDD Spec 徽章 |
+| 1.7.0 | 2026-03-08 | 整合 G類 SDD+ATDD+TDD 方法論（FLOW-OPT-001）+ Epic CMI 記憶庫進階優化（CMI-1~6）；同步 bmad-overlay 5 檔；新增 `sdd-spec-generator` Skill；`context-memory-db-strategy.md` v1.0→v1.1（+CMI 章節）；反向同步 Pipeline 檔案；更新 TRS 成果摘要 |
 | 1.6.0 | 2026-03-07 | 整合 Context Memory DB 策略（TD-32~36）；新增 `config-templates/context-db/`（MCP Server + init-db + package.json）；新增 `deploy-context-db.ps1` 一鍵部署腳本；新增 `context-memory-db.md` 規則檔、`MEMORY.md.template` 精簡範本；更新 README 資料夾結構、部署步驟（Step 4.6）、TRS 成果（TD-15~36）；補全 TD-15~19 資料庫/Skill 維護策略 |
 | 1.5.0 | 2026-03-02 | 整合 Claude 智能中控自動化排程（Pipeline 中控 + Token 安全閥 + batch-audit）；新增 TRS-35/37/38 優化成果（Sprint Status 縮行、Registry 歸檔/單讀）；新增 Pipeline 腳本至資料夾結構（story-pipeline/batch-runner/batch-audit/epic-auto-pilot）；部署手冊 v3.2.0→v3.3.0（新增 PART 10 Pipeline 自動化排程） |
 | 1.4.0 | 2026-02-28 | 部署手冊 v3.1.0→v3.2.0：新增 §4.10 技術債中央登錄協議 + §9.7 檢查清單 + Production Gate registry 驅動；worktree-quick-reference 新增 registry.yaml merge 規則；TRS 成果新增中央登錄（TRS-34） |

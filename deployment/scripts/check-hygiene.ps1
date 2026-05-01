@@ -1,4 +1,4 @@
-# MyProject File Hygiene Checker
+# PCPT File Hygiene Checker
 # ASCII ONLY PROJECT SOURCE TO AVOID ENCODING ERRORS
 
 param (
@@ -20,7 +20,7 @@ $Patterns = @(
 $TotalFiles = 0
 $CorruptedFiles = @()
 
-Write-Host "--- MyProject File Hygiene Check Start ---" -ForegroundColor Cyan
+Write-Host "--- PCPT File Hygiene Check Start ---" -ForegroundColor Cyan
 Write-Host "Scan Path: $SearchPath"
 
 $Files = Get-ChildItem -Path $SearchPath -Recurse -File -Include $Include | Where-Object { 

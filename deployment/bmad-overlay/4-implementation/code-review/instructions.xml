@@ -1,3 +1,4 @@
+<!-- DEPRECATED: 已遷移至 workflow.md + steps/ 目錄。本檔案保留作為備份參考。 -->
 <workflow>
   <critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
   <critical>You MUST have already loaded and processed: {installed_path}/workflow.yaml</critical>
@@ -33,11 +34,12 @@
       Compliance(CRITICAL): 個資保護, 資料保留, 存取審計, 授權
     </review-dimensions>
 
-    <!-- 🆕 Production Gate 閾值 -->
+    <!-- 🆕 Production Gate 閾值 (registry-driven per /pcpt-debt-registry §5) -->
     <production-gates>
       <gate name="zero-critical" rule="CRITICAL issues == 0">Story 不可標記 done</gate>
       <gate name="high-resolved" rule="HIGH issues all fixed OR justified">需要明確理由</gate>
-      <gate name="tech-debt-limit" rule="累積 LOW/MEDIUM &lt;= 10">超過則阻止新功能開發</gate>
+      <gate name="tech-debt-limit" rule="registry.yaml pending entries &lt;= 15">Count from tech-debt/registry.yaml, NOT from sprint-status comments</gate>
+      <gate name="zero-critical-debt" rule="registry.yaml pending + severity=CRITICAL == 0">No critical debt allowed in registry</gate>
       <gate name="coverage-minimum" rule="測試覆蓋 >= 70%">否則為 HIGH 問題</gate>
     </production-gates>
   </saas-standards>
@@ -58,7 +60,7 @@
       <action>For EACH skill in {{story_required_skills}}:
         - Invoke the Skill tool to load the skill
         - Pay special attention to FORBIDDEN rules in each skill
-        - Example: /example-editor-arch, /example-zustand-patterns
+        - Example: /pcpt-editor-arch, /pcpt-zustand-patterns
       </action>
       <output>📚 **Required Skills Loaded for Review:**
         {{#each story_required_skills}}
@@ -88,14 +90,21 @@
     <invoke-protocol name="discover_inputs" />
     <action>Load {project_context} for coding standards (if exists)</action>
 
-    <!-- 載入累積技術債統計 -->
+    <!-- 載入累積技術債統計 (from registry.yaml per /pcpt-debt-registry §5) -->
     <action>Set {{tech_debt_count}} = 0</action>
+    <action>Set {{registry_path}} = "{implementation_artifacts}/tech-debt/registry.yaml"</action>
+    <check if="{{registry_path}} exists">
+      <action>Read {{registry_path}}, store as {{registry_cache}}, and count entries where status == "pending" → {{tech_debt_count}}</action>
+      <action>Count entries where status == "pending" AND severity == "CRITICAL" → {{critical_debt_count}}</action>
+      <check if="{{critical_debt_count}} > 0">
+        <output>🚨 **CRITICAL 技術債**: {{critical_debt_count}} 個 CRITICAL pending entries in registry!</output>
+      </check>
+      <check if="{{tech_debt_count}} >= 15">
+        <output>⚠️ **技術債警告**: 累積 {{tech_debt_count}} 個待處理項目 (閾值: 15)！建議先處理技術債。</output>
+      </check>
+    </check>
     <check if="{sprint_status} file exists">
       <action>Load FULL {sprint_status} file and store as {{sprint_status_cache}} — do NOT re-read the file in subsequent steps</action>
-      <action>From {{sprint_status_cache}}, extract tech_debt_backlog section, count pending → {{tech_debt_count}}</action>
-      <check if="{{tech_debt_count}} >= 10">
-        <output>⚠️ **技術債警告**: 累積 {{tech_debt_count}} 個待處理項目！建議先處理技術債。</output>
-      </check>
     </check>
   </step>
 
@@ -169,6 +178,7 @@
       📈 Scalability(HIGH): N+1/eager loading, pagination/Take/Skip, async(禁.Result/.Wait), cache, IDisposable
       📊 Observability(MEDIUM): ILogger in catch, 計時/計數, correlation ID, health endpoint
       🔄 DataConsistency(HIGH): DbContext/Transaction scope, locking/concurrency, DataAnnotations, 冪等性
+      🗄️ MigrationIntegrity(HIGH): If new Migration files exist → verify Migration matches Model changes, FK/Navigation Property 配置正確(無影子FK), DeleteBehavior 符合規範, Check Constraint/Unique Index 完整, run `dotnet ef database update` 驗證無錯誤, run `has-pending-model-changes` 確認無殘留
       ⚠️ ErrorHandling(HIGH): try/catch, 禁洩露 stack trace, Polly/重試, 熔斷器, fallback
       🧪 TestCoverage: Read FULL test files, verify assertions(❌Assert.True(true)/空body, ✅Assert.Equal/Should()), >=70%
     </action>
@@ -257,6 +267,16 @@
       <action>Update {{fixed_count}}</action>
     </check>
 
+    <!-- ═══ DEBT REGISTRY: Mandatory Three-Way Classification (replaces abolished "retained") ═══ -->
+    <critical>🚫 ABOLISHED: The "retained" / "保留" classification is PERMANENTLY REMOVED.
+      Every non-FIXED issue MUST be classified as one of:
+      - DEFERRED: Has downstream impact, needs future Story to fix → registry.yaml entry + sidecar .debt.md
+      - WON'T FIX: No practical risk, purely style/preference → registry.yaml entry + written reason (no sidecar)
+      If uncertain → default to DEFERRED (track more, not less).
+      Any issue left without FIXED/DEFERRED/WON'T FIX classification is a workflow violation.
+      Invoke /pcpt-debt-registry Push mode for all non-FIXED entries.
+    </critical>
+
     <!-- ═══ 延後項目 → 側車文件寫入（Sidecar Architecture） ═══ -->
     <check if="{{action_count}} > 0">
       <critical>📝 寫入技術債側車文件 — 不讀取目標 Story，直接蒸餾上下文到 .debt.md</critical>
@@ -272,20 +292,19 @@
         Store in {{analyzed_deferred_issues}}
       </action>
 
-      <!-- Phase 2: 按目標 Story 分組，寫入側車文件 -->
-      <action>Group {{analyzed_deferred_issues}} by {{target_story_id}} → {{grouped_deferrals}}</action>
-      <action>For EACH target_story_id in {{grouped_deferrals}}:
-        Write sidecar file at {implementation_artifacts}/tech-debt/{{target_story_id}}.debt.md
-        with three-layer context:
+      <!-- Phase 2: Write sidecar file (named by SOURCE story per /pcpt-debt-registry §3) -->
+      <action>Write sidecar file at {implementation_artifacts}/tech-debt/{{story_key}}.debt.md
+        containing ALL DEFERRED items from this CR (one sidecar per source story):
 
         ```yaml
         ---
-        source_story: {{story_key}}
-        source_review_date: {{system_date}}
-        severity: {{max_severity_in_group}}
-        dimension: {{primary_dimension}}
+        source_story: "{{story_key}}"
+        source_review_date: "{{system_date}}"
+        severity: "{{max_severity_across_all_items}}"
+        dimension: "{{primary_dimension}}"
         items:
-          - problem_location: {{file}}:{{line}}
+          - id: "{{registry_id}}"
+            problem_location: "{{file}}:{{line}}"
             problem_description: |
               {{description}}
             fix_guidance: |
@@ -293,10 +312,11 @@
             affected_acceptance_criteria: |
               {{related_ac_from_source_story}}
             related_modules:
-              - {{affected_file_1}}
-              - {{affected_file_2}}
-            root_cause_category: {{root_cause_category}}
-            root_cause_detail: {{root_cause_detail}}
+              - "{{affected_file_1}}"
+              - "{{affected_file_2}}"
+            root_cause_category: "{{root_cause_category}}"
+            root_cause_detail: |
+              {{root_cause_detail}}
         routing_reason: "{{routing_reason}}"
         ---
         ```
@@ -304,6 +324,57 @@
         **Case B (需建新 Story)**:
           Also create Story stub at {implementation_artifacts}/stories/epic-{epic}/{{target_story_id}}.md
           with: Story ID, title, priority, status: backlog, link to .debt.md for full context
+      </action>
+
+      <!-- Phase 2.5: DEBT REGISTRY PUSH — Write entries to registry.yaml -->
+      <critical>📋 REGISTRY PUSH: Write ALL non-FIXED issues to tech-debt/registry.yaml</critical>
+      <action>Acquire registry lock before writing:
+        Run: powershell -File scripts/file-lock-acquire.ps1 -AgentId {{agent_id}} -StoryId {{story_key}} -FilePath "docs/implementation-artifacts/tech-debt/registry.yaml"
+        (Registers exclusive write lock in .agent-locks.json; prevents parallel CR agents from concurrent writes)
+      </action>
+      <action>Use {{registry_cache}} from Step 1 — do NOT re-read registry.yaml</action>
+      <action>For EACH DEFERRED issue in {{analyzed_deferred_issues}}:
+        Append entry to registry.yaml entries list:
+        ```yaml
+        - id: "{{story_short}}-{{issue_id}}"        # e.g., "BA-9-L2" — globally unique
+          classification: deferred
+          status: pending
+          severity: "{{severity}}"                   # CRITICAL | HIGH | MEDIUM | LOW
+          dimension: "{{dimension}}"
+          source_story: "{{story_key}}"
+          source_review_date: "{{system_date}}"
+          summary: "{{one_line_summary}}"
+          target_story: "{{target_story_id}}"
+          sidecar: "tech-debt/{{story_key}}.debt.md"
+          wont_fix_reason: null
+          resolved_date: null
+          resolved_by: null
+          resolved_in_story: null
+        ```
+      </action>
+      <action>For EACH WON'T FIX issue:
+        Append entry to registry.yaml entries list:
+        ```yaml
+        - id: "{{story_short}}-{{issue_id}}"
+          classification: wont_fix
+          status: wont_fix
+          severity: "{{severity}}"
+          dimension: "{{dimension}}"
+          source_story: "{{story_key}}"
+          source_review_date: "{{system_date}}"
+          summary: "{{one_line_summary}}"
+          target_story: null
+          sidecar: null
+          wont_fix_reason: "{{2_3_sentence_justification}}"
+          resolved_date: null
+          resolved_by: null
+          resolved_in_story: null
+        ```
+      </action>
+      <action>Update registry.yaml header: last_updated = {{system_date}}, last_updated_by = {{agent_id}}</action>
+      <action>Save registry.yaml preserving ALL existing entries and comments</action>
+      <action>Release registry lock after write:
+        Run: powershell -File scripts/file-lock-release.ps1 -FilePath "docs/implementation-artifacts/tech-debt/registry.yaml"
       </action>
 
       <!-- Phase 3: 更新當前 Story Tech Debt Reference（精簡版） -->
@@ -329,14 +400,93 @@
         - 📄 {{target_story_id}}.debt.md ({{item_count}} items, {{max_severity}})
         {{/each}}
       </output>
+
+      <!-- Phase 6: DEBT REGISTRY PUSH CHECKLIST — Mandatory verification -->
+      <critical>📋 PUSH CHECKLIST — All items MUST pass before proceeding</critical>
+      <action>Verify Push Checklist:
+        □ All non-FIXED issues classified as DEFERRED or WON'T FIX (zero "retained")
+        □ registry.yaml updated with all new entries
+        □ DEFERRED items have sidecar .debt.md at tech-debt/{{story_key}}.debt.md
+        □ WON'T FIX items have written justification in registry.yaml
+        □ Source Story Tech Debt Reference section updated
+        □ sprint-status.yaml tech_debt_backlog synced
+        If ANY item fails → HALT and fix before continuing.
+      </action>
+    </check>
+  </step>
+
+  <!-- ═══ STEP 4.5: SKILL STALENESS VALIDATION — BR-04, BR-05 (fix-50) ═══ -->
+  <step n="4.5" goal="Validate skill staleness entries from dev-story and write SKILL_STALE tech_debt_items">
+    <critical>🔍 SKILL STALENESS VALIDATION: Read tracking file for skill-staleness entries, then write to tech_debt_items DB</critical>
+
+    <action>Read the story tracking file at docs/tracking/active/{{story_key}}.track.md (or archived path)</action>
+    <action>Grep for lines matching pattern: `skill-staleness(` in the tracking file</action>
+    <action>Set {{stale_skill_entries}} = list of parsed entries:
+      Format 1 (glob match):    `skill-staleness({skill_name}): {files}` → severity eligible for escalation
+      Format 2 (domain fallback): `skill-staleness-fallback({skill_name}): domain match only, severity=INFO` → skip (INFO only, no DB write)
+    </action>
+
+    <check if="{{stale_skill_entries}} has glob-match entries (Format 1)">
+      <action>For EACH unique skill in glob-match entries:
+        1. Call search_debt MCP Tool:
+           Tool: mcp__pcpt-context__search_debt
+           query: "SKILL_STALE {{skill_name}}"
+           filters: { status: "pending" }
+           (Count existing SKILL_STALE records for this skill across ALL source_stories)
+        2. Set {{existing_count}} = number of matching records returned
+        3. Determine severity per BR-05:
+           - If {{existing_count}} >= 3 → severity = "MEDIUM"
+           - Otherwise → severity = "LOW"
+        4. Set {{matched_files}} = comma-joined file list from tracking entry
+        5. Run upsert-debt.js to write tech_debt_items:
+           node .context-db/scripts/upsert-debt.js --inline '{"type":"SKILL_STALE","severity":"{{severity}}","source_story":"{{story_key}}","summary":"Skill {{skill_name}} may be stale: {{matched_files}}","target_story":null,"status":"pending"}'
+      </action>
+      <output>📋 **Skill Staleness → tech_debt_items:**
+        {{#each stale_skills}}
+        - SKILL_STALE | {{skill_name}} | {{severity}} (existing: {{existing_count}}) | {{matched_files}}
+        {{/each}}
+      </output>
+    </check>
+
+    <check if="{{stale_skill_entries}} is empty">
+      <output>✅ No skill-staleness entries found in tracking file — skipping SKILL_STALE DB write</output>
+    </check>
+
+    <!-- Add staleness summary to CR report -->
+    <check if="{{stale_skill_entries}} has any entries">
+      <action>Append to CR report (tech_debt_items section):
+        ### Skill Staleness (SKILL_STALE)
+        | Skill | Severity | Matched Files | Existing Count |
+        |-------|----------|---------------|---------------|
+        {{#each stale_skills}}
+        | {{skill_name}} | {{severity}} | {{matched_files}} | {{existing_count}} |
+        {{/each}}
+        > INFO-only domain fallback entries are noted below (no DB write):
+        {{#each domain_fallback_entries}}
+        - ℹ️ {{skill_name}}: domain match only
+        {{/each}}
+      </action>
     </check>
   </step>
 
   <step n="5" goal="Apply Production Gate and update status">
     <critical>🔄 PRODUCTION GATE CHECK - 此步驟不可跳過！</critical>
 
+    <!-- ═══ STEP 5.0: BUG FIX VERIFICATION ═══ -->
+    <critical>MANDATORY BUG VERIFICATION — Must verify review_findings Bug fix status before Production Gate</critical>
+    <action>Invoke the Skill tool: /bug-fix-verification {{story_key}}</action>
+    <critical>Verification criteria:
+      1. Query review_findings for Bugs related to this Story (fix_story_id / suggested_story / module_code)
+      2. Each Bug MUST be verified by Reading actual source code (FIXED/OPEN/DEFERRED/NOT_APPLICABLE)
+      3. FIXED → update review_findings (fix_status=fixed + file:line evidence)
+      4. DEFERRED → sync to tech_debt_items (upsert-debt.js)
+      5. OPEN P0/P1 Bugs → count towards Production Gate critical_remaining
+      6. Append verification report to CR report
+    </critical>
+
     <action>Calculate final metrics:
-      {{critical_remaining}}, {{high_remaining}}, {{acs_incomplete}}, {{final_tech_debt}} = {{tech_debt_count}} + {{action_count}}
+      {{critical_remaining}}, {{high_remaining}}, {{acs_incomplete}}
+      {{final_tech_debt}} = {{tech_debt_count}} + count of new DEFERRED entries pushed in Step 4 (do NOT re-read registry.yaml)
     </action>
 
     <!-- 🆕 Production Gate 檢查 -->
@@ -379,6 +529,10 @@
       - Review完成時間: Execute `powershell -Command "Get-Date -Format 'yyyy-MM-dd HH:mm'"` to get current time
     </action>
     <action>Verify Status field was updated correctly</action>
+
+    <!-- MANDATORY: Sync H1 heading emoji -->
+    <critical>Invoke /story-status-emoji skill Mode A on this story file (status: {{new_status}}, check tech debt for compound marker)</critical>
+
     <action>Save story file</action>
 
     <!-- 同步 sprint-status.yaml -->
@@ -404,6 +558,34 @@
       {{else}}📋 請處理待辦項目後，重新執行 code-review。{{#if action_count>0}} 💡 延後項目已關聯到 **{{target_story_id}}**{{/if}}
       {{/if}}
     </output>
+  </step>
+
+  <!-- ═══ STEP 5.5: MANDATORY TASKS DB BACKFILL ═══ -->
+  <step n="5.5" goal="Tasks 回填驗證（DB-first Story 強制步驟）">
+    <critical>🔴 MANDATORY BACKFILL — 此步驟不可跳過，不可延後！</critical>
+    <critical>完成 Code Review 報告和所有修復後，必須呼叫 /tasks-backfill-verify</critical>
+
+    <action>Invoke the Skill tool: /tasks-backfill-verify {{story_key}}</action>
+
+    <critical>逐項驗證標準（違反任何一條視為回填失敗）：
+      1. 每個 ✅ 必須有實際 Read 程式碼的 file:line 證據
+      2. 每個 ⬜ 必須附有未完成原因
+      3. 禁止使用 [x]/[ ] 格式（必須用 ✅/⬜ emoji）
+      4. tasks 欄位必須是 Markdown 字串（不是 JSON array）
+      5. 禁止因「看起來都做了」就全部勾 ✅（每項獨立驗證）
+    </critical>
+
+    <check if="{{new_status}} == 'done'">
+      <action>Backfill tasks + file_list + test_count to DB via /tasks-backfill-verify</action>
+      <action>Confirm DB write completed by querying story tasks field</action>
+    </check>
+
+    <check if="{{new_status}} != 'done'">
+      <action>Still run /tasks-backfill-verify to record partial completion state</action>
+      <output>⬜ Tasks backfill recorded with partial completion state</output>
+    </check>
+
+    <output>Tasks 回填驗證完成 — DB tasks 欄位已更新為 ✅/⬜ 格式</output>
   </step>
 
   <step n="6" goal="Generate review report and archive tracking">
@@ -441,7 +623,32 @@
       | HIGH/MEDIUM | {{count}} | 下個 Sprint |
       | LOW | {{count}} | Backlog |
       {{else}}無延後項目。{{/if}}
+
+      ## 文檔同步狀態 (TD-31)
+      {{#if cr_doc_drift_items}}
+      **狀態**: ⚠️ Drift Detected
+
+      | 受影響文檔 | 變更類型 | 嚴重度 | 觸發變更 |
+      |-----------|---------|:------:|---------|
+      {{#each cr_doc_drift_items}}
+      | {{affected_doc}} | {{change_type}} | {{severity}} | {{changed_file}} |
+      {{/each}}
+
+      **需更新文檔清單 + 目標 Story**:
+      {{#each cr_must_sync_docs}}
+      - `{{doc_path}}` → Target Story: {{target_story}}
+      {{/each}}
+      {{else}}
+      **狀態**: ✅ N/A — No documentation drift detected from CR fixes
+      {{/if}}
       ```
+    </action>
+    <!-- CR Doc Drift Detection — TD-31 (AC-2) -->
+    <action>Run doc drift detection for CR fixes (TD-31):
+      Execute: powershell -ExecutionPolicy Bypass -File "{project-root}/scripts/check-doc-drift.ps1" -DiffRange "HEAD~1..HEAD" -JsonOutput -Quiet
+      Parse output JSON to populate {{cr_doc_drift_items}}
+      Severity "must-sync" items → populate {{cr_must_sync_docs}} with target_story from sprint-status (backlog/ready-for-dev)
+      This is Warn-Only — never blocks review completion.
     </action>
     <action>Update {implementation_artifacts}/reviews/README.md to include new report</action>
 
@@ -472,6 +679,14 @@
         <output>🗑️ 側車文件已清除: tech-debt/{{story_key}}.debt.md</output>
       </check>
     </check>
+
+    <action>Log workflow execution to Context Memory DB:
+      Call mcp__pcpt-context__log_workflow with:
+        workflow_type: "code-review"
+        story_id: "{{story_key}}"
+        agent_id: current Agent ID (CC-OPUS / CC-SONNET)
+        status: "completed"
+    </action>
 
     <output>**📋 Post-Review Documentation Complete!**
       **審查報告:** {{review_report_path}}

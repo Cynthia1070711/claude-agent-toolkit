@@ -1,6 +1,7 @@
 # Review Story Workflow (SaaS Standards v2.0)
 name: code-review
-description: "SaaS Production-Grade Code Review (Full Auto-Fix v3.0): 依照業界 SaaS 標準，ALL severity levels (CRITICAL/HIGH/MEDIUM/LOW) 全數自動修復，零人工介入。無法於程式碼層級修復的問題自動延後至技術債 Story 並建立追蹤關聯。Production Gates 阻止未達標 Story 進入 done 狀態。SaaS Readiness Score (0-100) 確保生產就緒。"
+description: "SaaS Production-Grade Code Review (Triple-Layer Parallel v4.1 + Review Trail): Blind Hunter + Edge Case Hunter + Acceptance Auditor 三層平行架構，與 SaaS 9 維審計正交互補。Step 1b 自動從 diff 生成 Review Trail（2-5 concerns × path:line stops，按 blast-radius 排序），含 fallback（無 spec 或 git 不可用）。ALL severity levels 全數自動修復，Triage 統一去重計分，Production Gates 阻止未達標 Story，SaaS Readiness Score 確保生產就緒。"
+version: "4.1.0"
 author: "BMad"
 
 # Critical variables from config
@@ -16,7 +17,7 @@ sprint_status: "{implementation_artifacts}/sprint-status.yaml || {output_folder}
 
 # Workflow components
 installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/code-review"
-instructions: "{installed_path}/instructions.xml"
+instructions: "{installed_path}/workflow.md"
 validation: "{installed_path}/checklist.md"
 template: false
 
