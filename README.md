@@ -2,8 +2,8 @@
 
 **版本**: 2.0.0
 **建立日期**: 2026-02-27
-**最後���新**: 2026-04-04（Epic CCI + WFQ-08: OTel Micro OTLP Collector — Pipeline Token 資料流修復 + Skill 封裝）
-**適用範圍**: BMAD Method v6.0.0-alpha.21（已升級 v6.2.2 概念���+ Claude Code CLI（含 ECC Hook 強�� + WFQ 配額管理 + CCI 環境整合 + OTel OTLP Token 追蹤）+ Gemini CLI + Antigravity IDE + Rovo Dev CLI
+**最後更新**: 2026-05-01（v2.1.0：新增 9 篇深度補全 — Skills/Rules/IDD/Hooks/Memory/MCP/BMAD Workflows/Commands + SANITIZATION-POLICY）
+**適用範圍**: BMAD Method v6.0.0-alpha.21（已升級 v6.2.2 概念）+ Claude Code CLI（含 ECC Hook 強化 + WFQ 配額管理 + CCI 環境整合 + OTel OTLP Token 追蹤）+ Gemini CLI + Antigravity IDE + Rovo Dev CLI
 
 ---
 
@@ -112,13 +112,24 @@ docs/專案部屬必讀/
 ├── multi-agent-parallel-execution-strategy.md ← 多 Agent 並行策略（Worktree + File Lock + Total Commit + Debt Registry §10）
 │
 ├── Claude智能中控自動化排程/              ← Pipeline 中控調度 + Token 安全閥
-│   ├── pipeline-audit-token-safety.md     ← ���整需求分析 + 根因分析 + Bug 修正紀錄
+│   ├── pipeline-audit-token-safety.md     ← 完整需求分析 + 根因分析 + Bug 修正紀錄
 │   └── pipeline-audit-token-safety.track.md ← 實作追蹤檔
 │
 ├── Agent-User/Claude-Docs/               ← Claude API/用量文檔（中文翻譯）
 │   └── 用量與成本API.md                   ← Anthropic Usage & Cost API（Admin API, 組織帳戶用）
 │
 ├── context-memory-db-strategy.md          ← Context Memory DB 策略全文（TD-32~36）
+│
+│  ─────── 2026-05-01 新增 9 篇深度補全（v2.1.0）───────
+├── SANITIZATION-POLICY.md                 ← 脫敏政策 SSoT（7 類映射 + 7 條 grep 終審）
+├── skills-deep-dive.md                    ← 74 Skills 全景 + 17 Domain Profile + 三引擎 + 三層 Sync Gates
+├── rules-deep-dive.md                     ← 20 Rules 完整索引 + 5 SUPREME Mandate + 9 Lifecycle Invariants + 3-Tier Boundary
+├── idd-framework.md                       ← IDD 4 層標註（Code/ADR/DB/Memory）+ COM/STR/REG/USR + forbidden_changes
+├── hooks-events-deep-dive.md              ← 14 Hooks + 11 層 RAG 注入 + 10 Hook event 矩陣 + Block vs Advisory
+├── memory-system-deep-dive.md             ← Context Memory DB 30+ tables schema + 23 MCP tools + 82 scripts + DevConsole + agent-memory
+├── mcp-ecosystem.md                       ← pcpt-context + chrome-devtools + claude-in-chrome + Google MCP + 內部 RAG 優先 6 步
+├── bmad-workflows-evolution.md            ← create-story 8 step + 7 Depth Gates / dev-story 13 step / code-review 13 step + 三層平行 + SaaS 9 維 + Phase A-D
+├── commands-reference.md                  ← 13 專案 + 3 全域 commands + 10 subagents + 25+ Skill 偽 commands
 │
 ├── agent-cli-guides/                      ← 四引擎入門指南
 │   ├── README.md                          ← 索引 + 功能比較表 + 新引擎接入 SOP
@@ -224,7 +235,7 @@ docs/專案部屬必讀/
 > Claude CLI 透過 `OTEL_LOGS_EXPORTER=otlp` + `OTEL_EXPORTER_OTLP_ENDPOINT` 將 per-request token 數據
 > 發送至 collector → 寫入 JSONL 檔案 → Pipeline watchdog 即時讀取累加 → 寫入 `workflow_executions` 表。
 > 完全繞過 stdout（解決 Bug #17 isatty 衝突），Dashboard 可顯示真實 Token 消耗 + Cost。
-> Skill: `.claude/skills/phycool-otel-micro-collector/`
+> Skill: `.claude/skills/pcpt-otel-micro-collector/`
 
 ---
 
@@ -234,7 +245,7 @@ docs/專案部屬必讀/
 
 > 首次部署前，建議先閱讀 **`BMAD架構演進與優化策略.md`**，了解：
 > - BMAD v6.2.2 最新架構（Skills-based + Markdown step 分檔）
-> - PhyCool 自訂系統已超越 BMAD 2.1 倍（Workflow 2,202 行 vs source 885 行）
+> - PCPT 自訂系統已超越 BMAD 2.1 倍（Workflow 2,202 行 vs source 885 行）
 > - Token 靜態消耗基準數據（v3.0 ~19,090 tokens — 含 63 Skills + 15 Rules）
 > - Epic BU 升級成果（三層平行 Review + Skill Validator + Quick Dev oneshot + Edge Case Hunter）
 > - 新專案 vs 舊專案的遷移決策樹
@@ -273,7 +284,7 @@ Copy-Item -Path "docs\專案部屬必讀\bmad-overlay\4-implementation\*" `
 > - code-review: 三層平行（Blind Hunter + Edge Case Hunter + Acceptance Auditor）+ SaaS 9 維
 > - create-story: 8 step 分檔（含 DB-first + Skill 自動發現 + KB 掃描）
 > - dev-story: 13 step 分檔（含 Skill staleness + Migration Cascade + KB 錯誤查詢）
-> 覆蓋後同時安裝 PhyCool 自訂功能（Production Gates、Tech Debt Registry 等）。
+> 覆蓋後同時安裝 PCPT 自訂功能（Production Gates、Tech Debt Registry 等）。
 > 舊 instructions.xml 保留為 DEPRECATED 備份。
 
 ### Step 4: 部署配置檔案（依安裝狀態條件部署）
@@ -454,7 +465,7 @@ Set-Content ".mcp.json" -Value $mcp -Encoding UTF8
 | **需修改** | `config.yml.template` | 填入專案名稱 | Rovo Dev |
 | 一鍵部署 | `context-db/*` | `deploy-context-db.ps1` 自動部署至 `.context-db/` | 通用 |
 | 直接複製 | `MEMORY.md.template` | 複製到 auto-memory 目錄（精簡版） | Claude |
-| **不複製** | 專案特定 Skills (`phycool-*`) | 每個專案自行建立 | — |
+| **不複製** | 專案特定 Skills (`pcpt-*`) | 每個專案自行建立 | — |
 
 ---
 
@@ -706,6 +717,7 @@ cd tools/dev-console && npm run dev
 
 | 版本 | 日期 | 變更 |
 |------|------|------|
+| **2.1.0** | **2026-05-01** | **9 篇深度補全 + 數字校正 + 編碼修復**。新增 9 篇 deep-dive：SANITIZATION-POLICY（脫敏 SSoT 7 類映射）/ skills-deep-dive（74 Skills + 17 Domain + 三層 Sync Gates）/ rules-deep-dive（20 Rules + 5 SUPREME Mandate + 9 Lifecycle Invariants）/ idd-framework（4 層標註 + COM/STR/REG/USR + forbidden_changes）/ hooks-events-deep-dive（14 Hooks + 11 層 RAG + 10 Hook event）/ memory-system-deep-dive（30+ tables schema + 23 MCP tools + 82 scripts + DevConsole + agent-memory + ledger.jsonl）/ mcp-ecosystem（pcpt-context + chrome-devtools + claude-in-chrome + Google MCP + 內部 RAG 6 步）/ bmad-workflows-evolution（create 8 step + 7 Depth Gates / dev 13 step / review 13 step + 三層平行 + SaaS 9 維 + Phase A-D）/ commands-reference（13 + 3 + 10 subagents + 25+ Skill 偽 commands）。修復既有亂碼 4 處（最後更新 / 概念）/ 強化 / 完整需求分析）。Resolution: Plan v3.5 Party Mode 17 BMAD agents 整合 |
 | 2.0.0 | 2026-04-04 | **Epic WFQ: Pipeline 配額管理系統**。新增 Pipeline Heartbeat (L5) + 429/Model Purity 偵測 (L6) + Recovery Script/SOP + OTel Token 追蹤 + Quota Prediction (GO/WARN/BLOCK) + Phase Timeout 分級 + ModelPricing 配置 + Model Purity Rule（禁止 Opus→Sonnet 降級）。-p 模式 Truth Table（v2.1.92 實測）。DB Schema 擴展 workflow_executions +4 欄位 + log_workflow MCP +4 參數。BMAD Workflow 定義補強（4 GAP 修復）+ Phase Target Map 集中化。6 Stories, avg CR 93.5, 落地驗證 34/34 通過 |
 | 1.9.0 | 2026-04-03 | Epic BU (BMAD v6.2.2 升級 6/6) + Epic ECC (Hook 基礎設施強化 5/5) |
 | 1.7.1 | 2026-03-08 | 新增 DevConsole Web UI 使用說明章節；記錄 5 項 Bug 修復（CRLF/Epic ID/路徑/Schema/預設模式）+ i18n 國際化 + SDD Spec 徽章 |

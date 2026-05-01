@@ -38,6 +38,16 @@ You are an independent quality validator in a fresh context. Systematically revi
 - [ ] **BR Completeness**: Spec 的 Business Rules 覆蓋所有 AC 需求
 - [ ] **Spec Reference in Story**: Story Dev Notes 檔案參考表包含 Spec 路徑與相關章節
 
+## Step 2.7: Story Output Quality Gate (5 Dimensions)
+
+> These 5 checks enforce consistent story depth regardless of story type or agent.
+
+- [ ] **Q1 Background Code Evidence**: Background section contains at least 1 code snippet with `file:line` reference from actual codebase (not paraphrased). Exception: purely new feature with no existing code — must state "全新功能" explicitly with closest pattern reference.
+- [ ] **Q2 AC Concrete Examples**: Every AC contains at least one concrete example (code snippet, JSON output, DOM value, or command output). No vague language like "正確顯示", "合理處理".
+- [ ] **Q3 Dev Notes Line Numbers**: All source file references in Dev Notes use `FileName.ext:L123-145` format. All spec references use `path §X.X` format.
+- [ ] **Q4 Definition of Done**: `## Definition of Done` section exists with `- [ ]` checkbox items (minimum 5 items, story-specific).
+- [ ] **Q5 Implementation Approach**: `## Implementation Approach` section exists with `### Phase N:` structure (minimum 2 phases, each mapping to Tasks with Verification).
+
 ## Step 3: Gap Analysis
 
 Check whether the story omits critical information in these five categories:

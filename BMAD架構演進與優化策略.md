@@ -13,7 +13,7 @@
 本文件記錄以下分析結果，供**新專案初始化**或**舊專案升級評估**時參考：
 
 1. 當前 BMAD 架構的 Token 靜態消耗量化數據
-2. BMAD v6.2.2 最新架構與 PhyCool 自訂系統的差異
+2. BMAD v6.2.2 最新架構與 PCPT 自訂系統的差異
 3. everything-claude-code (ECC) v1.9.0 功能覆蓋分析
 4. Epic BU 升級成果（2026-04-03）
 5. 遷移策略決策框架
@@ -23,7 +23,7 @@
 
 ## 1. Token 靜態消耗量化基準
 
-### 1.1 Always-Loaded 靜態消耗（PhyCool 專案實測）
+### 1.1 Always-Loaded 靜態消耗（PCPT 專案實測）
 
 > 計算規則：CJK 字元 ÷ 1.5 = tokens、英文字元 ÷ 4 = tokens
 
@@ -50,7 +50,7 @@
 |------|-------:|------|
 | Claude Code 預設 | ~18,000 | 無任何框架，純 System Prompt + 工具定義 |
 | ECC 優化後 | ~10,000 | everything-claude-code 瘦身版 |
-| **PhyCool 專案（TRS 後）** | **~2,607** | 經 35 個 TRS Story 優化 |
+| **PCPT 專案（TRS 後）** | **~2,607** | 經 35 個 TRS Story 優化 |
 | 理論最低 | ~1,500 | 僅保留 CLAUDE.md + 1 條 Rule |
 
 **結論（v1.1.0 時）**：2,607 tokens 佔 200K context window 的 **1.3%**，已無進一步壓縮的必要。
@@ -63,7 +63,7 @@
 
 ### 2.1 版本識別
 
-| 維度 | 舊版（PhyCool 使用中） | 最新版 v6.0.3 |
+| 維度 | 舊版（PCPT 使用中） | 最新版 v6.0.3 |
 |------|----------------------|--------------|
 | 安裝方式 | `npx bmad-method@alpha install` (alpha) | `npx bmad-method install` (stable) |
 | 安裝時間 | 2026-01-01 | 2026-02-23 release |
@@ -92,7 +92,7 @@
 | `code-review/instructions.xml` | 483 行 / 26KB | 226 行 / 10KB | **最新小 53%** |
 | `create-story/instructions.xml` | 449 行 / 25KB | 346 行 / 19KB | 最新小 23% |
 
-> **重要**：舊版的 code-review 比最新版大 2.1 倍，原因是包含 PhyCool 專案客製化規則（Zustand/useState 驗證、CR 延後項目路由等）。這些客製化必須在遷移時保留。
+> **重要**：舊版的 code-review 比最新版大 2.1 倍，原因是包含 PCPT 專案客製化規則（Zustand/useState 驗證、CR 延後項目路由等）。這些客製化必須在遷移時保留。
 
 ### 2.4 最新版新增的 Agent 角色（Party Mode 專用）
 
@@ -116,7 +116,7 @@
 | `bmad-os-release-module` | NPM 發版管理 |
 | `bmad-os-review-pr` | 對抗式 PR 審查 |
 
-> 注意：這些是 BMAD 開源專案自身的運維 Skills，**不是**使用者專案的業務 Skills。使用者專案的 Skills（如 `phycool-*`）由團隊自行建立。
+> 注意：這些是 BMAD 開源專案自身的運維 Skills，**不是**使用者專案的業務 Skills。使用者專案的 Skills（如 `pcpt-*`）由團隊自行建立。
 
 ---
 
@@ -127,7 +127,7 @@
 | ECC 功能 | 我們的對應實作 | 覆蓋率 |
 |----------|--------------|--------|
 | TDD 工作流 | `/tdd` command + `tdd-workflow` Skill + `rules/testing.md` | 90% |
-| Code Review | `/code-review` BMAD Workflow（含 PhyCool 客製化） | 100%+ |
+| Code Review | `/code-review` BMAD Workflow（含 PCPT 客製化） | 100%+ |
 | Security Review | `/security-review` Skill + `rules/security.md` | 70% |
 | Build Error Fix | `/build-fix` command + `build-error-resolver` agent | 80% |
 | Plan Mode | `/plan` command + `planner` agent | 85% |
@@ -204,7 +204,7 @@ Hook 檔案位置：`.claude/hooks/`（pre-commit-quality, config-protection, su
 └─ 否（舊專案）→ 評估遷移必要性
     │
     ├─ 目前 Token 消耗是否造成問題？
-    │   └─ 否（如 PhyCool: 2,607 tokens）→ 不遷移，維持現狀
+    │   └─ 否（如 PCPT: 2,607 tokens）→ 不遷移，維持現狀
     │
     ├─ BMAD 官方是否提供 in-place migration 工具？
     │   ├─ 是 → 評估自動遷移風險後決定
@@ -212,10 +212,10 @@ Hook 檔案位置：`.claude/hooks/`（pre-commit-quality, config-protection, su
     │
     └─ 是否有大量未客製化的 Workflow？
         ├─ 是 → 可考慮選擇性更新（cherry-pick）
-        └─ 否（如 PhyCool: code-review 高度客製化）→ 不遷移
+        └─ 否（如 PCPT: code-review 高度客製化）→ 不遷移
 ```
 
-### 4.2 PhyCool 專案決策
+### 4.2 PCPT 專案決策
 
 **決策 v1.1.0（2026-02-27）**：維持舊版架構，不遷移至 v6.0.3。
 **決策 v2.0.0（2026-04-03）**：已完成 Epic BU 概念升級，保留安裝基底但遷移 Workflow 格式。
@@ -240,7 +240,7 @@ npx bmad-method install
 # Step 2: 複製本範本包
 Copy-Item -Path "原始專案\docs\專案部屬必讀" -Destination "新專案\docs\專案部屬必讀" -Recurse
 
-# Step 3: 套用 Epic BU overlay（Markdown step 分檔 + PhyCool 自訂功能）
+# Step 3: 套用 Epic BU overlay（Markdown step 分檔 + PCPT 自訂功能）
 # overlay 已使用 v6.2.2 相容的 workflow.md + steps/ 格式
 Copy-Item -Path "docs\專案部屬必讀\bmad-overlay\4-implementation\*" `
           -Destination "_bmad\bmm\workflows\4-implementation\" -Recurse -Force
@@ -249,7 +249,7 @@ Copy-Item -Path "docs\專案部屬必讀\bmad-overlay\4-implementation\*" `
 ```
 
 > **v2.0.0 變更**：overlay 已從 XML instructions.xml 格式升級為 Markdown workflow.md + steps/ 格式。
-> 包含 PhyCool 自訂：DB-first、三層平行 Review、SaaS Production Gates、Skill 整合、KB 查詢等。
+> 包含 PCPT 自訂：DB-first、三層平行 Review、SaaS Production Gates、Skill 整合、KB 查詢等。
 > 舊 instructions.xml 保留為 DEPRECATED 備份，可在遷移完成確認後刪除。
 
 ---
@@ -316,7 +316,7 @@ _bmad/
 
 | Overlay 檔案 | 與 v6.0.3 相容性 | 處理方式 |
 |-------------|-----------------|---------|
-| `code-review/instructions.xml` | 🟡 需 diff | 最新原廠 226 行 vs overlay 471 行；overlay 含 PhyCool 客製化規則，通用專案可能不需要 |
+| `code-review/instructions.xml` | 🟡 需 diff | 最新原廠 226 行 vs overlay 471 行；overlay 含 PCPT 客製化規則，通用專案可能不需要 |
 | `code-review/checklist.md` | 🟡 需 diff | 確認最新版是否已內含壓縮後的項目 |
 | `create-story/instructions.xml` | 🟡 需 diff | 最新原廠 346 行 vs overlay 449 行；overlay 含 Skills 自動化邏輯 |
 | `create-story/checklist.md` | 🟢 可用 | 通用壓縮版，不含專案特定邏輯 |
@@ -326,16 +326,16 @@ _bmad/
 ### 5.4 新專案的 Overlay 策略建議
 
 ```
-通用策略（非 PhyCool 專案）：
+通用策略（非 PCPT 專案）：
 1. 安裝最新 BMAD v6.0.3
 2. 先不套用 overlay，直接使用最新原廠版
 3. 僅複製 config-templates/ 和 scripts/
 4. 開發過程中若發現 Workflow 需要客製化，再建立專案專屬 overlay
 
-PhyCool 衍生專案：
+PCPT 衍生專案：
 1. 安裝最新 BMAD v6.0.3
 2. diff overlay vs 最新原廠版
-3. PhyCool 特有規則僅 44 行（17%），直接保留在 instructions.xml 即可（見 §7.3）
+3. PCPT 特有規則僅 44 行（17%），直接保留在 instructions.xml 即可（見 §7.3）
 4. 套用壓縮版 checklist（通用部分）
 ```
 
@@ -367,14 +367,14 @@ PhyCool 衍生專案：
 
 ## 7. Code-Review Workflow 客製化深度分析
 
-> 來源：Party Mode 架構討論 2026-02-27，逐行比對 upstream vs PhyCool 版本。
+> 來源：Party Mode 架構討論 2026-02-27，逐行比對 upstream vs PCPT 版本。
 
 ### 7.1 差異量化
 
 | 版本 | Steps | 行數 | 大小 |
 |------|-------|------|------|
 | 最新 v6.0.3 upstream | 5 | 226 | 10KB |
-| PhyCool 版本 | 6 | 483 | 26KB |
+| PCPT 版本 | 6 | 483 | 26KB |
 | **差異** | +1 Step | **+257 行** | +16KB |
 
 ### 7.2 超出 upstream 的 257 行分類
@@ -382,26 +382,26 @@ PhyCool 衍生專案：
 | 客製化區塊 | 行數 | 分類 | 說明 |
 |-----------|------|------|------|
 | SaaS Production Standards（嚴重度分級 + 審查維度 + Production Gates） | ~30 | 通用增強 | 任何 SaaS 專案都適用 |
-| Required Skills 動態載入機制 | ~20 | PhyCool 特有 | 讀取 Story 的 `## Required Skills` 並載入 Skill 的 FORBIDDEN 規則 |
+| Required Skills 動態載入機制 | ~20 | PCPT 特有 | 讀取 Story 的 `## Required Skills` 並載入 Skill 的 FORBIDDEN 規則 |
 | Tech Debt 累積統計（從 sprint-status 讀取） | ~10 | 通用增強 | 技術債預警機制 |
 | 強制完整讀取協議（禁止 Grep 推斷） | ~8 | 通用增強 | 品質保證 |
 | SaaS 六維度深度審查（Security/Scalability/Observability/DataConsistency/ErrorHandling/TestCoverage） | ~15 | 通用增強 | 企業級審查標準 |
-| Skill FORBIDDEN 規則檢查 | ~8 | PhyCool 特有 | 檢查 Base64/Zustand/BackOffice namespace 等 |
+| Skill FORBIDDEN 規則檢查 | ~8 | PCPT 特有 | 檢查 Base64/Zustand/BackOffice namespace 等 |
 | 自動修復流程（CRITICAL → HIGH → MEDIUM → LOW） | ~40 | 通用增強 | upstream 是詢問使用者，我們改為自動修復 |
-| 架構 Bug 強制修復（useState/Zustand 重複檢測） | ~16 | PhyCool 特有 | CLAUDE.md §1 的架構規則 |
+| 架構 Bug 強制修復（useState/Zustand 重複檢測） | ~16 | PCPT 特有 | CLAUDE.md §1 的架構規則 |
 | 技術債側車文件寫入（Sidecar Architecture, .debt.md） | ~70 | 通用增強 | 延後項目根因分析 + 路由 + 側車文件 |
 | Production Gate 驗證（Zero Critical / High Resolved / Debt Limit / SaaS Score） | ~30 | 通用增強 | 品質閘門 |
-| Review Agent 追蹤欄位填寫 | ~6 | PhyCool 特有 | 多引擎追蹤 |
+| Review Agent 追蹤欄位填寫 | ~6 | PCPT 特有 | 多引擎追蹤 |
 | 審查報告生成 + 追蹤歸檔（Step 6 全新） | ~70 | 通用增強 | CR report + tracking archive |
 
-### 7.3 結論：「抽離 PhyCool 規則到 Skill」的 ROI 不足
+### 7.3 結論：「抽離 PCPT 規則到 Skill」的 ROI 不足
 
 | 分類 | 行數 | 佔比 |
 |------|------|------|
 | **通用增強**（任何專案都適用的品質提升） | ~213 行 | 83% |
-| **PhyCool 特有**（僅此專案需要的規則） | ~44 行 | 17% |
+| **PCPT 特有**（僅此專案需要的規則） | ~44 行 | 17% |
 
-PhyCool 特有的 44 行中，大部分已透過 Skills 機制間接處理：
+PCPT 特有的 44 行中，大部分已透過 Skills 機制間接處理：
 - Required Skills 載入 = 載入 **機制**，規則本身在各 Skill 的 SKILL.md 中
 - Skill FORBIDDEN 檢查 = 讀取 Skill 清單，不是硬編碼
 - useState/Zustand 檢查 = 已寫在 CLAUDE.md §1 觸發規則中
@@ -415,14 +415,14 @@ PhyCool 特有的 44 行中，大部分已透過 Skills 機制間接處理：
 場景 A：通用新專案
   1. 使用最新 v6.0.3 原廠版（226 行）
   2. 逐步添加需要的通用增強（SaaS Standards、Production Gates 等）
-  3. 不需要 PhyCool 特有的 44 行
+  3. 不需要 PCPT 特有的 44 行
 
-場景 B：PhyCool 衍生專案
+場景 B：PCPT 衍生專案
   1. 直接套用 bmad-overlay/ 中的完整版（483 行）
   2. diff 確認與最新原廠版的相容性
-  3. 修改 PhyCool 特有規則為新專案的規則
+  3. 修改 PCPT 特有規則為新專案的規則
 
-場景 C：想要通用增強但不要 PhyCool 規則
+場景 C：想要通用增強但不要 PCPT 規則
   1. 基於 bmad-overlay/ 版本
   2. 刪除 Required Skills 載入（20 行）、Skill FORBIDDEN 檢查（8 行）、
      useState/Zustand 架構 Bug 檢查（16 行）
@@ -508,10 +508,10 @@ Write-Host "  - Architecture decisions made"
 
 ### 9.1 短期（維持現狀）
 
-- PhyCool 專案：不遷移，繼續使用舊版架構 + TRS 優化
+- PCPT 專案：不遷移，繼續使用舊版架構 + TRS 優化
 - 新專案：直接 `npx bmad-method install` 使用最新版
 - overlay 套用前先 diff 確認相容性
-- code-review 的客製化**不抽離**（PhyCool 特有部分僅 44 行）
+- code-review 的客製化**不抽離**（PCPT 特有部分僅 44 行）
 
 ### 9.2 中期（觀察 BMAD 官方動態）
 
@@ -534,8 +534,8 @@ Write-Host "  - Architecture decisions made"
 | 報告 | 路徑 |
 |------|------|
 | BMAD-METHOD 與 ECC 完整比較 | `claude token減量策略研究分析/BMAD-METHOD 與 everything-claude-code 比較.md` |
-| Token 減量策略深度分析 | `claude token減量策略研究分析/PHYCOOL_Claude_Code_Token_減量策略_深度分析報告.md` |
-| Token 減量最終彙整 | `claude token減量策略研究分析/PhyCool_Claude_Code_Token減量策略_最終彙整報告.md` |
+| Token 減量策略深度分析 | `claude token減量策略研究分析/PCPT_Claude_Code_Token_減量策略_深度分析報告.md` |
+| Token 減量最終彙整 | `claude token減量策略研究分析/PCPT_Claude_Code_Token減量策略_最終彙整報告.md` |
 | 多 Agent 協作策略 | `claude token減量策略研究分析/web_claude多agnet協作策略.md` |
 | 最新 BMAD v6.0.3 原始碼 | `claude token減量策略研究分析/BMAD-METHOD-main/` |
 
@@ -543,7 +543,7 @@ Write-Host "  - Architecture decisions made"
 
 | 元件 | 版本 | 備註 |
 |------|------|------|
-| BMAD Method（PhyCool 安裝版） | v6.0.0-alpha.21 | 2026-01-01 安裝 |
+| BMAD Method（PCPT 安裝版） | v6.0.0-alpha.21 | 2026-01-01 安裝 |
 | BMAD Method（最新 stable） | v6.0.3 | 2026-02-23 release |
 | Claude Code CLI | Opus 4.6 / Sonnet 4.6 / Haiku 4.5 | 主線開發引擎 |
 | 部署手冊 | v3.0.0 | 本文件為補充附件 |

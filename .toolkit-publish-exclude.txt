@@ -1,0 +1,117 @@
+# Toolkit GitHub 推送黑名單(v1.8.0)
+# 推送至 github.com/Cynthia1070711/claude-agent-toolkit 時 ❌ 不應包含的目錄/檔案
+# 規則:過時研究資料、理論報告、story 紀錄、整合優化過程產出資料 全部排除
+
+# === 過時 / 已棄用範本格式 ===
+bmad-overlay/4-implementation/code-review/instructions.xml      # XML 已棄用,改用 workflow.md
+bmad-overlay/4-implementation/create-story/instructions.xml     # 同上
+bmad-overlay/4-implementation/dev-story/instructions.xml        # 同上
+
+# === 外部 reference repos(均為上游已存的 clone)===
+1.專案部屬必讀/everything-claude-code-main/                     # Anthropic 課程 fork(直接連 upstream)
+1.專案部屬必讀/BMAD-METHOD-main/                                # BMAD 上游 source(直接連 upstream)
+1.專案部屬必讀/context-hub-main/                                # 外部 ref
+1.專案部屬必讀/claude-mem-main/                                 # 外部 ref
+1.專案部屬必讀/agent-skills-main/                               # 外部 ref
+1.專案部屬必讀/awesome-claude-skills-main/                      # 外部 ref
+1.專案部屬必讀/awesome-design-md-main/                          # 外部 ref
+
+# === root level 過時研究資料 / 理論報告 ===
+專案優化項目計畫.md                                              # F1-F5/G1-G3/H1-H4 內部規劃
+Claude_Code_Token_減量策略_最終彙整報告_v2.0.md                  # 歷史報告(2026-03-12)
+PhyCool_Claude_Code_Token減量策略_最終彙整報告.md                # 歷史報告(2026-02-25)
+PHYCOOL_Claude_Code_Token_減量策略_深度分析報告.md               # 歷史深度分析(2026-02-24)
+context-token-reduction-strategy.md                              # 內部憲法級基礎文件
+hermes導入.md                                                   # Hermes 5 概念移植觀察(2026-04-16)
+BMAD-METHOD 與 everything-claude-code 比較.md                   # 內部比較研究
+multi-engine-collaboration-strategy.md                           # 內部策略草稿(已整合進 README)
+web_claude多agnet協作策略.md                                    # 同上
+claude-code-config-guide.md                                      # 2026-04-14 BusinessNext 轉載(版權考量)
+saas交接任務.md                                                 # 內部交接任務(無公開價值)
+任務.md                                                         # 內部任務問卷
+auto-pilot-multi-agent-research.md.resolved                      # 已解決研究
+ChatGPT_智能專案開發升級建議方案.md                              # 內部 ChatGPT 諮詢結果
+
+# === 內部開發過程 / 整合優化資料 ===
+1.專案部屬必讀/Agent-User/                                      # 內部 API 翻譯 / 私人筆記
+1.專案部屬必讀/各AGENT使用說明/                                  # 私人筆記
+1.專案部屬必讀/ATDD-SDD-TDD-BDD/                                # 方法論研究脈絡
+1.專案部屬必讀/工作流/                                          # 歷史工作流研究
+1.專案部屬必讀/記憶庫策略/                                      # 內部記憶庫研究 + bat 啟動腳本
+1.專案部屬必讀/saas-to-skills/                                  # 整合過程
+1.專案部屬必讀/stories/                                         # 內部 stories 資料 / 範本
+1.專案部屬必讀/tools/                                           # 內部開發工具
+1.專案部屬必讀/Claude智能中控自動化排程/                         # 整合過程(僅 pipeline-audit-token-safety.md 已穩定可推)
+1.專案部屬必讀/config-templates/                                # ❗注意:本目錄需推送(已上 include 清單,但子目錄注意)
+1.專案部屬必讀/agent-cli-guides/                                # ❗注意:本目錄需推送(已上 include 清單)
+1.專案部屬必讀/bmad-overlay/                                    # ❗注意:本目錄需推送(已上 include 清單,但 instructions.xml 排除)
+1.專案部屬必讀/scripts/                                         # ❗注意:本目錄部分推送
+
+# === Track / 過程紀錄 ===
+**/*.track.md                                                    # 所有 .track.md 開發追蹤記錄
+**/*-research.md                                                 # 所有 research 後綴
+**/*-analysis.md                                                 # 所有 analysis 後綴(歷史分析)
+**/*-discussion.md                                               # 所有 discussion 後綴(內部討論)
+**/_archive/                                                     # 所有 _archive 目錄
+**/*.bak                                                        # 所有備份檔
+**/*.old                                                        | 所有舊版
+
+# === Claude 智能中控相關過程資料 ===
+1.專案部屬必讀/Claude智能中控自動化排程/pipeline-audit-token-safety.track.md   # 實作追蹤檔(過程資料)
+# 但 pipeline-audit-token-safety.md 本體已穩定,在 include 清單內
+
+# === 本工具包專屬內部資料 ===
+github-toolkit-readme-update/                                    # toolkit 草稿目錄(推送時 README.md + README.zh-TW.md 取代 GitHub repo 根 README,目錄本身不推)
+.toolkit-publish-include.txt                                     # 本檔(僅內部 reference)
+.toolkit-publish-exclude.txt                                     # 本檔(僅內部 reference)
+
+# === 環境變數 / 機密 ===
+**/.env
+**/.env.*
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/credentials*
+**/secrets*
+**/.credentials.json
+
+# === 編譯產物 / 暫存 ===
+**/node_modules/
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/dist/
+**/build/
+
+# === 大型 cache(若不慎被 toolkit 引用) ===
+**/cache/
+**/file-history/
+**/shell-snapshots/
+**/telemetry/
+
+# === SQLite DB 檔案(各專案獨立累積) ===
+**/*.db
+**/*.sqlite
+**/*.sqlite-shm
+**/*.sqlite-wal
+**/ledger.jsonl
+
+# === Git ===
+.git/
+.gitignore           # toolkit 應有自己的 .gitignore,從 phycool 專案不複製
+
+---
+
+# 推送 SOP 範例(供使用者手動執行)
+#
+# 1. 在 toolkit GitHub repo 內 git checkout -b release/v1.8.0
+# 2. 從 phycool 專案複製白名單檔案至 toolkit repo:
+#    - 1.專案部屬必讀/* (依 include 清單)
+#    - github-toolkit-readme-update/README.md → toolkit-root/README.md
+#    - github-toolkit-readme-update/README.zh-TW.md → toolkit-root/README.zh-TW.md
+#    - .claude/rules/deployment-doc-freshness.md → toolkit/.../rules/
+#    - scripts/verify-deployment-docs.cjs → toolkit/scripts/
+# 3. 確認 .toolkit-publish-exclude.txt 內項目均不在 staged
+# 4. git add . && git commit -m "release: v1.8.0 — 215 templates added, 100% sanitized"
+# 5. git tag v1.8.0 + git push origin release/v1.8.0 + 開 PR / merge to master
+# 6. GitHub Release notes 引用 RELEASE-NOTES_v1.8.0.md

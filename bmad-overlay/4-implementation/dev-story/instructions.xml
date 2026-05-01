@@ -1,3 +1,4 @@
+<!-- DEPRECATED: 已遷移至 workflow.md + steps/ 目錄。本檔案保留作為備份參考。 -->
 <workflow>
   <critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
   <critical>You MUST have already loaded and processed: {installed_path}/workflow.yaml</critical>
@@ -11,6 +12,35 @@
     other instruction.</critical>
   <critical>Do NOT schedule a "next session" or request review pauses unless a HALT condition applies. Only Step 6 decides completion.</critical>
   <critical>User skill level ({user_skill_level}) affects conversation style ONLY, not code updates.</critical>
+
+  <!-- ═══ STEP 0: DB-FIRST — Query Context Memory DB before reading .md files ═══ -->
+  <step n="0" goal="Query Context Memory DB for story context (DB-first principle)">
+    <critical>🗄️ DB-FIRST PRINCIPLE: Context Memory DB is the SINGLE SOURCE OF TRUTH.
+      Query DB BEFORE reading .md files. If system prompt already contains DB-injected context, use it directly.</critical>
+
+    <action>Check if system prompt already contains [MEMORY DB STORY CONTEXT] block (pipeline mode)</action>
+    <check if="system prompt has DB-injected story context">
+      <action>Use injected context as primary source — skip .md file search in Step 1</action>
+      <action>Set {{db_context_available}} = true</action>
+    </check>
+    <check if="system prompt does NOT have DB-injected context (manual mode)">
+      <action>Query story from DB via MCP tool:
+        Tool: mcp__pcpt-context__search_stories
+        Parameters: { story_id: "{{story_key}}", include_details: true }
+      </action>
+      <action>If DB has enriched data (AC, tasks, dev_notes non-empty) → use as primary source</action>
+      <action>Set {{db_context_available}} = true if DB has data, false otherwise</action>
+    </check>
+
+    <action>Query related decisions and patterns:
+      Tool: mcp__pcpt-context__search_context
+      Parameters: { query: "{{story_key}}", filters: { include_content: true, limit: 3 } }
+    </action>
+    <action>Query tech knowledge for this domain:
+      Tool: mcp__pcpt-context__search_tech
+      Parameters: { query: "domain keywords", limit: 3 }
+    </action>
+  </step>
 
   <step n="1" goal="Find next ready story and load it" tag="sprint-status">
     <check if="{{story_path}} is provided">
@@ -101,7 +131,7 @@
       <action>Store as {{story_required_skills}} list</action>
       <action>For EACH skill in {{story_required_skills}}:
         - Invoke the Skill tool to load the skill
-        - Example: /phycool-editor-arch, /phycool-zustand-patterns
+        - Example: /pcpt-editor-arch, /pcpt-zustand-patterns
       </action>
       <output>📚 **Required Skills Loaded:**
         {{#each story_required_skills}}
@@ -112,6 +142,61 @@
     <check if="Required Skills section does NOT exist">
       <output>ℹ️ No Required Skills section found in story - proceeding without skill loading</output>
       <action>Consider referencing {project-root}/.claude/skills/skills_list.md for relevant skills</action>
+    </check>
+
+    <!-- ═══ SKILL STALENESS DETECTION — BR-03, BR-06 (fix-50) ═══ -->
+    <critical>🔍 SKILL STALENESS CHECK: Compare file_list against loaded Skills' watches patterns</critical>
+    <check if="{{story_required_skills}} is not empty AND story has file_list">
+      <action>Extract {{file_list}} from story (files changed/added in this story's implementation scope)</action>
+      <action>Set {{staleness_hits}} = empty list</action>
+      <action>Set {{domain_fallback_candidates}} = empty list</action>
+      <action>Extract {{story_domain}} from story metadata (e.g., auth, editor, payment, admin, etc.)</action>
+      <action>For EACH skill in {{story_required_skills}}:
+        1. Read the skill's SKILL.md frontmatter to extract the `watches` field (YAML list of {glob, domain?})
+        2. If `watches` field is absent or empty → skip this skill (no error, per BR-01)
+        3. Set {{skill_glob_matched}} = false
+        4. For EACH entry in watches:
+           a. Extract entry.glob (required) and entry.domain (optional)
+           b. For EACH file in {{file_list}}:
+              - Test if file path matches entry.glob pattern (treat as minimatch-style glob)
+              - If match found:
+                * Append to {{staleness_hits}}: {skill: skill_name, file: file_path, glob: entry.glob}
+                * Set {{skill_glob_matched}} = true
+           c. If entry.domain is set AND entry.domain == {{story_domain}}:
+              - Add to {{domain_fallback_candidates}}: {skill: skill_name, domain: entry.domain}
+        5. If {{skill_glob_matched}} is false AND skill appears in {{domain_fallback_candidates}}:
+           - This is a domain-only match → record as fallback (severity=INFO, NOT a tech_debt_items entry)
+      </action>
+      <check if="{{staleness_hits}} is not empty">
+        <action>For EACH unique skill in {{staleness_hits}}:
+          - Collect all matched files for that skill
+          - Append to tracking file:
+            `skill-staleness({{skill_name}}): {{matched_files joined by ", "}}`
+        </action>
+        <output>⚠️ **Skill Staleness Detected:**
+          {{#each staleness_hits grouped by skill}}
+          - skill-staleness({{skill}}): {{files}}
+          {{/each}}
+          These will be validated by code-review and written to tech_debt_items (type=SKILL_STALE).
+        </output>
+      </check>
+      <check if="{{domain_fallback_candidates}} has entries with no glob match (fallback only)">
+        <action>For EACH fallback-only skill:
+          - Append to tracking file:
+            `skill-staleness-fallback({{skill_name}}): domain match only, severity=INFO`
+        </action>
+        <output>ℹ️ **Skill Domain Fallback (INFO only, no tech_debt_items):**
+          {{#each fallback_only}}
+          - skill-staleness-fallback({{skill}}): domain={{domain}}, severity=INFO
+          {{/each}}
+        </output>
+      </check>
+      <check if="{{staleness_hits}} is empty AND {{domain_fallback_candidates}} is empty">
+        <output>✅ No skill staleness detected — all watches patterns checked, no matches found</output>
+      </check>
+    </check>
+    <check if="{{story_required_skills}} is empty OR story has no file_list">
+      <output>ℹ️ Skill staleness check skipped — no Required Skills loaded or no file_list available</output>
     </check>
 
     <!-- ═══ DEBT REGISTRY PULL — Scan registry for debt targeting this story ═══ -->
@@ -162,18 +247,18 @@
 
     <!-- Skill → Domain mapping -->
     <action>Map {{story_required_skills}} to KB domains using this table:
-      /phycool-editor-arch      → frontend/, database/
-      /phycool-admin-module     → backend/
-      /phycool-sqlserver        → database/
-      /phycool-pdf-engine       → backend/
-      /phycool-zustand-patterns → frontend/
-      /phycool-testing-patterns → (all: frontend/ backend/ database/ devops/ workflow/)
-      /phycool-auth-identity    → backend/
-      /phycool-payment-subscription → backend/
-      /phycool-business-api     → backend/
-      /phycool-i18n-seo         → frontend/ backend/
-      /phycool-signalr-realtime → backend/
-      /phycool-background-services → backend/
+      /pcpt-editor-arch      → frontend/, database/
+      /pcpt-admin-module     → backend/
+      /pcpt-sqlserver        → database/
+      /pcpt-pdf-engine       → backend/
+      /pcpt-zustand-patterns → frontend/
+      /pcpt-testing-patterns → (all: frontend/ backend/ database/ devops/ workflow/)
+      /pcpt-auth-identity    → backend/
+      /pcpt-payment-subscription → backend/
+      /pcpt-business-api     → backend/
+      /pcpt-i18n-seo         → frontend/ backend/
+      /pcpt-signalr-realtime → backend/
+      /pcpt-background-services → backend/
       (default, no skills)      → (all domains)
     </action>
 
@@ -363,7 +448,7 @@
 
     <check if="new or modified Migration files detected">
       <action>Log to Dev Agent Record: "Migration files detected: {{migration_file_list}}"</action>
-      <action>Run: dotnet ef database update --project src/PhyCool.Platform/PhyCool.Web</action>
+      <action>Run: dotnet ef database update --project src/Platform/App.Web</action>
 
       <check if="dotnet ef database update succeeds">
         <action>Log to Dev Agent Record: "✅ Database migrations applied successfully: {{migration_names}}"</action>
@@ -380,10 +465,23 @@
         </action>
       </check>
 
-      <action>Verify schema consistency: dotnet ef migrations has-pending-model-changes --project src/PhyCool.Platform/PhyCool.Web</action>
+      <action>Verify schema consistency: dotnet ef migrations has-pending-model-changes --project src/Platform/App.Web</action>
       <check if="has-pending-model-changes reports changes remain">
         <action>Log warning: "⚠️ Model changes still pending after migration — may need additional migration"</action>
       </check>
+
+      <!-- FIX-P0-02: Migration Cascade Checklist (ADR-DB-001) -->
+      <output>📋 **Migration Cascade Checklist** (ADR-DB-001 — 每次 Migration 後必須逐項確認)
+
+        1. [ ] **UI 層** — 新欄位/移除欄位是否需要更新顯示邏輯？（View / Razor / React 組件）
+        2. [ ] **Service 層** — 業務邏輯是否需要更新過濾條件或查詢行為？
+        3. [ ] **Repository / Query** — 是否需要更新 Repository 查詢或加入 IgnoreQueryFilters()？
+        4. [ ] **測試資料 / Seeder** — TestAccountSeeder 或其他 Seeder 是否需要補充新欄位的種子資料？
+        5. [ ] **Global Query Filter** — 含 IsDeleted 的實體是否已在 OnModelCreating 配置 HasQueryFilter(e => !e.IsDeleted)？
+        6. [ ] **ModelSnapshot 一致性** — dotnet ef migrations has-pending-model-changes 回報 No 且 ModelSnapshot 已更新？
+
+        ⚠️ 未勾選項目須在本 Story 完成前處理或記錄為技術債。
+      </output>
     </check>
 
     <check if="no new Migration files detected">
@@ -548,8 +646,31 @@
     <action if="File List is incomplete">HALT - Update File List with all changed files</action>
     <action if="definition-of-done validation fails">HALT - Address DoD failures before completing</action>
 
+    <!-- ═══ STEP 9.3: BUG FIX VERIFICATION ═══ -->
+    <critical>MANDATORY BUG VERIFICATION — Must verify related Bug fix status before promoting to review</critical>
+    <action>Invoke the Skill tool: /bug-fix-verification {{story_key}}</action>
+    <critical>Verification criteria:
+      1. Query review_findings for Bugs related to this Story (fix_story_id or module_code)
+      2. Each Bug MUST be verified by Reading actual source code (FIXED/OPEN/NOT_APPLICABLE)
+      3. FIXED Bugs → update review_findings (fix_status=fixed + file:line evidence)
+      4. OPEN P0/P1 Bugs → HALT, cannot promote to review
+      5. Record results in tracking file
+    </critical>
+
     <!-- MANDATORY: Sync H1 heading emoji -->
     <critical>Invoke /story-status-emoji skill Mode A on this story file (status: review)</critical>
+
+    <!-- ═══ STEP 9.4: MANDATORY TASKS DB BACKFILL ═══ -->
+    <critical>🔴 MANDATORY DB BACKFILL — 完成所有實作和測試後，必須執行以下步驟</critical>
+    <action>Invoke the Skill tool: /tasks-backfill-verify {{story_key}}</action>
+    <critical>逐項驗證標準：
+      1. 每個 ✅ 必須有 Read 程式碼的 file:line 證據
+      2. 每個 ⬜ 必須附有未完成原因
+      3. 禁止 [x]/[ ] 格式（必須用 ✅/⬜）
+      4. tasks 是 Markdown 字串，非 JSON array
+      5. 不可因「已全部完成」就跳過逐項驗證
+    </critical>
+    <action>After /tasks-backfill-verify completes: confirm DB tasks field updated with ✅/⬜ markers</action>
 
     <!-- Update tracking file -->
     <action>Set {{tracking_active_path}} = "{output_folder}/tracking/active/{{story_key}}.track.md"</action>
@@ -593,7 +714,7 @@
         {{/each}}
 
         **處理建議**: 在本 Story 完成後，應同步更新上述文檔。
-        參閱 `/phycool-doc-sync` Skill 的文檔更新 Checklist。
+        參閱 `/pcpt-doc-sync` Skill 的文檔更新 Checklist。
         ```
       </action>
       <action>Update tracking file with drift summary:
@@ -613,6 +734,14 @@
   <step n="10" goal="Completion communication and user support">
     <action>Execute the enhanced definition-of-done checklist using the validation framework</action>
     <action>Prepare a concise summary in Dev Agent Record → Completion Notes</action>
+
+    <action>Log workflow execution to Context Memory DB:
+      Call mcp__pcpt-context__log_workflow with:
+        workflow_type: "dev-story"
+        story_id: current story key
+        agent_id: current Agent ID (CC-OPUS / CC-SONNET)
+        status: "completed"
+    </action>
 
     <action>Communicate to {user_name} that story implementation is complete and ready for review</action>
     <action>Summarize key accomplishments: story ID, story key, title, key changes made, tests added, files modified</action>

@@ -74,14 +74,14 @@ so that {{benefit}}.
 
 | 類型 | 路徑 | 章節 | 讀取指示 |
 |------|------|------|---------|
-| 規格 | `docs/project-planning-artifacts/functional-specs/PCPT-MVP/25.PhyCool-PCPT(MVP)_PhyCool管理系統_平台環境設定.md` | §5.1 | 僅讀此節 |
+| 規格 | `docs/project-planning-artifacts/functional-specs/PCPT-MVP/25.pcpt-PCPT(MVP)_PCPT管理系統_平台環境設定.md` | §5.1 | 僅讀此節 |
 | {{file_references}} |
 
 #### 路徑引用格式範例
 
 ```markdown
 <!-- ✅ 正確：完整相對路徑 + 章節號 + 僅讀此節 -->
-| 規格 | `docs/project-planning-artifacts/functional-specs/PCPT-MVP/3.PhyCool-PCPT(MVP)_PhyCool管理系統_公告功能.md` | §6 | 僅讀此節 |
+| 規格 | `docs/project-planning-artifacts/functional-specs/PCPT-MVP/3.pcpt-PCPT(MVP)_PCPT管理系統_公告功能.md` | §6 | 僅讀此節 |
 
 <!-- ❌ 錯誤：缺完整路徑，create-story 被迫讀取整份文件 -->
 | 規格 | 功能規格 #3 §6 | 維護模式規格 |
@@ -95,6 +95,37 @@ so that {{benefit}}.
 ### References
 
 - Cite all technical details with source paths and sections, e.g. [Source: docs/<file>.md §X.X]
+
+---
+
+## Definition of Done
+
+> Exit criteria — ALL items must be checked `[x]` before marking story as "done".
+
+- [ ] All Acceptance Criteria verified (ATDD Given-When-Then pass)
+- [ ] All Tasks / Subtasks completed
+- [ ] Code compiles without warnings
+- [ ] Required tests written and passing
+- [ ] Code Review completed with score >= 80
+- [ ] DB Migration verified (if applicable)
+- [ ] Documentation updated (if doc impact detected)
+- [ ] {{additional_dod_items}}
+
+---
+
+## Implementation Approach
+
+> Phase breakdown mapping to Tasks. Each Phase = a logical unit of work that can be verified independently.
+
+### Phase 1: {{phase_1_title}}
+**Tasks:** Task {{N}}.x
+**Verification:** {{how_to_verify_phase_1}}
+
+### Phase 2: {{phase_2_title}}
+**Tasks:** Task {{N}}.x
+**Verification:** {{how_to_verify_phase_2}}
+
+{{additional_phases}}
 
 ---
 

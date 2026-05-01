@@ -27,7 +27,7 @@
     Lock TTL in minutes (default: 30)
 
 .EXAMPLE
-    powershell -File scripts/file-lock-acquire.ps1 -AgentId CC-OPUS -StoryId QGR-BA-3 -FilePath "src/PhyCool.Web/Program.cs"
+    powershell -File scripts/file-lock-acquire.ps1 -AgentId CC-OPUS -StoryId QGR-BA-3 -FilePath "src/App.Web/Program.cs"
 #>
 
 param(
@@ -161,7 +161,7 @@ if (Test-FreePolicy -Path $RelPath) {
 }
 
 # --- Mutex-protected lock file update ---
-$mutexName = "Global\AgentFileLock_PhyCool"
+$mutexName = "Global\AgentFileLock_PCPT"
 $mutex = $null
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 

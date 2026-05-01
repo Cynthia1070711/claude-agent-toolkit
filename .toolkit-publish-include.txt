@@ -1,0 +1,98 @@
+# Toolkit GitHub 推送白名單(v1.8.0)
+# 推送至 github.com/Cynthia1070711/claude-agent-toolkit 時應包含的檔案
+# 凡未列於本檔的目錄/檔案,預設「不推送」
+
+# === 主要部屬手冊 + 索引 ===
+README.md
+RELEASE-NOTES_v1.8.0.md
+SANITIZATION-POLICY.md
+開發前環境部署_v3.0.0.md
+worktree-quick-reference.md
+BMAD架構演進與優化策略.md
+context-memory-db-strategy.md
+multi-agent-parallel-execution-strategy.md
+
+# === 9 篇 v1.8.0 新增深度補全 ===
+skills-deep-dive.md
+rules-deep-dive.md
+idd-framework.md
+hooks-events-deep-dive.md
+memory-system-deep-dive.md
+mcp-ecosystem.md
+bmad-workflows-evolution.md
+commands-reference.md
+global-claude-config.md
+
+# === Pipeline 中控(已穩定) ===
+Claude智能中控自動化排程/pipeline-audit-token-safety.md
+
+# === CLI 引擎入門指南 ===
+agent-cli-guides/README.md
+agent-cli-guides/claude-code-guide.md
+agent-cli-guides/gemini-cli-guide.md
+agent-cli-guides/antigravity-guide.md
+agent-cli-guides/rovo-dev-guide.md
+
+# === 配置範本(完整可部屬) ===
+config-templates/claude/CLAUDE.md.template
+config-templates/claude/CLAUDE.local.md.template
+config-templates/claude/MEMORY.md.template
+config-templates/claude/claudeignore.template
+config-templates/claude/settings.json.template
+config-templates/claude/settings.local.json.template
+config-templates/claude/hooks/**/*
+config-templates/claude/rules/**/*
+config-templates/claude/agents/**/*
+config-templates/claude/commands/**/*
+
+config-templates/context-db/server.js
+config-templates/context-db/package.json.template
+config-templates/context-db/mcp.json.template
+config-templates/context-db/scripts/**/*
+config-templates/context-db/migrations/**/*
+
+config-templates/gemini/**/*
+config-templates/antigravity/**/*
+config-templates/rovodev/**/*
+
+# === BMAD Overlay(v6.2.2 概念升級版,Markdown step files) ===
+bmad-overlay/4-implementation/code-review/workflow.md
+bmad-overlay/4-implementation/code-review/checklist.md
+bmad-overlay/4-implementation/code-review/saas-standards.md
+bmad-overlay/4-implementation/code-review/workflow.yaml
+bmad-overlay/4-implementation/code-review/steps/**/*
+
+bmad-overlay/4-implementation/create-story/workflow.md
+bmad-overlay/4-implementation/create-story/checklist.md
+bmad-overlay/4-implementation/create-story/template.md
+bmad-overlay/4-implementation/create-story/workflow.yaml
+bmad-overlay/4-implementation/create-story/steps/**/*
+
+bmad-overlay/4-implementation/dev-story/workflow.md
+bmad-overlay/4-implementation/dev-story/checklist.md
+bmad-overlay/4-implementation/dev-story/workflow.yaml
+bmad-overlay/4-implementation/dev-story/steps/**/*
+
+# === 自動化腳本 ===
+scripts/check-hygiene.ps1
+scripts/sync-epic-readme.ps1
+scripts/pre-compact-snapshot.ps1
+scripts/file-lock-check.ps1
+scripts/file-lock-acquire.ps1
+scripts/file-lock-release.ps1
+scripts/story-pipeline.ps1
+scripts/batch-runner.ps1
+scripts/batch-audit.ps1
+scripts/epic-auto-pilot.ps1
+scripts/deploy-context-db.ps1
+scripts/otel-micro-collector.js
+
+# === Toolkit 自身的 maintenance + verify(從專案根 .claude/rules/ + scripts/ 對應) ===
+# 注意:這兩個檔案實際在專案根,推送時需 copy 到 toolkit 對應位置
+# .claude/rules/deployment-doc-freshness.md → toolkit/config-templates/claude/rules/
+# scripts/verify-deployment-docs.cjs → toolkit/scripts/
+
+# === GitHub 主 README 雙語(置於 toolkit 根) ===
+# 注意:當前 ./github-toolkit-readme-update/README.md 與 README.zh-TW.md
+# 推送時應放至 toolkit GitHub repo 根目錄取代既有 README
+# (執行手動 git operations 推送)

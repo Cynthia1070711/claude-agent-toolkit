@@ -14,7 +14,7 @@ story_dir: "{implementation_artifacts}"
 # Workflow components
 installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/create-story"
 template: "{installed_path}/template.md"
-instructions: "{installed_path}/instructions.xml"
+instructions: "{installed_path}/workflow.md"
 validation: "{installed_path}/checklist.md"
 
 # Variables and inputs

@@ -71,6 +71,7 @@ validation-rules:
 
 - [ ] **Story Status Updated:** Story Status set to "review"
 - [ ] **Sprint Status Updated:** Sprint status updated to "review" (when sprint tracking is used)
+- [ ] **Tracking File Synced:** `docs/tracking/active/{story_key}.track.md` 狀態更新為 🟠 review + 補入 dev-story 執行記錄
 - [ ] **H1 Emoji Synced:** Invoke /story-status-emoji Mode A — heading shows 🟠 (review)
 - [ ] **Quality Gates Passed:** All quality checks and validations completed successfully
 - [ ] **No HALT Conditions:** No blocking issues or incomplete work remaining
