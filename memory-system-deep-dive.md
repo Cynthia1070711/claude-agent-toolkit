@@ -175,7 +175,7 @@ Phase 4 連續學習層
 | 1 | `search_context` | context_entries FTS5 + optional vector rerank |
 | 2 | `search_tech` | tech_entries 過濾 category / tech_stack / outcome |
 | 3 | `search_debt` | tech_debt_items 過濾 status / severity / story_id / target_story |
-| 4 | `search_stories` | stories 過濾 epic / domain / complexity / status + AC/tasks/dev_notes |
+| 4 | `search_stories` | stories 過濾 epic / domain / complexity / status + AC/tasks/dev_notes;**精確查詢(`story_id`)+ `include_details: true` 預設回傳完整 46 欄位**(CMI-12 修復 2026-05-01),列表查詢保留 `_preview` 防多筆 token 爆炸,`fields=` 顯式指定亦回傳完整 |
 | 5 | `search_documents` | doc_index + document_chunks FTS5 |
 | 6 | `search_glossary` | glossary canonical_name / aliases + domain 過濾 |
 | 7 | `search_conversations` | conversation_sessions + turns(role / 日期過濾)|

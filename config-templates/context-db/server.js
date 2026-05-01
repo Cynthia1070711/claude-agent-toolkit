@@ -2301,27 +2301,56 @@ async function handleSearchStories(args) {
       selectCols = requestedFields.map(f => `s.${f}`).join(', ');
     } else {
       // 預設模式：摘要 + 可選詳情（向後相容）
-      const summaryCols = `
+      // CMI-12 (2026-05-01): story_id 精確查詢 + include_details 時回傳完整(無 _preview, 全欄位),
+      //   解決 cold-start dev agent 看不到 pipeline_notes / acceptance_criteria 完整內容的問題。
+      //   列表查詢(空 query / FTS5)保留 _preview 防多筆 token 爆炸。
+      const isPreciseStoryQuery = !!story_id;
+
+      const baseSummaryCols = `
         s.story_id, s.epic_id, s.domain, s.title, s.status,
         s.priority, s.complexity, s.story_type, s.dev_agent, s.review_agent,
         s.tags, s.dependencies, s.created_at, s.updated_at,
         s.cr_issues_total, s.cr_issues_fixed, s.cr_issues_deferred,
-        SUBSTR(s.cr_summary, 1, 200) AS cr_summary_preview,
         s.started_at, s.completed_at, s.review_completed_at
       `;
 
-      const detailCols = include_details ? `,
-        s.user_story, s.background,
-        SUBSTR(s.acceptance_criteria, 1, 500) AS acceptance_criteria_preview,
-        SUBSTR(s.tasks, 1, 500) AS tasks_preview,
-        SUBSTR(s.dev_notes, 1, 500) AS dev_notes_preview,
-        s.required_skills, s.file_list,
-        SUBSTR(s.implementation_approach, 1, 300) AS implementation_approach_preview,
-        SUBSTR(s.testing_strategy, 1, 300) AS testing_strategy_preview,
-        SUBSTR(s.definition_of_done, 1, 300) AS definition_of_done_preview,
-        s.discovery_source, s.cr_score, s.test_count,
-        SUBSTR(s.execution_log, 1, 300) AS execution_log_preview
-      ` : '';
+      let summaryCols = baseSummaryCols;
+      let detailCols = '';
+
+      if (isPreciseStoryQuery && include_details) {
+        // 精確查詢 + 詳情:回傳完整(無 _preview, 涵蓋全 stories 表 46 欄位)
+        // 對齐 cold-start dev agent 接續完整性 — pipeline_notes / risk_assessment / rollback_plan /
+        // monitoring_plan / sdd_spec / create_agent / create_started_at / create_completed_at /
+        // review_started_at / source_file / affected_files / cr_summary 全可取
+        detailCols = `,
+          s.user_story, s.background,
+          s.acceptance_criteria, s.tasks, s.dev_notes,
+          s.required_skills, s.file_list, s.affected_files,
+          s.implementation_approach, s.testing_strategy, s.definition_of_done,
+          s.risk_assessment, s.rollback_plan, s.monitoring_plan,
+          s.discovery_source, s.cr_score, s.test_count, s.execution_log,
+          s.source_file, s.sdd_spec, s.cr_summary,
+          s.create_agent, s.create_started_at, s.create_completed_at, s.review_started_at,
+          s.pipeline_notes
+        `;
+      } else {
+        // 列表查詢 / 不要詳情:summary + 既有 _preview 行為(防多筆 token 爆炸)
+        summaryCols += ', SUBSTR(s.cr_summary, 1, 200) AS cr_summary_preview';
+        if (include_details) {
+          detailCols = `,
+            s.user_story, s.background,
+            SUBSTR(s.acceptance_criteria, 1, 500) AS acceptance_criteria_preview,
+            SUBSTR(s.tasks, 1, 500) AS tasks_preview,
+            SUBSTR(s.dev_notes, 1, 500) AS dev_notes_preview,
+            s.required_skills, s.file_list,
+            SUBSTR(s.implementation_approach, 1, 300) AS implementation_approach_preview,
+            SUBSTR(s.testing_strategy, 1, 300) AS testing_strategy_preview,
+            SUBSTR(s.definition_of_done, 1, 300) AS definition_of_done_preview,
+            s.discovery_source, s.cr_score, s.test_count,
+            SUBSTR(s.execution_log, 1, 300) AS execution_log_preview
+          `;
+        }
+      }
 
       selectCols = summaryCols + detailCols;
     }

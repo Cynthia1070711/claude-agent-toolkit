@@ -109,6 +109,17 @@ PCPT 對 Chrome 的自動化有兩套工具,**不可混用**:
 | **Trace**(3)| trace_context / get_symbol_context / get_session_detail |
 | **Analytics**(6)| get_patterns / get_intentional_decision / list_sessions / log_workflow / upsert_benchmark / verify_intentional_annotations |
 
+### 5.1 search_stories CMI-12 修復(2026-05-01)— 精確查詢回傳完整 46 欄位
+
+**修復前**:`search_stories({story_id, include_details: true})` 預設 truncate 為 `_preview`(8 欄位 200-500 chars)+ 完全不回傳 11 欄位(pipeline_notes / risk_assessment / rollback_plan / monitoring_plan / sdd_spec / create_agent / create_started_at / create_completed_at / review_started_at / source_file / affected_files),導致 cold-start agent 看不到 Story 完整內容。
+
+**修復後**(`config-templates/context-db/server.js:2295-2351`):
+- **精確查詢**(`story_id` 指定)+ `include_details: true` → ✅ 回傳完整 46 欄位無 truncation
+- 列表查詢(空 query / FTS5)+ `include_details: true` → 🟡 保留 `_preview` 行為(防多筆 token 爆炸)
+- `fields="..."` 顯式指定 → ✅ 完整(行為不變)
+
+**Cold-start 受益**:dev agent 啟動時 `search_stories` 預設取 pipeline_notes / acceptance_criteria / tasks / dev_notes / implementation_approach / sdd_spec 全完整,無需 fallback `fields=` 顯式指定。對齊 `db-first-no-md-mirror.md` SSoT 精神。
+
 詳細 API 參照 `memory-system-deep-dive.md` §4。
 
 ---
