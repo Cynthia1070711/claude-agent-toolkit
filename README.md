@@ -274,6 +274,20 @@ npm run dev
 # API:      http://localhost:3001
 ```
 
+#### DevConsole Screenshots
+
+| Page | Preview |
+|:----|:----|
+| **Dashboard** — Story status KPI + recent activity | ![Dashboard](docs/screenshots/01-dashboard.png) |
+| **Stories Kanban** — Epic filter + Markdown rendering | ![Stories](docs/screenshots/02-stories-kanban.png) |
+| **Sessions Timeline** — Conversation lifecycle records | ![Sessions](docs/screenshots/03-sessions-timeline.png) |
+| **Patterns / Continuous Learning** — Phase 4 retrieval observations & hot entries | ![Patterns](docs/screenshots/04-patterns-continuous-learning.png) |
+| **Memory Schema** — 30+ tables visualized | ![Schema](docs/screenshots/05-memory-schema.png) |
+| **Rule Violations** — Phase 3 hint hook tracker(top-5 hot zones / 30 days) | ![Violations](docs/screenshots/06-rule-violations.png) |
+
+> All screenshots captured from real-world deployment(SaaS app development workspace, 2026-05-01).
+> Web UI source: `tools/dev-console/` (React 18 + Express)
+
 ---
 
 ## Module Details
