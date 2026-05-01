@@ -274,6 +274,20 @@ npm run dev
 # API: http://localhost:3001
 ```
 
+#### DevConsole 螢幕截圖
+
+| 頁面 | 預覽 |
+|:----|:----|
+| **儀表板** — Story 狀態 KPI + 最近活動 | ![Dashboard](docs/screenshots/01-dashboard.png) |
+| **任務進度看板** — Epic 篩選 + Markdown 渲染 | ![Stories](docs/screenshots/02-stories-kanban.png) |
+| **時間軸紀錄** — 對話生命週期紀錄 | ![Sessions](docs/screenshots/03-sessions-timeline.png) |
+| **持續學習機制** — Phase 4 retrieval observations & 熱門條目 | ![Patterns](docs/screenshots/04-patterns-continuous-learning.png) |
+| **記憶庫資料結構** — 30+ tables 視覺化 | ![Schema](docs/screenshots/05-memory-schema.png) |
+| **違規追蹤紀錄** — Phase 3 hint hook 追蹤器(熱區 top-5 / 30 天)| ![Violations](docs/screenshots/06-rule-violations.png) |
+
+> 所有截圖來自真實 SaaS 開發環境(2026-05-01 拍攝)。
+> Web UI 原始碼:`tools/dev-console/`(React 18 + Express)
+
 ---
 
 ## 模組詳解
