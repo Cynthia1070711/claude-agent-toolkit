@@ -33,7 +33,7 @@
     powershell -File scripts/file-lock-release.ps1 -StoryId QGR-BA-3
 
     # Release a specific file lock
-    powershell -File scripts/file-lock-release.ps1 -FilePath "src/MyProject.Web/Program.cs"
+    powershell -File scripts/file-lock-release.ps1 -FilePath "src/App.Web/Program.cs"
 
     # Release all locks (full cleanup)
     powershell -File scripts/file-lock-release.ps1 -All
@@ -90,7 +90,7 @@ if ($FilePath) {
 }
 
 # --- Mutex-protected release ---
-$mutexName = "Global\AgentFileLock_MyProject"
+$mutexName = "Global\AgentFileLock_PCPT"
 $mutex = $null
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 

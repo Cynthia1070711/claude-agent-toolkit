@@ -1,186 +1,146 @@
-# Claude Agent Toolkit (v1.7.1)
+# Claude Agent Toolkit (v1.8.0)
 
-**Multi-Agent Collaboration Strategy | Semi-Automated Sprint Pipeline | Shared Project Toolkit**
+> **Multi-Engine AI Agent Collaboration Toolkit** — Battle-tested deployment templates, Token reduction strategy, Context Memory DB, and BMAD-driven workflow integration for Claude Code / Gemini CLI / Antigravity IDE / Rovo Dev CLI.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![繁體中文](https://img.shields.io/badge/lang-繁體中文-green)](README.zh-TW.md)
+**Last Updated**: 2026-05-01
+**Languages**: [English](README.md) | [繁體中文](README.zh-TW.md)
 
 ---
 
-### Primary Development Strategy
+## Primary Development Strategy
 
-**Antigravity IDE + Claude Code CLI (Primary) + BMAD Method v6**
+This toolkit is the **deployable distillation** of a real-world multi-engine AI Agent project's accumulated optimization wisdom (2026-01 → 2026-05). Battle-tested across **41 TRS Stories**, validated by **6 Epics (BU/CMI/CCI/ECC/WFQ/Phase4)**, and crystallized into one-command deployment.
 
-1. **Claude Token Reduction Strategy**
-   Static consumption 15.4K → 3.6K tokens (-76.5%), MEMORY.md 90%+ slimmer, Prompt Cache killer elimination. Systematically validated across 41 TRS stories covering Always-On slimming, On-Demand loading, and Workflow compression.
+### What's New in v1.8.0 (2026-05-01)
 
-2. **Multi-Agent Collaboration (Gemini CLI, Rovo Dev CLI, Antigravity IDE)**
-   4-engine task matrix + handoff SOP + parallel file locks (Worktree + File Lock + Total Commit). Open extension architecture — compile your CLI usage guide + code examples, then deploy via Claude Opus 4.6 reading the deployment manual for automated setup. Guides provided for: Claude Code, Gemini CLI, Antigravity IDE, Rovo Dev CLI, Copilot CLI.
-
-3. **[Everything Claude Code](https://github.com/anthropics/courses) Integration (Anthropic Hackathon Winner)**
-   Token economics, Event-driven Hooks, Continuous Learning v2, AgentShield security audit. Each project can adjust its primary strategy to Everything Claude Code, BMAD Method, or custom workflows depending on its needs.
-
-4. **Context Memory DB (Vector Memory Database)**
-   SQLite + FTS5 + MCP Server — multi-agent shared memory, precise knowledge retrieval, expandable breadth. 4-layer progressive architecture + **CMI Epic** (6 stories) for auto-lifecycle recording:
-   - **L0 Knowledge Memory**: FTS5 full-text search + 6 MCP Tools (search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context)
-   - **L1 Code Semantic**: Roslyn AST symbol extraction + dependency graph
-   - **L2 Vector Semantic**: Local ONNX Embedding (384D, zero-cost) or OpenAI Embedding + Cosine Similarity search
-   - **L3 Dynamic Injection**: UserPromptSubmit Hook auto-injects relevant context per prompt
-   - **CMI Enhancements**: Auto session lifecycle (Stop/SessionEnd/PreCompact Hooks), full document ETL (136 stories + 50 CRs + 29 ADRs), conversation-level memory (list_sessions / get_session_detail / search_conversations), UTC+8 timezone normalization, compaction recovery guard, **document vectorization semantic search** (Heading-aware Chunking + Hybrid Fusion Search: 0.7×Vector + 0.3×FTS5), **local ONNX Embedding** (Xenova/all-MiniLM-L6-v2, 384D — zero-cost replacement for OpenAI API)
-   - **DevConsole Web UI**: Standalone Node.js app (Express 5 + Vite + React 18) for visual memory DB browsing/search/CRUD, Story Kanban board, CR Issue tracking, Session timeline, **Documents browser** (category group mapping, FTS5 + LIKE fallback for short CJK queries, keyword highlighting, VS Code one-click open, related documents API). i18n support (zh-TW / en). `localhost:5174` (frontend) + `localhost:3001` (API)
-
-5. **Semi-Automated Sprint Pipeline (BMAD Workflows)**
-   Pipeline automation + Token safety valve + Sprint semi-auto execution. Includes batch-runner (batch execution), story-pipeline (single story end-to-end), epic-auto-pilot (entire epic auto-push), batch-audit (batch code review). Recommend **Claude Opus 4.6 as the controller**, with Sonnet/Haiku for sub-tasks.
-
-6. **Telegram Integration Strategy**
-   Remote control to launch Claude tasks from your phone. Telegram Bot Bridge v2.0 uses stream-json persistent process mode (context loaded once), supporting multi-turn conversation memory, message queue, auto-reconnect, model switching (`/model opus`), path bookmarks (`/bookmark`). Monitor progress, send commands, and switch working directories from mobile.
-
-7. **SDD + ATDD + TDD Methodology (Spec-Driven Development)**
-   BDD demoted to requirements-communication aid only (PRD/Epic level). Core development loop: **SDD Spec → ATDD Acceptance Tests → TDD Unit Tests → Implementation**. M/L/XL Stories auto-trigger `/sdd-spec-generator` to produce `{id}-spec.md` (Business Rules + API Contract + DB Schema + Boundary Conditions). Every AC maps to `[Verifies: BR-XXX]`, 3-round debug limit, VSDD Simplified code-review for Spec vs Code alignment. Estimated additional 20%~35% token reduction on top of existing 76.5% baseline. Covers xUnit + Moq + FluentAssertions (backend) and Vitest + Playwright E2E (frontend).
+- **Skills system matured**: 74 skills across 17 Domain Profiles + three-engine sync (`.claude/`/`.gemini/`/`.agent/`)
+- **Hooks expanded**: 14 hooks (was 6) including 11-layer RAG injection
+- **Rules consolidated**: 20 rules with 5 SUPREME Mandates + 9 Lifecycle Invariants + 3-Tier Subagent Boundary
+- **IDD Framework**: 4-layer annotation (Code/ADR/DB/Memory) with 4 sub-types (COM/STR/REG/USR)
+- **Memory DB scaled**: 30+ tables / 23 MCP tools / 82 scripts / DevConsole Web UI
+- **BMAD workflows evolved**: v6.0.0-alpha.21 + Epic BU upgrade to v6.2.2 concept (XML→Markdown step files)
+- **Pipeline 6-Layer Defense**: L5 Heartbeat + L6 429/Model Purity detection
+- **OTel Token tracking**: `otel-micro-collector.js` + `workflow_executions` table 4 token columns + cost USD
+- **Phase 4 Rule Violation Tracker**: 5-Layer Anti-Recidivism Chain
+- **9 deep-dive documents added**: SANITIZATION-POLICY / skills / rules / idd / hooks / memory / mcp / bmad-workflows / commands
 
 ---
 
 ## What Is This?
 
-A **ready-to-deploy AI Agent development methodology toolkit** that moves teams from "Vibe Coding" to **Spec-Driven Development (SDD)**.
+A **complete, portable multi-engine collaboration template package** combining:
+- Token economics (static cost cut from ~18K → ~13K, peak −76.5%)
+- Context Memory DB (SQLite + FTS5 + ONNX local embedding, zero API cost)
+- 14 Hooks lifecycle automation (RAG / Pipeline / Debt / IDD / Rule Violation)
+- 74 Skills with auto-detection + three-engine synchronization
+- 20 Rules including Constitutional / Verification / Sync Gates / IDD Protection
+- BMAD workflow overlay (create-story / dev-story / code-review with 41 step files)
+- DevConsole Web UI for memory visualization
 
 ---
 
-## Framework Integration: BMAD Method x Everything Claude Code
+## Framework Integration: BMAD Method × Everything Claude Code
 
-This toolkit stands on the shoulders of two major open-source frameworks:
+| Framework | Strength | Integration |
+|:----|:----|:----|
+| **BMAD Method** v6.0.0-alpha.21 | Spec-driven agile team simulation, 17 agents, 4-phase workflows | `_bmad/` directory, Markdown step file format (Epic BU) |
+| **Everything Claude Code** v1.9.0 | Token economics, TDD workflow, AgentShield, continuous learning | Hooks integration, RAG injection, Skills marketplace |
+| **Custom Augmentation** | DB-First stories, Sync Gates, Pipeline 6-layer defense, IDD | This toolkit's overlay |
 
-### BMAD Method — Spec-Driven Agile Team Simulation
-
-[BMAD Method](https://github.com/bmadcode/BMAD-METHOD) (Build More Architect Dreams) treats AI as a full agile development team with "Agent-as-Code":
-
-- **12+ Specialized Roles**: Business analyst, PM, architect, Scrum Master, developer, QA — each defined as independent YAML/Markdown files
-- **34+ Standardized Workflows**: Four-phase lifecycle from analysis to implementation, each phase with strict gate checks
-- **Scale-Adaptive**: Auto-adjusts from L0 single fix to L4 enterprise systems
-- **Context Sharding**: Forces large PRDs into atomic user stories for clean context windows
-
-### Everything Claude Code — Anthropic Hackathon Winner's Token Economics
-
-[Everything Claude Code](https://github.com/anthropics/courses) (ECC) comes from the Anthropic Hackathon winning team, validated over 10+ months of production use:
-
-- **Token Economics**: Treats 200K context window as precious — static consumption from 18K down to ~10K tokens
-- **Event-Driven Hooks**: PreToolUse / PostToolUse / SessionStart lifecycle events for background formatting and security scanning
-- **Continuous Learning v2**: Auto-observes coding habits, extracts "instincts" with confidence scores, evolves into permanent skills
-- **AgentShield**: Opus-based red/blue team audit — scans for hardcoded keys and overly permissive settings
-
-### Our Integration Strategy — Best of Both Worlds
-
-| Aspect | From BMAD | From ECC | Our Enhancement |
-|--------|----------|---------|----------------|
-| **Process** | 4-phase SDLC + Gate Check | — | + Dual status update + 5-point sync |
-| **Roles** | Agent-as-Code system | — | + Multi-engine Agent ID system |
-| **Token Control** | — | Token economics | + Quantified baselines + cache killer elimination |
-| **Hooks** | — | Event-driven architecture | + File Lock + Hygiene Check |
-| **Knowledge** | — | Continuous learning concept | + Context Memory DB (SQLite + MCP) |
-| **Security** | — | AgentShield concept | + check-hygiene.ps1 |
-| **Quality Gates** | Code review workflow | — | + useState/Zustand duplication detection |
-| **Automation** | Sprint Planning | — | + Pipeline + Auto-Pilot + Telegram |
-
-> **Design Principle**: BMAD handles "What to do", ECC handles "How to save", this toolkit handles "How to collaborate".
+**Integration Strategy**: Take both frameworks' strengths, fuse via overlay pattern, deploy via PowerShell automation.
 
 ---
 
 ## Table of Contents
 
-- [Problems Solved](#problems-solved)
-- [Architecture Overview](#architecture-overview)
-- [Directory Structure](#directory-structure)
-- [Quick Start](#quick-start)
-- [Module Details](#module-details)
-  - [1. Multi-Engine Collaboration](#1-multi-engine-collaboration)
-  - [2. Context Memory DB](#2-context-memory-db)
-  - [3. BMAD Method Integration](#3-bmad-method-integration)
-  - [4. Token Reduction Strategy](#4-token-reduction-strategy)
-  - [5. Pipeline Automation](#5-pipeline-automation)
-  - [6. Multi-Agent Parallel Execution](#6-multi-agent-parallel-execution)
-  - [7. Telegram Remote Control](#7-telegram-remote-control)
-- [Research Reports Index](#research-reports-index)
-- [TRS Execution Stories](#trs-execution-stories)
-- [Requirements](#requirements)
-- [License](#license)
+1. [Problems Solved](#problems-solved)
+2. [Architecture Overview](#architecture-overview)
+3. [Directory Structure](#directory-structure)
+4. [Quick Start](#quick-start)
+5. [Module Details](#module-details)
+6. [Research Reports Index](#research-reports-index)
+7. [TRS Execution Stories](#trs-execution-stories)
+8. [Requirements](#requirements)
+9. [Deployment Scenarios](#deployment-scenarios)
+10. [Version History](#version-history)
+11. [License & Acknowledgments](#license--acknowledgments)
 
 ---
 
 ## Problems Solved
 
 | Challenge | Symptom | Solution |
-|-----------|---------|----------|
-| **Context Loss** | Every new conversation starts from zero — bug patterns, architecture decisions, CR lessons forgotten | Context Memory DB — SQLite + MCP Server on-demand queries |
-| **Token Waste** | Bloated static configs consume context window, workflow overhead ~31K tokens/sprint | 4-layer token reduction, MEMORY.md 90%+ slimmer |
-| **Multi-Engine Conflicts** | Claude Code, Gemini CLI, Antigravity IDE operating simultaneously → commit conflicts, file overwrites | 3-layer parallel strategy (Worktree + File Lock + Total Commit) |
-| **Fragmented Workflow** | create-story → dev-story → code-review requires manual chaining | Pipeline automation + Token safety valve + Telegram remote |
-| **Remote Control** | Cannot monitor or command agents after leaving the computer | Telegram Bot Bridge — operate Claude CLI from mobile |
+|:----|:----|:----|
+| Static prompt overhead too large | Each new conversation loads ~18K tokens before user types | Three-layer CLAUDE.md (global ≤30 lines / project ≤200 / local) → ~13K (−28%) |
+| Cross-conversation knowledge lost | AI re-learns same bug fixes / decisions per session | Context Memory DB + 11-layer RAG injection via UserPromptSubmit hook |
+| Multi-engine coordination chaos | Claude / Gemini / Antigravity / Rovo Dev work in silos | Unified `AGENTS.md` charter + sprint-status.yaml + tracking files state machine |
+| Pipeline silent stalling | Sub-windows hang on quota exhaustion / model degradation | 6-Layer defense: Heartbeat (L5) + 429/Model Purity (L6) auto-kill |
+| Skills drift over time | Code changes but Skills not synced → next session uses stale SOP | Skill-Sync-Gate + Skill-IDD-Sync-Gate + literal Skill tool invocation mandatory |
+| Tech debt invisibility | Defer reasons forgotten, repeat discussions | Tech Debt v3.0 framework (6 categories × 5 severity × Priority Score × 5-Min Rule × Boy Scout × 5-Layer Triage) |
+| Intentional decisions confused with debt | Free-plan-no-gate logged as "TODO fix later" | IDD Framework: 4-layer annotation, 4 sub-types, forbidden_changes protection |
 
 ---
 
 ## Architecture Overview
 
-### Token Consumption 3-Layer Architecture
-
-| Layer | Content | Load Mode | Before | After |
-|:-----:|---------|-----------|:------:|:-----:|
-| 1 | Global `~/.claude/CLAUDE.md` | Always-On | ~3,640 | ~220 |
-| 2 | Project `CLAUDE.md` + `.claude/rules/*` | Always-On | ~11,000 | ~2,600 |
-| 3 | Skills descriptions + MCP tools | On-Demand | ~800 | ~800 |
-| **Total** | | | **~15,440** | **~3,620** |
-
-> Static consumption reduced **76.5%** — ~12K tokens freed for actual work.
-
-### Context Memory DB 4-Layer Progressive Architecture
+### Token Consumption Layered Model
 
 ```
-L0 Knowledge Memory Layer (Required — zero external deps)
-  ├── context_entries: decisions, patterns, debug findings, incidents
-  ├── tech_entries: technical solutions (success/fail), bug fixes, architecture decisions
-  ├── FTS5 trigram: full-text search (CJK + English)
-  └── MCP Tools: search_context / search_tech / add_context / add_tech / add_cr_issue / trace_context
+Layer 0: System Prompt (immutable)
+Layer 1: ~/.claude/CLAUDE.md      (global, ≤30 lines, ~221 tokens)  ← Always-On
+Layer 2: ./CLAUDE.md              (project, ≤200 lines, ~1,276 tokens) ← Always-On
+Layer 3: ./CLAUDE.local.md        (local, identity, ~241 tokens)  ← Always-On
+Layer 4: .claude/rules/*.md       (20 rules, ~5,400 tokens)  ← Always-On
+Layer 5: .claude/skills/*/SKILL.md descriptions (74 skills, ~6,200 tokens)  ← Always-On (descriptions)
+Layer 6: Workflow execution       (per-task, on-demand, ~1,500-3,000 tokens)
+```
 
-L1 Code Semantic Layer (Optional — requires .NET SDK)
-  ├── symbol_index: class / method / interface / enum (Roslyn AST extraction)
-  ├── symbol_dependencies: calls / inherits / implements / uses
-  └── MCP Tools: search_symbols / get_symbol_context
+### Context Memory DB 4-Layer Architecture
 
-L2 Vector Semantic Layer (Optional — local ONNX or OpenAI API)
-  ├── symbol_embeddings: local Xenova/all-MiniLM-L6-v2 (384D, zero-cost)
-  │   or OpenAI text-embedding-3-small (1536D, requires API Key)
-  ├── Cosine Similarity semantic search
-  └── MCP Tool: semantic_search
+```
+L0 Knowledge Layer (essential)
+  ├── 30+ tables: context_entries / tech_entries / tech_debt_items /
+  │   intentional_decisions / stories / cr_reports / cr_issues /
+  │   conversation_sessions / conversation_turns / doc_index /
+  │   document_chunks / glossary / workflow_executions / benchmarks /
+  │   test_journeys / test_traceability / pipeline_checkpoints /
+  │   sprint_index / rule_violations / 7 embedding tables
+  ├── FTS5 trigram + WAL mode + ledger.jsonl (disaster recovery)
+  └── 23 MCP tools (search × 10 / write × 4 / trace × 3 / analytics × 6)
 
-L3 Dynamic Injection Layer (Optional — requires L2)
-  ├── UserPromptSubmit Hook
-  ├── Auto-injects relevant code context per user prompt
-  └── S_final = 0.6×vec + 0.2×graph + 0.2×fts
+L1 Code Semantic Layer (optional, .NET SDK required)
+  └── symbol_index / symbol_dependencies / symbol_embeddings (Roslyn AST)
+
+L2 Vector Semantic Layer (optional, local ONNX or OpenAI)
+  └── Xenova/all-MiniLM-L6-v2 (384D, zero API cost)
+
+L3 Dynamic Injection Layer
+  └── UserPromptSubmit Hook → 11-layer RAG injection
+      (Session / Rule Violations / Story / Tech Debt / Decisions /
+       Pipeline / Skills / LSP / Code RAG / IDD / Document RAG)
+
+Phase 4 Continuous Learning
+  └── retrieval_observations / retrieval_hits / retrieval_keywords /
+      pattern_observations / embedding_queue
 ```
 
 ### Multi-Engine Collaboration Architecture
 
 ```
-┌─────────────────────────────────────────────────┐
-│           AGENTS.md Unified Charter              │
-│  (Shared by 4 engines: language, structure,      │
-│   trigger rules)                                 │
-└──────┬──────────┬──────────┬──────────┬──────────┘
-       │          │          │          │
-  ┌────▼────┐ ┌───▼────┐ ┌──▼───────┐ ┌▼─────────┐
-  │ Claude  │ │ Gemini │ │Antigrav- │ │ Rovo Dev │
-  │ Code    │ │ CLI    │ │ity IDE   │ │ CLI      │
-  │ CLI     │ │        │ │          │ │          │
-  ├─────────┤ ├────────┤ ├──────────┤ ├──────────┤
-  │CLAUDE.md│ │GEMINI  │ │.agent/   │ │config.yml│
-  │.claude/ │ │.md     │ │rules/    │ │Charter   │
-  │rules/   │ │.gemini/│ │workflows/│ │System    │
-  │hooks/   │ │settings│ │          │ │Prompt    │
-  └─────────┘ └────────┘ └──────────┘ └──────────┘
-       │          │          │          │
-  ┌────▼──────────▼──────────▼──────────▼──────────┐
-  │         Context Memory DB (MCP Server)          │
-  │    search_context / search_tech / add_context   │
-  └─────────────────────────────────────────────────┘
+┌─────────────┬─────────────┬─────────────┬─────────────┐
+│ Claude Code │ Gemini CLI  │ Antigravity │ Rovo Dev    │
+│ (CC-OPUS)   │ (GC-PRO)    │ (AG-OPUS)   │ (RD-SONNET) │
+├─────────────┼─────────────┼─────────────┼─────────────┤
+│ .claude/    │ .gemini/    │ .agent/     │ .rovodev/   │
+│ 74 skills   │ 75 skills   │ 74 skills   │ -           │
+└─────────────┴─────────────┴─────────────┴─────────────┘
+        ↓ shared state via ↓
+┌──────────────────────────────────────────────────────┐
+│ AGENTS.md (unified charter)                          │
+│ sprint-status.yaml (state machine)                    │
+│ docs/tracking/active/*.track.md (per-story log)      │
+│ context-memory.db (Context Memory DB SSoT)            │
+└──────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -189,67 +149,81 @@ L3 Dynamic Injection Layer (Optional — requires L2)
 
 ```
 claude-agent-toolkit/
-│
-├── deployment/                            # One-click deployment package
-│   ├── config-templates/                  # Engine-specific config templates
-│   │   ├── claude/                        # Claude Code CLI
-│   │   │   ├── CLAUDE.md.template         #   Project-level instructions
-│   │   │   ├── MEMORY.md.template         #   Minimized auto-memory (~380 tokens)
-│   │   │   ├── hooks/pre-prompt-rag.js    #   L3 Code RAG auto-injection hook
-│   │   │   └── rules/*.md                 #   Behavioral rules (7 files)
-│   │   ├── context-db/                    # Context Memory DB (MCP Server + SQLite)
-│   │   ├── gemini/                        # Gemini CLI templates
-│   │   ├── antigravity/                   # Antigravity IDE templates
-│   │   └── rovodev/                       # Rovo Dev CLI templates
-│   ├── scripts/                           # Automation scripts (PowerShell)
-│   │   ├── deploy-context-db.ps1          #   Context Memory DB one-click deploy
-│   │   ├── batch-runner.ps1               #   Batch story executor
-│   │   ├── epic-auto-pilot.ps1            #   Sprint auto-execution engine
-│   │   ├── check-hygiene.ps1              #   Pre-commit hygiene check
-│   │   └── file-lock-*.ps1               #   Multi-agent file locking (3 scripts)
-│   ├── bmad-overlay/                      # BMAD workflow enhancement overlay (+SDD/ATDD/TDD)
-│   ├── agent-cli-guides/                  # Engine-specific usage guides
-│   ├── BMAD-METHOD-main/                  # BMAD Method source (3rd party, MIT)
-│   └── everything-claude-code-main/       # Everything Claude Code (3rd party)
-│
-├── research/                              # Strategy research reports
-│   ├── token-reduction-final-report.md    # Token reduction final report (16 reports consolidated)
-│   ├── multi-engine-collaboration-strategy.md  # 4-engine specs + task matrix
-│   ├── bmad-vs-everything-claude-code.md  # BMAD vs ECC deep comparison
-│   ├── context-memory-db/                 # Memory DB analysis (multi-agent + multi-model)
-│   ├── pipeline-automation/               # Pipeline + Token safety valve
-│   ├── methodology/                       # SDD+ATDD+TDD methodology research (3 cross-analyses)
-│   └── claude-mem-reference/              # claude-mem open source reference
-│
-├── guides/                                # AI CLI usage guides
-│   ├── Claude Code Guide.md
-│   ├── Gemini CLI Guide.md
-│   ├── Antigravity Guide.md
-│   ├── Rovo Dev CLI Guide.md
-│   └── Copilot CLI Guide.md
-│
-├── tools/                                 # Developer tools
-│   └── dev-console/                      # DevConsole Web UI (Memory DB visualization)
-│       ├── server/                       #   Express 5 REST API (better-sqlite3)
-│       ├── src/                          #   React 18 SPA + i18n (zh-TW / en)
-│       └── package.json                  #   `npm run dev` starts both frontend & backend
-│
-├── telegram-bridge/                       # Telegram remote control for Claude CLI
-│   ├── src/                               # TypeScript source
-│   │   ├── telegram-bot.ts                #   Telegram Bot UI layer
-│   │   ├── claude-manager.ts              #   Claude CLI persistent process manager
-│   │   ├── stream-json-parser.ts          #   NDJSON event stream parser
-│   │   └── session-store.ts               #   SQLite session persistence
-│   ├── PRD.md                             # Product requirements (v2.0 persistent mode)
-│   ├── technical-spec.md                  # Technical spec (3-layer architecture)
-│   └── SETUP.md                           # Setup guide (BotFather + env vars)
-│
-└── stories/                               # TRS execution stories (41, battle-tested)
-    ├── TRS-0  ~ TRS-9                     # Phase 1: Basic token reduction
-    ├── TRS-10 ~ TRS-19                    # Phase 2: Workflow compression
-    ├── TRS-20 ~ TRS-29                    # Phase 3: 4-engine unification
-    ├── TRS-30 ~ TRS-33                    # Phase 4: Parallel execution
-    └── TRS-34 ~ TRS-40                    # Phase 5: Advanced optimization
+├── deployment/
+│   ├── config-templates/
+│   │   ├── claude/                  ← Project-level Claude config
+│   │   │   ├── CLAUDE.md.template
+│   │   │   ├── CLAUDE.local.md.template
+│   │   │   ├── MEMORY.md.template
+│   │   │   ├── settings.json.template
+│   │   │   ├── settings.local.json.template
+│   │   │   ├── hooks/
+│   │   │   │   ├── pre-prompt-rag.js          ← 11-layer RAG injection
+│   │   │   │   ├── session-recovery.js
+│   │   │   │   ├── precompact-tool-preprune.js
+│   │   │   │   └── ... (14 hooks total)
+│   │   │   └── rules/                          ← 20 rules
+│   │   │       ├── constitutional-standard.md
+│   │   │       ├── verification-protocol.md
+│   │   │       ├── skill-sync-gate.md
+│   │   │       ├── skill-idd-sync-gate.md
+│   │   │       ├── skill-tool-invocation-mandatory.md
+│   │   │       ├── deployment-doc-freshness.md
+│   │   │       ├── story-lifecycle-invariants.md
+│   │   │       └── ... (12 more)
+│   │   ├── claude-global/                      ← ~/.claude global layer
+│   │   │   ├── CLAUDE.md.template (27 lines minimal)
+│   │   │   ├── settings.json.template
+│   │   │   └── commands/                       ← 3 Telegram bridge
+│   │   ├── context-db/                         ← MCP server template
+│   │   │   ├── server.js
+│   │   │   ├── package.json.template
+│   │   │   ├── mcp.json.template
+│   │   │   └── scripts/init-db.js
+│   │   ├── gemini/                             ← .gemini/ template
+│   │   ├── antigravity/                        ← .agent/ template
+│   │   └── rovodev/                            ← .rovodev/ template
+│   ├── bmad-overlay/                           ← BMAD v6.2.2 concept
+│   │   └── 4-implementation/
+│   │       ├── code-review/   (13 step files + saas-standards.md)
+│   │       ├── create-story/  (8 step files)
+│   │       └── dev-story/     (13 step files)
+│   ├── scripts/                                ← Automation
+│   │   ├── deploy-context-db.ps1
+│   │   ├── story-pipeline.ps1
+│   │   ├── batch-runner.ps1
+│   │   ├── batch-audit.ps1
+│   │   ├── epic-auto-pilot.ps1
+│   │   ├── otel-micro-collector.js             ← Token tracking
+│   │   ├── pipeline-recovery.js
+│   │   ├── pipeline-quota-check.js
+│   │   ├── pipeline-log-tokens.js
+│   │   ├── verify-deployment-docs.cjs          ← Doc freshness CI
+│   │   └── ... (10+ check-*.ps1/.cjs scripts)
+│   └── docs/
+│       ├── README.md
+│       ├── 開發前環境部署_v3.0.0.md             ← Main deployment manual
+│       ├── BMAD架構演進與優化策略.md
+│       ├── context-memory-db-strategy.md
+│       ├── multi-agent-parallel-execution-strategy.md
+│       ├── worktree-quick-reference.md
+│       ├── SANITIZATION-POLICY.md              ← (NEW v1.8.0)
+│       ├── skills-deep-dive.md                 ← (NEW v1.8.0)
+│       ├── rules-deep-dive.md                  ← (NEW v1.8.0)
+│       ├── idd-framework.md                    ← (NEW v1.8.0)
+│       ├── hooks-events-deep-dive.md           ← (NEW v1.8.0)
+│       ├── memory-system-deep-dive.md          ← (NEW v1.8.0)
+│       ├── mcp-ecosystem.md                    ← (NEW v1.8.0)
+│       ├── bmad-workflows-evolution.md         ← (NEW v1.8.0)
+│       ├── commands-reference.md               ← (NEW v1.8.0)
+│       └── global-claude-config.md             ← (NEW v1.8.0)
+├── tools/
+│   └── dev-console/                            ← React + Express Web UI
+└── research/                                   ← Strategy reports
+    ├── token-reduction-final-report.md
+    ├── multi-engine-collaboration-strategy.md
+    ├── bmad-vs-everything-claude-code.md
+    └── 當前環境完整快照_2026-05-01.md          ← (NEW v1.8.0 SSoT snapshot)
 ```
 
 ---
@@ -259,359 +233,199 @@ claude-agent-toolkit/
 ### Prerequisites
 
 ```bash
-# Required
-node --version    # Node.js 18+
-claude --version  # Claude Code CLI
-
-# Optional
-gemini --version  # Gemini CLI (large context)
-dotnet --version  # .NET SDK 8+ (L1 Code RAG)
+node --version    # ≥18 (MCP Server runtime)
+git --version     # ≥2.30
+claude --version  # Claude Code CLI (required)
+gemini --version  # Optional
 ```
 
-### Step 1: Deploy Context Memory DB
+### 5-Step Deployment
 
 ```powershell
+# Step 1: Deploy Context Memory DB (one-shot)
 cd <your-project-root>
-powershell -ExecutionPolicy Bypass -File <toolkit-path>/deployment/scripts/deploy-context-db.ps1
-```
+powershell -ExecutionPolicy Bypass `
+  -File <toolkit-path>/deployment/scripts/deploy-context-db.ps1
 
-Automatically completes 6 steps: directory creation → MCP Server copy → npm install → DB init → .mcp.json registration → rules deployment.
-
-### Step 2: Configure CLAUDE.md
-
-```bash
+# Step 2: Configure CLAUDE.md (project layer)
 cp <toolkit-path>/deployment/config-templates/claude/CLAUDE.md.template ./CLAUDE.md
-# Edit: replace {{PROJECT_NAME}}, add skills index, set up project-specific rules
-```
+# Edit: project name, Skill index, test accounts, forbidden patterns
 
-### Step 3: Deploy Rules
-
-```bash
+# Step 3: Deploy Rules (19 files)
 mkdir -p .claude/rules
 cp <toolkit-path>/deployment/config-templates/claude/rules/*.md .claude/rules/
+
+# Step 4: (Optional) BMAD Overlay
+cp -r <toolkit-path>/deployment/bmad-overlay/4-implementation/* `
+       _bmad/bmm/workflows/4-implementation/
+
+# Step 5: Verify
+claude mcp list                                     # MCP server registered
+node <toolkit>/deployment/scripts/verify-deployment-docs.cjs   # Doc freshness
 ```
 
-### Step 4: Install BMAD Overlay (Optional)
+### DevConsole Web UI (Optional Visualization)
 
 ```bash
-cp -r <toolkit-path>/deployment/bmad-overlay/4-implementation/* \
-  _bmad/bmm/workflows/4-implementation/
-```
-
-### Step 5: Verify
-
-```bash
-claude mcp list  # Confirm MCP Server registered
-# Restart Claude Code, then test: "Search memory DB for token reduction records"
+cd tools/dev-console
+npm install
+npm run dev
+# Frontend: http://localhost:5174
+# API:      http://localhost:3001
 ```
 
 ---
 
 ## Module Details
 
-### 1. Multi-Engine Collaboration
+### 1. Token Economics
 
-**Core file**: `research/multi-engine-collaboration-strategy.md`
-
-| Engine | Type | Best For | Agent ID |
-|--------|------|----------|:--------:|
-| **Claude Code CLI** | Terminal CLI | Primary commander, architecture, CR | `CC-` |
-| **Gemini CLI** | Terminal CLI | Large context analysis, bulk tasks | `GC-` |
-| **Antigravity IDE** | Agent-First IDE | E2E testing, UI development | `AG-` |
-| **Rovo Dev CLI** | Terminal CLI + IDE | Non-mainline tasks, quick fixes | `RD-` |
-
-Key designs:
-- **Unified Charter** (`AGENTS.md`) — shared language rules, directory structure, triggers
-- **Handoff SOP** — 3-step verification on agent switch (Sprint Status → Tracking → Last Log)
-- **Model Task Matrix** — each engine selects optimal model per task type
+- **Achievement**: Static prompt overhead reduced from ~18K → ~13K (−28%; peak −76.5% for stripped projects)
+- **Strategy**: Three-layer CLAUDE.md (global / project / local) + Skills lazy load + Rules conditional paths
+- **Reference**: `research/token-reduction-final-report.md`
 
 ### 2. Context Memory DB
 
-**Core file**: `deployment/context-memory-db-strategy.md`
+- **Engine**: SQLite + FTS5 trigram + WAL mode
+- **Embedding**: Xenova/all-MiniLM-L6-v2 (384D, zero API)
+- **Tables**: 30+ (knowledge / code / vector / Phase 4 learning / Phase 5 metrics)
+- **MCP Tools**: 23 (search × 10 / write × 4 / trace × 3 / analytics × 6)
+- **Reference**: `deployment/docs/memory-system-deep-dive.md`
 
-Solves the fundamental problem of AI agents "starting from zero every conversation."
+### 3. Multi-Engine Collaboration
 
-| Level | Name | Function | Dependency |
-|:-----:|------|----------|-----------|
-| **L0** | Knowledge Memory | FTS5 full-text search + 6 MCP Tools | Node.js 18+ |
-| **L1** | Code Semantic | Roslyn AST symbol extraction + dependency graph | .NET SDK 8+ |
-| **L2** | Vector Semantic | Local ONNX (384D) or OpenAI Embedding + Cosine Similarity | Optional (local ONNX = zero-cost) |
-| **L3** | Dynamic Injection | UserPromptSubmit Hook auto-injects context | L2 complete |
+- **Engines**: Claude Code (CC) / Gemini CLI (GC) / Antigravity IDE (AG) / Rovo Dev (RD)
+- **Charter**: Unified `AGENTS.md` v3.0 (857 lines)
+- **State**: `sprint-status.yaml` + `tracking/active/*.track.md`
+- **MCP Sharing**: stdio identical / HTTP transport key differs (`url` vs `httpUrl` vs `serverUrl`)
+- **Reference**: `research/multi-engine-collaboration-strategy.md`
 
-**MCP Tools (L0 Base)**:
+### 4. Pipeline Automation (Epic WFQ)
 
-| Tool | Function | Use Case |
-|------|----------|----------|
-| `search_context` | Search context memory | Query historical decisions before tasks |
-| `search_tech` | Search technical knowledge | Check known solutions before bug fixes |
-| `add_context` | Write context memory | New architecture decisions, pattern confirmations |
-| `add_tech` | Write technical findings | Technical solution validation results |
-| `add_cr_issue` | Write CR findings | Issues discovered during code review |
-| `trace_context` | Trace related context | Expand story_id + related_files |
+- **3-Slot Concurrency**: create / dev / review parallel, 12s interval, 8min watchdog
+- **6-Layer Defense**:
+  - L1 Pre-batch token check
+  - L2 Pre-story token check
+  - L3 Phase Gate
+  - L4 Post-execution audit
+  - L5 Heartbeat (Stop hook timestamp)
+  - L6 429/Model Purity (stderr scan, kill on degrade)
+- **Model Purity Rule**: NO Opus→Sonnet auto-degrade (corrupts code-review)
+- **OTel Token Tracking**: `otel-micro-collector.js` (port 49152-65535) → JSONL → DB
+- **Reference**: `deployment/docs/Claude智能中控自動化排程/pipeline-audit-token-safety.md`
 
-**MCP Tools (CMI Conversation Memory)**:
+### 5. BMAD Workflow Overlay
 
-| Tool | Function | Use Case |
-|------|----------|----------|
-| `list_sessions` | List recent sessions | Review conversation history overview |
-| `get_session_detail` | Get session details + turns | Deep-dive into a specific past conversation |
-| `search_conversations` | Search conversation content | Find past discussions by keyword |
+- **Base**: BMAD Method v6.0.0-alpha.21
+- **Concept Upgrade**: v6.2.2 (Markdown step file format, XML deprecated)
+- **3 Core Workflows**:
+  - `code-review`: 13 steps + 3-layer parallel (Blind / Edge / Acceptance) + SaaS 9 dimensions + Phase A-D Audit
+  - `create-story`: 8 steps + 7 Depth Gates (D1-D7) + DB-first + ATDD
+  - `dev-story`: 13 steps + Skill Staleness + Migration Cascade + KB Error Query + 3-layer Sync Gates
+- **Reference**: `deployment/docs/bmad-workflows-evolution.md`
 
-**Hook Automation (CMI-1)**:
+### 6. Skills Governance
 
-| Hook | Trigger | Behavior |
-|------|---------|----------|
-| **Stop** | Every Claude response | Auto-save session snapshot (UPDATE if <2min, INSERT otherwise) |
-| **SessionEnd** | Conversation ends | Unconditional INSERT (last-resort backup) |
-| **PreCompact** | Before context compaction | Shares dedup logic with Stop hook |
-| **UserPromptSubmit** | Each user prompt | Injects last 3 session records into additionalContext |
+- **Total**: 74 (47 domain + 1 third-party + 26 utility)
+- **Domain Profile**: 17 domains, ≤3 members → all load; ≥4 → primary + 2 most relevant
+- **Three-Engine Sync**: `.claude/` ⟷ `.gemini/` ⟷ `.agent/` (md5 identical except engine-specific frontmatter)
+- **Sync Gates 3 Layers**: skill-sync-gate / skill-idd-sync-gate / skill-tool-invocation-mandatory
+- **Reference**: `deployment/docs/skills-deep-dive.md`
 
-### 2.1. DevConsole Web UI
+### 7. IDD Framework (Intentional Decision Debt)
 
-**Core directory**: `tools/dev-console/`
-
-A standalone visual interface for browsing and managing Context Memory DB data, complementing the CLI-based MCP Tools.
-
-| Page | Function |
-|------|----------|
-| **Dashboard** | Story status KPI distribution + recent activity + Embedding stats |
-| **Stories** | Kanban board + Epic filter + Story detail (Markdown rendering) |
-| **Memory** | Memory DB browse/search + category filter + manual CRUD |
-| **Sessions** | Session work log timeline |
-| **CR Issues** | Code Review issue tracking + severity/resolution stats |
-| **Documents** | Document browser with 6 category groups, FTS5 + LIKE fallback search, keyword highlighting, VS Code one-click open, related documents API |
-
-**Tech Stack**: Express 5 (API, port 3001) + Vite + React 18 (SPA, port 5174) + better-sqlite3 + i18n (zh-TW default / en)
-
-**Documents Page Features**:
-- **Category Group Mapping**: 14 fine-grained DB categories aggregated into 6 UI groups (Requirements, Technical, Analysis, Knowledge, Workflow, Other) with card navigation
-- **Dual-Path Search**: FTS5 trigram MATCH for queries >= 3 chars, LIKE `%keyword%` fallback for 2-char CJK queries (e.g., short Chinese keywords)
-- **Keyword Highlighting**: Search terms highlighted with `<mark>` in results
-- **VS Code Integration**: `vscode://file/{path}` URI scheme opens documents directly in VS Code
-- **Related Documents API**: `GET /api/documents/related` — Epic-first exact match, then FTS5 keyword fallback
-
-```bash
-cd tools/dev-console && npm run dev
-# Frontend: http://localhost:5174
-# API: http://localhost:3001
-```
-
-### 3. BMAD Method Integration
-
-**Core file**: `deployment/bmad-overlay/`
-
-Production-grade enhancements on top of [BMAD Method](https://github.com/bmadcode/BMAD-METHOD) v6.0:
-
-| Workflow | Original | Overlay Enhancement |
-|----------|----------|-------------------|
-| **dev-story** | Basic task execution | + Dual status update + 5-point sync + Auto skills loading + **SDD-TDD Bridge** (BR→Test mapping, 3-round debug limit) |
-| **code-review** | Basic code review | + useState/Zustand duplication detection + Full-fix tech debt policy + CR deferred routing + **VSDD Simplified** (Spec vs Code alignment) |
-| **create-story** | Basic story creation | + Auto-analyze skills_list.md + Auto-create tracking + Auto-update sprint status + **AC-BR Traceability** + SDD Spec pre-check (M/L/XL) |
-
-**BMAD 4-Phase Development Lifecycle**:
-
-```
-Phase 1: Analysis    →  /product-brief
-Phase 2: Planning    →  /create-prd
-Phase 3: Architecture →  /create-architecture (+ Gate Check)
-Phase 4: Implementation →  /create-story → /dev-story → /code-review (Sprint cycle)
-```
-
-### 4. Token Reduction Strategy
-
-**Core file**: `research/token-reduction-final-report.md`
-
-Systematic optimization across 41 TRS Stories:
-
-| Strategy | Approach | Result |
-|----------|----------|--------|
-| **Static Slimming** | CLAUDE.md rewrite, Rules split, Auto-memory minimization | Static tax 15.4K → 3.6K tokens |
-| **Cache Killer Elimination** | Remove dynamic content (sprint status, timestamps) | Prompt Caching hit rate restored |
-| **Workflow Compression** | XML instruction trimming, checklist merging | Sprint cycle 31.2K → ~22K tokens |
-| **On-Demand Queries** | MEMORY.md → Context Memory DB, 8.8KB → 723B | Auto-memory fixed cost -90% |
-| **Skills On-Demand** | Full Skill content loaded on-demand, only summaries Always-On | Prevents 15+ Skills full-load |
-
-### 5. Pipeline Automation
-
-**Core files**: `deployment/scripts/`
-
-| Script | Function | Use Case |
-|--------|----------|----------|
-| `batch-runner.ps1` | Batch story executor | ≥2 stories in parallel |
-| `batch-audit.ps1` | Batch code review | Multi-story review in one pass |
-| `story-pipeline.ps1` | Full pipeline (create → dev → review) | Single story end-to-end |
-| `epic-auto-pilot.ps1` | Sprint auto-execution engine | Push entire epic automatically |
-| `check-hygiene.ps1` | Pre-commit hygiene check | Sensitive data scanning |
-
-**Token Safety Valve**: Auto-detects abnormal token consumption during batch execution, pauses and notifies when threshold exceeded.
-
-### 6. Multi-Agent Parallel Execution
-
-**Core file**: `deployment/multi-agent-parallel-execution-strategy.md`
-
-Three-layer architecture, choose per scenario:
-
-| Layer | Strategy | Problem Solved | Scenario |
-|:-----:|----------|---------------|----------|
-| 1 | **Worktree Isolation** | Same-engine multi-instance file conflicts | 5xCC-OPUS parallel sprint |
-| 2 | **File Lock** | Cross-engine same-directory file overwrites | CC + GC working different features |
-| 3 | **Total Commit** | Commit conflicts + token waste | Agents don't commit, human decides timing |
-
-### 7. Telegram Remote Control
-
-**Core directory**: `telegram-bridge/`
-
-Control Claude Code CLI from your phone via Telegram Bot.
-
-#### Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Telegram Bot Layer                     │
-│  Commands: /new /stop /clear /model /status /cd /bookmark│
-│  Message routing → sendInput / startSession              │
-│  File upload → save to working dir + notify Claude       │
-│  Heartbeat → typing status indicator                     │
-│  Output buffer → 800ms batch + token/time stats          │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│                Claude Manager Layer                      │
-│  startSession() → launch stream-json persistent process  │
-│  sendInput()    → JSON stdin write + queue management    │
-│  Events: output / ready / responseComplete / closed      │
-│  Auto-reconnect: process death → restart on next message │
-│  Zombie cleanup: scan and kill residual processes        │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│             Stream-JSON Parser Layer                     │
-│  Parse NDJSON event stream                               │
-│  Accumulate text_delta → complete text blocks            │
-│  Detect message_stop → mark response complete            │
-│  Extract session_id + usage (token stats)                │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────────┐
-│               Session Store (SQLite)                     │
-│  Session persistence + message history + model pref      │
-│  + path bookmarks                                        │
-└─────────────────────────────────────────────────────────┘
-```
-
-#### v2.0 Key Features (Persistent Process Mode)
-
-v1.0 spawned an independent `claude -p "message"` process per Telegram message (one-shot), causing repeated project context loading (10+ second delay + token re-consumption). v2.0 uses **stream-json persistent process**:
-
-| Feature | Description |
-|---------|-------------|
-| **Stream-JSON Persistent Process** | Context loaded once, multi-turn with memory |
-| **Message Queue** | Rapid-fire messages won't be lost, processed in order |
-| **Auto-Reconnect** | Process death → auto-restart on next message |
-| **Typing Heartbeat** | Telegram shows "typing..." while Claude thinks |
-| **Zombie Cleanup** | Auto-cleans residual processes on start/stop |
-| **Output Buffer** | 800ms batch send with token usage and time stats |
-
-#### Commands
-
-| Command | Function |
-|---------|----------|
-| `/new [path]` | Start new session — end current process, launch new Claude session |
-| `/stop` | Stop Claude process |
-| `/clear` | Clear conversation context |
-| `/status` | Show status, model, working dir, turn count, cumulative tokens |
-| `/model <name>` | Switch model (haiku/sonnet/opus) |
-| `/cd <path>` | Change working directory |
-| `/bookmark add <name> <path>` | Save path bookmark |
-
-#### Quick Deploy
-
-```bash
-cd telegram-bridge
-cp .env.example .env
-# Edit .env: fill TELEGRAM_BOT_TOKEN + ALLOWED_USER_IDS
-npm install
-npm run dev
-```
-
-> See `telegram-bridge/SETUP.md` for detailed setup steps (including BotFather tutorial).
+- **4 Sub-types**: COM (Commercial) / STR (Strategic) / REG (Regulatory) / USR (User Feedback)
+- **4-Layer Annotation**: Code (`[Intentional: IDD-XXX]`) / ADR / DB (`intentional_decisions` table) / Memory (`memory/intentional_*.md` + MEMORY.md)
+- **Forbidden Changes**: JSON pattern protected by Skill-IDD-Sync-Gate
+- **Reference**: `deployment/docs/idd-framework.md`
 
 ---
 
 ## Research Reports Index
 
-All strategies were cross-validated across multiple engines and models:
-
-| Report | Topic | Models Involved |
-|--------|-------|----------------|
-| `token-reduction-final-report.md` | Token reduction consolidated | Opus 4.6, Sonnet 4.6, Gemini Pro |
-| `multi-engine-collaboration-strategy.md` | 4-engine specs + task matrix | BMAD Party Mode (5 roles) |
-| `auto-pilot-multi-agent-research.md` | Auto-Pilot workflow improvement | AG-OPUS (Antigravity) |
-| `bmad-vs-everything-claude-code.md` | BMAD vs ECC architecture integration | Web AI deep research |
-| `context-memory-db/*.md` | Memory DB strategy (multi-perspective) | CC + AC + GC + RC + ChatGPT |
-| `methodology/*.md` | SDD+ATDD+TDD methodology research | ChatGPT + Gemini + Claude cross-analysis |
+| Report | Path |
+|:----|:----|
+| Token Reduction Final Report v2.0 | `research/Claude_Code_Token_減量策略_最終彙整報告_v2.0.md` |
+| Multi-Engine Collaboration Strategy | `research/multi-engine-collaboration-strategy.md` |
+| BMAD-METHOD vs Everything Claude Code | `research/BMAD-METHOD 與 everything-claude-code 比較.md` |
+| Hermes Adoption (5 concept ports) | `research/hermes導入.md` |
+| Project Optimization Plan F1-F5 / G1-G3 / H1-H4 | `research/專案優化項目計畫.md` |
+| **Current Environment Snapshot 2026-05-01** | `research/當前環境完整快照_2026-05-01.md` ← (NEW v1.8.0) |
 
 ---
 
-## TRS Execution Stories
+## TRS Execution Stories (41 battle-tested)
 
-41 TRS (Token Reduction Strategy) stories documenting the full problem-to-solution journey:
-
-| Phase | Stories | Theme |
-|:-----:|:-------:|-------|
-| **1** | TRS-0 ~ TRS-9 | Basic token reduction: .claudeignore, CLAUDE.md slimming, Rules split |
-| **2** | TRS-10 ~ TRS-19 | Workflow compression: XML optimization, code-review audit |
-| **3** | TRS-20 ~ TRS-29 | 4-engine unification: Gemini MD alignment, Antigravity Skills |
-| **4** | TRS-30 ~ TRS-33 | Parallel execution: File Lock mechanism, Worktree SOP |
-| **5** | TRS-34 ~ TRS-40 | Advanced: Tech debt registry, YAML index optimization |
-| **CMI** | CMI-1 ~ CMI-6 | Context Memory Improvement: auto session lifecycle, document ETL, conversation memory, document vectorization semantic search (Hybrid Fusion), compaction guard, local ONNX Embedding + session quality enhancement |
-| **FLOW** | FLOW-OPT-001 | SDD+ATDD+TDD methodology integration: BDD demotion, spec-gen auto-trigger, AC-BR traceability, VSDD simplified |
-
-> Each story contains: problem definition, execution details, file change list, quantified benefits.
+| Epic | Stories | Outcome |
+|:----|:----:|:----|
+| TRS-0~34 | 35 | Token static cost −86% (15.4K→2.6K) |
+| TD-15~19 | 5 | DB Schema cleanup + Skill validator |
+| TD-32~36 | 5 | Context Memory DB + MCP Server + ONNX |
+| CMI-1~6 | 6 | Conversation lifecycle + ETL + dialogue memory |
+| WFQ-01~08 | 8 | Pipeline quota + Heartbeat + 429/Model Purity |
+| ECC-01~05 | 5 | Hook infrastructure (Pre-Commit / Config Protection / RAG / suggest-compact / MCP Health) |
+| BU-01~06 | 6 | BMAD v6.2.2 upgrade (XML→MD + 3-layer parallel + Skill Validator) |
 
 ---
 
 ## Requirements
 
-| Item | Version | Required | Purpose |
-|------|---------|:--------:|---------|
-| **Node.js** | 18+ | Yes | MCP Server runtime |
-| **PowerShell** | 5.1+ | Yes | Deployment scripts, pipeline automation |
-| **Claude Code CLI** | Latest | Yes | Primary AI agent engine |
-| **Git** | 2.30+ | Recommended | Version control, Worktree support |
-| **Gemini CLI** | Latest | Optional | Large context development |
-| **Antigravity IDE** | Latest | Optional | E2E testing, UI development |
-| **Rovo Dev CLI** | Latest | Optional | Non-mainline tasks |
-| **.NET SDK** | 8+ | Optional | L1 Code RAG (Roslyn AST) |
-| **OpenAI API Key** | — | Optional | L2 vector semantic search (not needed if using local ONNX) |
+| Component | Version | Required | Purpose |
+|:----|:----:|:----:|:----|
+| Node.js | ≥18 | ✅ | MCP Server runtime |
+| PowerShell | 5.1+ | ✅ | Automation scripts (Windows) |
+| Claude Code CLI | latest | ✅ | Primary AI engine |
+| Git | ≥2.30 | Recommended | Version control |
+| .NET SDK | ≥8 | Optional | L1 Code RAG (Roslyn) |
+| Gemini CLI | latest | Optional | Multi-engine support |
+| Antigravity IDE | latest | Optional | E2E testing + IDE integration |
+| Rovo Dev CLI | latest | Optional | Atlassian integration |
 
 ---
 
 ## Deployment Scenarios
 
-| Scenario | Recommended Level |
-|----------|------------------|
-| **Solo developer + Claude Code** | L0 Context Memory DB + Rules + Token reduction |
-| **Small team + dual engine** | Above + BMAD Overlay + batch-runner |
-| **Multi-engine parallel development** | Above + File Lock + Worktree + Pipeline automation |
-| **Enterprise sprint management** | Full deployment + L1/L2 Code RAG + Auto-Pilot |
+| Scenario | Engines | Use Case |
+|:----|:----|:----|
+| **Minimal** | Claude Code only | Solo dev, VS Code workflow |
+| **Dual** | Claude + Gemini | Plan-vs-execute split |
+| **Triple** | Claude + Gemini + Antigravity | + E2E testing, IDE integration |
+| **Full** | All 4 engines | + Atlassian Jira/Confluence integration |
 
 ---
 
-## License
+## Version History
 
-| Component | License | Source |
-|-----------|---------|--------|
-| BMAD Method | MIT | [bmadcode/BMAD-METHOD](https://github.com/bmadcode/BMAD-METHOD) |
-| Everything Claude Code | Original | [anthropics/courses](https://github.com/anthropics/courses) |
-| claude-mem | Reference | Open source community |
-| **Custom parts** | **MIT** | This repository |
+| Version | Date | Changes |
+|:----|:----|:----|
+| **1.8.0** | **2026-05-01** | **9 deep-dive documents added** (SANITIZATION-POLICY / skills / rules / idd / hooks / memory / mcp / bmad-workflows / commands) + **global-claude-config.md** + **当前環境完整快照 2026-05-01** snapshot. Numbers updated: 14 hooks (was 6) / 74 skills (was 38) / 20 rules (was 7) / 30+ DB tables / 23 MCP tools / 82 scripts. **Maintenance rule**: `deployment-doc-freshness.md` + `verify-deployment-docs.cjs` CI advisory. **3-Layer Sync Gates** mandatory enforcement. **IDD 4-layer annotation** + 4 sub-types. **Pipeline 6-Layer Defense** (L5 Heartbeat + L6 429/Model Purity + Model Purity Rule). **OTel Token tracking**. **BMAD v6.2.2 concept upgrade** (Epic BU). **Phase 4 Rule Violation Tracker** (5-Layer Anti-Recidivism Chain). |
+| 1.7.1 | 2026-04-04 | Epic WFQ Pipeline quota management + Heartbeat (L5) + 429/Model Purity (L6) + Recovery Script + OTel Token + Quota Prediction + Phase Timeout tiering + ModelPricing + Model Purity Rule. -p mode Truth Table (v2.1.92). DB Schema +4 columns. BMAD Workflow definition reinforcement (4 GAP fixes). 6 Stories, avg CR 93.5. |
+| 1.7.0 | 2026-03-12 | G-class SDD+ATDD+TDD methodology (FLOW-OPT-001) + Epic CMI conversation lifecycle (CMI-1~6) + bmad-overlay sync 5 files + sdd-spec-generator skill. Token reduction Session cost ~4,910 tokens (−68%). |
+| 1.6.0 | 2026-03-07 | Context Memory DB strategy (TD-32~36) + MCP Server + init-db + deploy-context-db.ps1 + context-memory-db.md rule + MEMORY.md template (~350 tokens) + TD-15~19 schema cleanup. |
+| 1.5.0 | 2026-03-02 | Pipeline central control automation + Token safety valve + batch-audit + TRS-35/37/38 (Sprint Status compression / Registry archival / single-read). |
+| 1.4.0 | 2026-02-28 | Tech Debt central registry (TRS-34) + worktree merge rules. |
+| 1.3.0 | 2026-02-27 | Worktree quick reference + main manual v3.1.0 (PART 8.5 Worktree parallel + merge SOP). |
+| 1.2.0 | 2026-02-27 | BMAD architecture evolution analysis + Token quantification + ECC coverage + migration decision framework. |
+| 1.1.0 | 2026-02-27 | Rovo Dev CLI templates + CLI installation guides + conditional deployment + environment matrix + new engine onboarding SOP. |
+| 1.0.0 | 2026-02-27 | Initial: TRS optimization overlay + config templates + automation scripts. |
 
 ---
 
-## Acknowledgments
+## License & Acknowledgments
 
-- [BMAD Method](https://github.com/bmadcode/BMAD-METHOD) — Spec-driven "Agent-as-Code" framework
-- [Everything Claude Code](https://github.com/anthropics/courses) — Token economics and continuous learning
-- [claude-mem](https://github.com/anthropics/claude-mem) — MCP-based memory persistence reference
-- Anthropic Claude — Opus / Sonnet / Haiku models powering the entire workflow
+**License**: MIT
+
+**Source Materials**:
+- [BMAD-METHOD](https://github.com/bmadcode/BMAD-METHOD) — MIT License
+- [Everything Claude Code](https://github.com/anthropics/everything-claude-code) — Anthropic course materials
+- Custom integration & augmentation by toolkit author
+
+**Acknowledgments**:
+- Anthropic team for Claude Code CLI + MCP protocol
+- BMAD Method community for spec-driven workflow methodology
+- All TRS Story contributors for battle-testing optimizations
+
+---
+
+> **Languages**: [English](README.md) | [繁體中文](README.zh-TW.md)
+> **Version**: 1.8.0 | **Last Updated**: 2026-05-01

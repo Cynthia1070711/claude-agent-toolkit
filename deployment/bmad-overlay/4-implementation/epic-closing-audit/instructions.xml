@@ -1,0 +1,284 @@
+<workflow>
+  <critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
+  <critical>You MUST have already loaded and processed: {installed_path}/workflow.yaml</critical>
+  <critical>Communicate all responses in {communication_language}</critical>
+  <critical>Generate the audit report document in {document_output_language}</critical>
+  <critical>This workflow produces a single audit report file. Save to output file after each audit step.</critical>
+  <critical>This is a TEMPLATE workflow. Initialize report from audit-report-template.md first.</critical>
+
+  <step n="0" goal="Initialize and determine target epic">
+    <check if="{{epic_id}} is provided as argument">
+      <action>Use provided epic_id (e.g., "qgr", "td")</action>
+    </check>
+    <check if="{{epic_id}} is empty">
+      <ask>Which epic to audit? Provide epic ID (e.g., "qgr", "td", "fra") or "auto" to detect from sprint-status:</ask>
+      <check if="user says 'auto'">
+        <action>Read {sprint_status} and find the most recently completed epic (status == 'done')</action>
+        <action>Set {{epic_id}} = found epic key (strip 'epic-' prefix)</action>
+      </check>
+    </check>
+
+    <action>Set {{output_file}} = "{implementation_artifacts}/reviews/epic-{{epic_id}}/epic-{{epic_id}}-closing-audit-{date}.md"</action>
+    <action>Create output directory if it does not exist</action>
+    <action>Read audit-report-template.md and write to {{output_file}} with {{epic_id}} and {{date}} substituted</action>
+
+    <action>Load epic stories: read all .md files in {stories_dir}/epic-{{epic_id}}/</action>
+    <action>From each done/review story, extract: story_key, File List section content, Tasks/Subtasks checklist</action>
+    <action>Store combined as {{epic_story_data}}</action>
+
+    <output>
+## 審計初始化完成
+
+- **目標 Epic:** epic-{{epic_id}}
+- **報告路徑:** {{output_file}}
+- **Story 數量:** {{story_count}} 個已掃描
+    </output>
+  </step>
+
+  <step n="1" goal="DB Schema consistency audit (AC-2)">
+    <critical>This step verifies database schema documentation currency against actual migrations</critical>
+
+    <!-- 1a: Find latest migration date -->
+    <action>List all files in {migration_dir} matching pattern *.cs (exclude Designer.cs and Snapshot.cs)</action>
+    <action>Parse migration file names — BMAD EF Core migration format: YYYYMMDDHHMMSS_MigrationName.cs</action>
+    <action>Extract the timestamp from the most recent migration filename</action>
+    <action>Store as {{latest_migration_date}} (format: YYYY-MM-DD)</action>
+    <action>Store latest migration name as {{latest_migration_name}}</action>
+
+    <!-- 1b: Read database-schema.md last updated date -->
+    <action>Read first 15 lines of {database_schema}</action>
+    <action>Find line matching pattern: "Last Updated:" or "最後更新:" or similar date field</action>
+    <action>Extract date value as {{schema_last_updated}}</action>
+
+    <!-- 1c: Calculate gap -->
+    <action>Calculate {{gap_days}} = ({{latest_migration_date}} - {{schema_last_updated}}) in days</action>
+    <action>Set {{db_audit_severity}} based on gap:
+      - gap > 14 days → CRITICAL
+      - gap 7-14 days → WARNING
+      - gap 0-7 days → OK
+    </action>
+
+    <!-- 1d: Extract new entities from epic stories -->
+    <action>Scan {{epic_story_data}} File Lists for new/modified files matching patterns:
+      - Data/Migrations/*.cs (new migrations)
+      - Models/*.cs (new or modified entities)
+      - Data/ApplicationDbContext.cs (DbSet additions)
+    </action>
+    <action>Store as {{new_entities_in_epic}} list</action>
+
+    <!-- 1e: Save results -->
+    <action>Update {{output_file}} — fill in Section 1 (DB Schema 一致性審計) with:
+      - {{latest_migration_name}}, {{latest_migration_date}}
+      - {{schema_last_updated}}, {{gap_days}}, {{db_audit_severity}}
+      - {{new_entities_in_epic}} list
+    </action>
+
+    <output>
+### Step 1 完成：DB Schema 一致性審計
+
+- **最新 Migration:** {{latest_migration_name}} ({{latest_migration_date}})
+- **Schema 文檔更新:** {{schema_last_updated}}
+- **差距:** {{gap_days}} 天 → **{{db_audit_severity}}**
+- **Epic 新增 Entity:** {{new_entities_in_epic}}
+    </output>
+  </step>
+
+  <step n="2" goal="Documentation staleness scan (AC-3)">
+    <critical>Compare epic file changes against documentation last-updated dates</critical>
+
+    <!-- 2a: Collect modified source files from epic -->
+    <action>Scan {{epic_story_data}} File Lists — extract all modified backend files:
+      - Controllers/**/*.cs
+      - Services/**/*.cs
+      - Models/**/*.cs
+      - Program.cs
+      - Areas/**/*.cs
+    </action>
+    <action>Categorize by type: Controller, Service, Model, Config</action>
+    <action>Store as {{modified_source_files}}</action>
+
+    <!-- 2b: Check documentation dates -->
+    <action>For each documentation file in scope, read first 20 lines and find Last Updated date:
+      - {project-root}/docs/project-planning-artifacts/technical-specs/database-schema.md
+      - {project-root}/docs/project-planning-artifacts/architecture/*.md (all files)
+      - {project-root}/docs/project-planning-artifacts/technical-specs/*.md (all files)
+      - {project-root}/docs/project-context.md
+    </action>
+    <action>For each doc, calculate gap vs most recent epic story completion date</action>
+    <action>Flag as STALE if gap > 14 days AND doc covers modules changed in this epic</action>
+    <action>Store as {{stale_docs}} list with: doc_path, last_updated, gap_days, affected_modules</action>
+
+    <!-- 2c: Save results -->
+    <action>Update {{output_file}} — fill in Section 2 (文檔過時掃描) with {{stale_docs}} findings</action>
+
+    <output>
+### Step 2 完成：文檔過時掃描
+
+- **過時文檔數:** {{stale_doc_count}}
+- **嚴重過時 (>30天):** {{critical_stale_count}}
+    </output>
+  </step>
+
+  <step n="3" goal="Skill coverage analysis (AC-4)">
+    <critical>Identify new patterns in epic that lack Skill coverage</critical>
+
+    <!-- 3a: Read skills_list.md trigger keywords -->
+    <action>Read {skills_list} — extract all trigger keywords per skill</action>
+    <action>Store as {{skill_keyword_map}}: skill_name → [keyword1, keyword2, ...]</action>
+
+    <!-- 3b: Collect new file patterns from epic -->
+    <action>Scan {{epic_story_data}} File Lists — collect:
+      - New directories created
+      - New service class names (Services/**/I*.cs, Services/**/*.cs)
+      - New model names (Models/**/*.cs)
+      - New frontend patterns (ClientApp/src/**/*.ts, *.tsx)
+    </action>
+    <action>Store as {{new_patterns_in_epic}} list</action>
+
+    <!-- 3c: Match patterns against skill keywords -->
+    <action>For each item in {{new_patterns_in_epic}}:
+      - Check if any keyword in {{skill_keyword_map}} matches (case-insensitive substring)
+      - If match found → record as covered
+      - If no match → record as uncovered
+    </action>
+    <action>Calculate {{coverage_pct}} = (covered_count / total_count) * 100</action>
+    <action>Store {{uncovered_patterns}} = list of patterns with no matching skill</action>
+
+    <!-- 3d: Save results -->
+    <action>Update {{output_file}} — fill in Section 3 (Skill 覆蓋率分析) with coverage stats and uncovered patterns</action>
+
+    <output>
+### Step 3 完成：Skill 覆蓋率分析
+
+- **新模式總數:** {{total_pattern_count}}
+- **Skill 覆蓋:** {{coverage_pct}}%
+- **未覆蓋模式:** {{uncovered_patterns}}
+    </output>
+  </step>
+
+  <step n="4" goal="ADR gap assessment (AC-5)">
+    <critical>Identify architectural decisions in epic that lack ADR documentation</critical>
+
+    <!-- 4a: Load existing ADRs -->
+    <action>Read {adr_dir}/README.md to get existing ADR list</action>
+    <action>If README.md not found, list all .md files in {adr_dir}</action>
+    <action>Store as {{existing_adrs}} list with: adr_id, title, topic keywords</action>
+
+    <!-- 4b: Identify architectural decisions in epic -->
+    <action>Scan {{epic_story_data}} for architectural decision markers:
+      - New Entity types (new DbSet in ApplicationDbContext.cs)
+      - New Service patterns (new interface + implementation pairs)
+      - New Protocol/Middleware additions (Program.cs changes)
+      - New external integrations (3rd party APIs, new NuGet packages)
+      - New frontend architecture (new store patterns, new context providers)
+    </action>
+    <action>Store as {{epic_arch_decisions}} list</action>
+
+    <!-- 4c: Gap analysis -->
+    <action>For each item in {{epic_arch_decisions}}:
+      - Search {{existing_adrs}} for related title/keywords
+      - If match found → mark as COVERED
+      - If no match → mark as NEEDS_ADR
+    </action>
+    <action>Store {{missing_adrs}} = decisions marked NEEDS_ADR</action>
+
+    <!-- 4d: Save results -->
+    <action>Update {{output_file}} — fill in Section 4 (ADR 缺口評估) with findings</action>
+
+    <output>
+### Step 4 完成：ADR 缺口評估
+
+- **現有 ADR 數:** {{existing_adr_count}}
+- **Epic 架構決策數:** {{epic_arch_decision_count}}
+- **需新建 ADR:** {{missing_adr_count}} 個
+    </output>
+  </step>
+
+  <step n="5" goal="Generate fix stories (AC-6)">
+    <critical>Auto-generate TD story frameworks for all audit findings requiring action</critical>
+
+    <!-- 5a: Aggregate all findings requiring action -->
+    <action>Collect actionable findings from Steps 1-4:
+      - Step 1: If {{db_audit_severity}} is CRITICAL or WARNING → generate DB Schema update story
+      - Step 2: For each STALE doc → generate doc sync story (group by doc type if multiple)
+      - Step 3: If {{coverage_pct}} &lt; 80% → generate new skill creation story
+      - Step 4: For each missing ADR → generate ADR creation story
+    </action>
+
+    <!-- 5b: Determine next TD story ID -->
+    <action>Read {sprint_status} and find highest existing td-N-* story number</action>
+    <action>Set {{next_story_num}} = highest_num + 1</action>
+
+    <!-- 5c: Generate story framework for each finding -->
+    <action>For each actionable finding, create story framework:
+      - Story ID: td-{{next_story_num}}-{descriptive-slug}
+      - Title: 繁體中文描述
+      - Priority: P0 if CRITICAL, P1 if WARNING/gap, P2 if low coverage
+      - Complexity: S/M/L based on scope
+      - Status: backlog
+      - Acceptance Criteria: 2-4 specific ACs based on finding
+      - Increment {{next_story_num}} for each new story
+    </action>
+
+    <!-- 5d: Write story files -->
+    <check if="one or more fix stories generated">
+      <action>For EACH generated story:
+        1. Create story file at: {stories_dir}/epic-td/{{story_id}}.md
+           (Use create-story template format: Story 資訊 table + Story + AC + Tasks sections)
+        2. Add entry to {sprint_status}:
+           {{story_id}}: backlog  # {complexity}, P{priority}, {short_description} (created: audit {{date}})
+        3. Create tracking file at: {output_folder}/tracking/active/{{story_id}}.track.md
+      </action>
+    </check>
+
+    <!-- 5e: AC-9 Context Memory DB reservation -->
+    <action>In audit report Section 5, add note:
+      "Context Memory DB 整合預留 (AC-9): 若 TD-32a/b/c/d 完成後，以下查詢可改用 DB 介面：
+       - 文檔新鮮度查詢 → doc_index 表
+       - Skill 觸發歷史 → workflow_executions 表
+       - 新 Story 寫入 → stories 表"
+    </action>
+
+    <!-- 5f: Save results -->
+    <action>Update {{output_file}} — fill in Section 5 (修復 Story 生成) with generated story list and file paths</action>
+    <action>Update {{output_file}} — fill in Section 6 (審計摘要) with overall health score and executive summary</action>
+
+    <output>
+### Step 5 完成：修復 Story 自動生成
+
+- **生成 TD Story 數:** {{generated_story_count}}
+- **新增至 sprint-status.yaml:** {{generated_story_count}} 個 backlog 項目
+- **Report 路徑:** {{output_file}}
+    </output>
+  </step>
+
+  <step n="6" goal="Final report and completion">
+    <action>Verify {{output_file}} is complete — all 6 sections filled</action>
+    <action>Calculate overall audit health score:
+      - DB Schema OK → +25 pts
+      - Docs &lt;= 1 stale → +25 pts
+      - Skill coverage >= 80% → +25 pts
+      - ADR gaps = 0 → +25 pts
+      (Each deduction proportional to severity)
+    </action>
+    <action>Update audit report Summary section with health score and timestamp</action>
+
+    <output>
+## Epic Closing Audit 完成
+
+**Epic:** epic-{{epic_id}}
+**審計報告:** {{output_file}}
+**整體健康分數:** {{health_score}}/100
+
+### 建議後續行動
+
+1. 執行已生成的 TD Story 修復任務
+2. 若 DB Schema CRITICAL → 優先執行 database-schema.md 更新
+3. 若文檔過時 → 依優先級更新 architecture/ 和 technical-specs/
+4. 將審計報告分享給 SM 和架構師審閱
+
+**Tip:** 建議在 Epic 50% 和 75% 進度時也執行一次中期審計。
+    </output>
+  </step>
+
+</workflow>

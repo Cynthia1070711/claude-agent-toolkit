@@ -21,7 +21,7 @@
     The file path to check. If not provided, reads from hook env vars.
 
 .EXAMPLE
-    powershell -File scripts/file-lock-check.ps1 -AgentId CC-OPUS -FilePath "src/MyProject.Web/Program.cs"
+    powershell -File scripts/file-lock-check.ps1 -AgentId CC-OPUS -FilePath "src/App.Web/Program.cs"
 #>
 
 param(
@@ -121,7 +121,7 @@ foreach ($lock in $lockContent.locks) {
 
 # --- Write back cleaned locks if any expired (M2: unified UTF-8 no-BOM write) ---
 if ($cleaned) {
-    $mutexName = "Global\AgentFileLock_MyProject"
+    $mutexName = "Global\AgentFileLock_PCPT"
     $mutex = $null
     try {
         $mutex = New-Object System.Threading.Mutex($false, $mutexName)

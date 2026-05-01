@@ -10,7 +10,7 @@
 
 ## 一、問題背景
 
-MyProject 專案使用四引擎（Claude Code CLI + Gemini CLI + Antigravity IDE + Rovo Dev CLI）協作開發，且經常**同一引擎多開**（如 5 個 CC-OPUS 同時執行不同 Story）。Party Mode 討論中識別出三個核心風險：
+PCPT 專案使用四引擎（Claude Code CLI + Gemini CLI + Antigravity IDE + Rovo Dev CLI）協作開發，且經常**同一引擎多開**（如 5 個 CC-OPUS 同時執行不同 Story）。Party Mode 討論中識別出三個核心風險：
 
 1. **Commit Token 成本** — Agent 在 commit 過程中消耗的 token
 2. **多 Agent 同時 Commit** — Staging area 污染、index.lock 衝突
@@ -50,7 +50,7 @@ Layer 3: Total Commit 模式（解決 commit 衝突與 token 浪費）
 Git Worktree 在同一個 repository 中建立多個獨立工作目錄，每個目錄 checkout 不同 branch，共享 `.git` 物件資料庫但檔案完全隔離。
 
 ```
-主目錄:  MyProject-MVP/
+主目錄:  <workspace-root>/
           ├── .git/                    (共享的 git 資料庫)
           └── .claude/worktrees/
               ├── ba-3/                (實例 1 的獨立工作區，branch: story/ba-3)
@@ -94,7 +94,7 @@ claude -w d3
 #### 重新進入已存在的 Worktree（不會觸發 GitHub 認證）
 
 ```powershell
-cd C:\Users\Alan\Desktop\Projects\MyProject-MVP\.claude\worktrees\ba-3
+cd C:\Users\Alan\Desktop\Projects\<workspace-root>\.claude\worktrees\ba-3
 claude              # 新對話
 claude --resume     # 接續上次對話
 ```
@@ -114,7 +114,7 @@ Worktree 內 Commit = 零風險
 
 ```powershell
 # 回到主目錄
-cd C:\Users\Alan\Desktop\Projects\MyProject-MVP
+cd C:\Users\Alan\Desktop\Projects\<workspace-root>
 
 # 依序 merge 各 branch
 git merge story/ba-3
@@ -219,7 +219,7 @@ hot_files:
   "version": 1,
   "locks": [
     {
-      "file": "src/MyProject.Web/Program.cs",
+      "file": "src/App.Web/Program.cs",
       "agent": "CC-SONNET",
       "story": "QGR-BA-3",
       "type": "write",
@@ -469,7 +469,7 @@ Merge 時 Program.cs 衝突範例：
 
 ## 十、Tech Debt Registry 與多 Agent 協作
 
-> **關聯**: `/example-debt-registry` Skill v1.0.0 | TRS-34
+> **關聯**: `/pcpt-debt-registry` Skill v1.0.0 | TRS-34
 
 ### 10.1 registry.yaml 作為 Hot File
 

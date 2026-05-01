@@ -1,0 +1,52 @@
+name: epic-closing-audit
+description: "Run after epic completion to perform global consistency audit: DB schema, technical docs, skill coverage, ADR gaps, and auto-generate fix stories"
+author: "BMad"
+
+# Critical variables from config
+config_source: "{project-root}/_bmad/bmm/config.yaml"
+output_folder: "{config_source}:output_folder"
+user_name: "{config_source}:user_name"
+communication_language: "{config_source}:communication_language"
+user_skill_level: "{config_source}:user_skill_level"
+document_output_language: "{config_source}:document_output_language"
+implementation_artifacts: "{config_source}:implementation_artifacts"
+date: system-generated
+
+# Workflow components
+installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/epic-closing-audit"
+instructions: "{installed_path}/instructions.xml"
+template: "{installed_path}/audit-report-template.md"
+validation: "{installed_path}/checklist.md"
+
+# Target epic (provided by user or auto-detected from sprint-status)
+epic_id: ""  # e.g., "qgr", "td", "fra" — set via argument or ask at runtime
+
+# Output report path
+default_output_file: "{implementation_artifacts}/reviews/epic-{epic_id}/epic-{epic_id}-closing-audit-{date}.md"
+
+# Sprint & registry inputs
+sprint_status: "{implementation_artifacts}/sprint-status.yaml"
+registry: "{implementation_artifacts}/tech-debt/registry.yaml"
+skills_list: "{project-root}/.claude/skills/skills_list.md"
+adr_dir: "{project-root}/docs/technical-decisions"
+migration_dir: "{project-root}/src/Platform/App.Web/Data/Migrations"
+database_schema: "{project-root}/docs/project-planning-artifacts/technical-specs/database-schema.md"
+stories_dir: "{implementation_artifacts}/stories"
+story_template: "{project-root}/_bmad/bmm/workflows/4-implementation/create-story/template.md"
+
+# Smart input file patterns
+input_file_patterns:
+  epic_stories:
+    description: "All stories for the target epic (done + review)"
+    whole: "{stories_dir}/epic-{epic_id}/*.md"
+    load_strategy: "FULL_LOAD"
+  sprint_status_file:
+    description: "Sprint status for story enumeration"
+    whole: "{sprint_status}"
+    load_strategy: "FULL_LOAD"
+  registry_file:
+    description: "Tech debt registry for pending items"
+    whole: "{registry}"
+    load_strategy: "FULL_LOAD"
+
+standalone: true

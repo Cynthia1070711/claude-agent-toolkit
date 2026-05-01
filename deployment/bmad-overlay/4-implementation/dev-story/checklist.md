@@ -36,9 +36,21 @@ validation-rules:
 - [ ] **No Ambiguous Implementation:** Clear, unambiguous implementation that meets story requirements
 - [ ] **Edge Cases Handled:** Error conditions and edge cases appropriately addressed
 - [ ] **Dependencies Within Scope:** Only uses dependencies specified in story or project-context.md
+- [ ] **Database Migration Applied:** If new migration files were created, `dotnet ef database update` executed successfully
+- [ ] **Schema Consistency:** If migrations exist, `dotnet ef migrations has-pending-model-changes` returns "No changes"
 
-## 🧪 Testing & Quality Assurance
+## 🧪 Testing & Quality Assurance (SDD+TDD Enhanced)
 
+**SDD-TDD Bridge（M/L/XL Story 有 SDD Spec 時啟用）:**
+- [ ] **Spec BR Loading**: 讀取 SDD Spec 的 Business Rules 區塊作為測試來源
+- [ ] **ATDD First**: 從 AC + BR 生成 Acceptance Tests（xUnit + FluentAssertions）
+  - 測試命名規則：`{BR_ID}_{Scenario}_{ExpectedResult}`（如 `BR001_DiscountAbove50_ReturnsValidationError`）
+- [ ] **TDD Red Phase**: 從 BR boundary conditions 生成 Unit Tests（Moq 模擬依賴）
+- [ ] **TDD Green Phase**: 僅撰寫能讓測試通過的最小必要程式碼（禁止 over-engineering）
+- [ ] **TDD Refactor Phase**: 重構但不改變行為（所有測試仍通過）
+- [ ] **3-Round Debug Limit**: 測試失敗修復不超過 3 輪，超過強制觸發上下文壓縮
+
+**標準測試驗證（所有 Story）:**
 - [ ] **Unit Tests:** Unit tests added/updated for ALL core functionality introduced/changed by this story
 - [ ] **Integration Tests:** Integration tests added/updated for component interactions when story requirements demand them
 - [ ] **End-to-End Tests:** End-to-end tests created for critical user flows when story requirements specify them
@@ -59,6 +71,8 @@ validation-rules:
 
 - [ ] **Story Status Updated:** Story Status set to "review"
 - [ ] **Sprint Status Updated:** Sprint status updated to "review" (when sprint tracking is used)
+- [ ] **Tracking File Synced:** `docs/tracking/active/{story_key}.track.md` 狀態更新為 🟠 review + 補入 dev-story 執行記錄
+- [ ] **H1 Emoji Synced:** Invoke /story-status-emoji Mode A — heading shows 🟠 (review)
 - [ ] **Quality Gates Passed:** All quality checks and validations completed successfully
 - [ ] **No HALT Conditions:** No blocking issues or incomplete work remaining
 - [ ] **User Communication Ready:** Implementation summary prepared for user review

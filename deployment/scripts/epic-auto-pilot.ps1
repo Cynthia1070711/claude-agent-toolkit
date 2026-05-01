@@ -1,5 +1,5 @@
 # ============================================================================
-# MyProject Epic Auto-Pilot Orchestrator
+# PCPT Epic Auto-Pilot Orchestrator
 # ============================================================================
 # Full-auto Epic pipeline via PowerShell orchestrating Claude Code + Gemini CLI
 # Engine assignment per multi-engine-sop.md:
@@ -292,8 +292,8 @@ function Invoke-GeminiCLI {
 function Build-CreateStoryPrompt {
     param([PSCustomObject]$Story)
     $sid = $Story.Id
-    $prompt = "You are CC-OPUS, MyProject project AI commander.`n"
-    $prompt += "Working directory: MyProject-MVP project root.`n`n"
+    $prompt = "You are CC-OPUS, PCPT project AI commander.`n"
+    $prompt += "Working directory: pcpt-PCPT-MVP project root.`n`n"
     $prompt += "## Task`nCreate story '$sid' using create-story workflow.`n`n"
     $prompt += "## Steps`n"
     $prompt += "1. Read docs/implementation-artifacts/stories/epic-$EpicId/README.md`n"
@@ -312,8 +312,8 @@ function Build-CreateStoryPrompt {
 function Build-DevStoryPrompt {
     param([PSCustomObject]$Story)
     $sid = $Story.Id
-    $prompt = "You are GC-PRO, MyProject project execution agent.`n"
-    $prompt += "Working directory: MyProject-MVP project root.`n`n"
+    $prompt = "You are GC-PRO, PCPT project execution agent.`n"
+    $prompt += "Working directory: pcpt-PCPT-MVP project root.`n`n"
     $prompt += "## Task`nDevelop story '$sid' using dev-story workflow.`n`n"
     $prompt += "## Steps`n"
     $prompt += "1. Read sprint-status.yaml, confirm '$sid' status = ready-for-dev`n"
@@ -336,7 +336,7 @@ function Build-CodeReviewPrompt {
     param([PSCustomObject]$Story)
     $sid = $Story.Id
     $prompt = "You are CC-OPUS, performing adversarial code review.`n"
-    $prompt += "Working directory: MyProject-MVP project root.`n`n"
+    $prompt += "Working directory: pcpt-PCPT-MVP project root.`n`n"
     $prompt += "## Task`nReview story '$sid' using code-review workflow.`n`n"
     $prompt += "## Steps`n"
     $prompt += "1. Read sprint-status.yaml, confirm '$sid' status = review`n"
@@ -443,7 +443,7 @@ function Send-Notification {
 function Main {
     Write-Host ""
     Write-Host "============================================================" -ForegroundColor Cyan
-    Write-Host "  MyProject Epic Auto-Pilot Orchestrator" -ForegroundColor Cyan
+    Write-Host "  PCPT Epic Auto-Pilot Orchestrator" -ForegroundColor Cyan
     $modeLabel = "LIVE"; if ($DryRun) { $modeLabel = "DRY-RUN" }
     Write-Host "  EPIC: $EpicId | Mode: $modeLabel" -ForegroundColor Cyan
     Write-Host "============================================================" -ForegroundColor Cyan

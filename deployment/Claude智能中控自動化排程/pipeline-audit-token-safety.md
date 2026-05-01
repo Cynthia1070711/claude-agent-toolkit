@@ -18,7 +18,7 @@
 
 ## 目標
 
-As a MyProject 平台開發者/SM,
+As a PCPT 平台開發者/SM,
 I want 主視窗 Claude 作為中控，分批開啟新視窗完整執行 BMAD workflows（create → dev → review），並在 Token 達 90% 安全閥時主動停止排程,
 so that 自動化排程如同手動操作般完整可靠，且不因 Token 配額耗盡導致任務中斷。
 
@@ -973,7 +973,7 @@ MANDATORY PIPELINE MODE RULES:
 ```powershell
 # story-pipeline.ps1 L342-401
 function Update-SprintStatusSafe {
-    $mutexName = "Global\MyProjectSprintStatusYaml"
+    $mutexName = "Global\PCPTSprintStatusYaml"
     $mutex = New-Object System.Threading.Mutex($false, $mutexName)
     $acquired = $mutex.WaitOne(30000)  # 30s timeout
     # ... atomic read-modify-write ...

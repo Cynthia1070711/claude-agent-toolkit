@@ -1,0 +1,15 @@
+# 4-implementation
+
+(自動生成) 本目錄包含專案相關檔案。
+
+## 檔案列表 (自動更新)
+
+* 📁 **code-review/**
+* 📁 **correct-course/**
+* 📁 **create-story/**
+* 📁 **dev-story/**
+* 📁 **retrospective/**
+* 📁 **sprint-planning/**
+* 📁 **sprint-status/**
+
+> *最後更新時間: 2025-12-27 13:58*
