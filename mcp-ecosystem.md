@@ -100,11 +100,11 @@ PCPT 對 Chrome 的自動化有兩套工具,**不可混用**:
 
 ---
 
-## 5. pcpt-context MCP — 23 Tools 與 4 Layer 對應
+## 5. pcpt-context MCP — 24 Tools 與 4 Layer 對應(2026-05-02 ADR-GOVERNANCE-001 加 search_god_nodes)
 
 | Layer | Tools |
 |:----|:----|
-| **Search**(10)| search_context / search_tech / search_debt / search_stories / search_documents / search_glossary / search_conversations / search_intentional_decisions / search_symbols / semantic_search |
+| **Search**(11)| search_context / search_tech / search_debt / search_stories / search_documents / search_glossary / search_conversations / search_intentional_decisions / search_symbols / semantic_search / **search_god_nodes**(NEW) |
 | **Write**(4)| add_context / add_tech / add_cr_issue / add_intentional_decision |
 | **Trace**(3)| trace_context / get_symbol_context / get_session_detail |
 | **Analytics**(6)| get_patterns / get_intentional_decision / list_sessions / log_workflow / upsert_benchmark / verify_intentional_annotations |
@@ -121,6 +121,77 @@ PCPT 對 Chrome 的自動化有兩套工具,**不可混用**:
 **Cold-start 受益**:dev agent 啟動時 `search_stories` 預設取 pipeline_notes / acceptance_criteria / tasks / dev_notes / implementation_approach / sdd_spec 全完整,無需 fallback `fields=` 顯式指定。對齊 `db-first-no-md-mirror.md` SSoT 精神。
 
 詳細 API 參照 `memory-system-deep-dive.md` §4。
+
+### 5.2 search_god_nodes — God Node Integration Pattern(2026-05-02 ADR-GOVERNANCE-001 + Tianji v1.1.0)
+
+**新增背景**: 既有 11-Layer pre-prompt RAG + `symbol_dependencies` graph + `expandDependencies` 2-hop + 8063 symbols 100% embedding 已 ready,但 BMAD workflow 0 命中調用 graph capability(揭示「Latent Capability Trap」反模式)。本 MCP tool 補完缺口。
+
+**Tool 簽章**:
+
+```javascript
+mcp__phycool-context__search_god_nodes({
+  domain: "Payment",        // optional, namespace LIKE filter
+  limit: 10,                 // optional, top-N(預設 10,上限 50)
+  min_centrality: 50.0,      // optional, P95 threshold
+  include_generated: false   // optional, 預設 false 排除 Migrations / ModelSnapshot / Tests
+})
+```
+
+**回傳結構**:
+
+```json
+{
+  "total": 5,
+  "filter": { "domain": "Payment", "include_generated": false, "excluded_namespaces": ["Migrations", "ModelSnapshot", "Tests"] },
+  "god_nodes": [
+    { "id": 1234, "symbol_name": "RefundService", "namespace": "PhyCool.Web.Services.Payment",
+      "file_path": "src/.../RefundService.cs", "start_line": 12, "end_line": 458,
+      "centrality_score": 30.60 }
+  ],
+  "hint": "高 centrality_score = 被多個 symbol 依賴 / 主動引用多個。修改前必先 Read + 評估 BlastRadius。詳細 dependency 用 get_symbol_context(symbol_id, depth=2)展開。"
+}
+```
+
+**5 步整合 SOP(對齊 capability-integration-mandate.md)**:
+
+```
+Step 1 SKILL 同步: phycool-context-memory v2.8 §3 / §3a god node use case 章節
+Step 2 BMAD 整合: 
+  - create-story step-03 §3.0(Glob/Grep 之前先 search_god_nodes 取候選)
+  - dev-story step-05 §0.5(實作前注入 mental model)
+  - code-review step-04 Phase 0.5(BlastRadius 自動補值,替代主觀估算)
+Step 3 Pipeline 注入: subagent-context-inject.js Layer 5(SubagentStart Hook 注入 epic god node Top-3)
+Step 4 部屬範本: 本章節
+Step 5 Schema 公告: migration 2026-05-02-add-symbol-centrality-score.sql + Memory DB add_context category=infrastructure-evolution
+```
+
+**演算法**(對齊 graphify analyze.py reasoning + RELATION_WEIGHTS):
+
+```
+centrality_score(symbol) = 0.6 * weighted_in_degree + 0.4 * weighted_out_degree
+weighted_in_degree  = SUM(RELATION_WEIGHTS[t] for incoming edges)
+weighted_out_degree = SUM(RELATION_WEIGHTS[t] for outgoing edges)
+RELATION_WEIGHTS = { inherits:1.0, implements:0.9, calls:0.7, uses_inferred:0.4 }
+```
+
+**對照 BlastRadius 補值表**(code-review Phase 0.5 用):
+
+| centrality_score | BlastRadius |
+|:---:|:---:|
+| ≥ P95 (≥ 50.0) | 10(全站) |
+| ≥ P75 (≥ 5.0) | 5(模組) |
+| ≥ P50 (≥ 0.5) | 2(單檔) |
+| < P50 (< 0.5) | 1(單行) |
+
+**離線批計算**: `node .context-db/scripts/compute-centrality.cjs --top 20`(預設寫 DB,`--dry-run` 不寫)
+
+**Real PCPT god nodes**(2026-05-02 baseline,排除 Migrations / Tests):
+- AnnouncementService(83.24)/ HelpContentService(82.68)/ AssetService(76.52)/ LegalDocumentService(74.56)/ PdfGeneratorService(70.64)/ AdminAccessService(55.52)
+- Payment domain: RefundService(30.60)/ ECPayGatewayService(25.28)/ OrderService(16.88)
+
+**Kill Switch**(對齊 ADR-GOVERNANCE-001 §8.4):
+- Layer 10 加權 δ=0.05,若 retrieval_observations 命中率退化 ≥ 5% → 設 DELTA=0 回退
+- Migration rollback: `sqlite3 phycool.db < .context-db/migrations/2026-05-02-add-symbol-centrality-score-down.sql`
 
 ---
 
