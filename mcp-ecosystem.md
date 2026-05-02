@@ -129,7 +129,7 @@ PCPT 對 Chrome 的自動化有兩套工具,**不可混用**:
 **Tool 簽章**:
 
 ```javascript
-mcp__phycool-context__search_god_nodes({
+mcp__<project>-context__search_god_nodes({
   domain: "Payment",        // optional, namespace LIKE filter
   limit: 10,                 // optional, top-N(預設 10,上限 50)
   min_centrality: 50.0,      // optional, P95 threshold
@@ -144,7 +144,7 @@ mcp__phycool-context__search_god_nodes({
   "total": 5,
   "filter": { "domain": "Payment", "include_generated": false, "excluded_namespaces": ["Migrations", "ModelSnapshot", "Tests"] },
   "god_nodes": [
-    { "id": 1234, "symbol_name": "RefundService", "namespace": "PhyCool.Web.Services.Payment",
+    { "id": 1234, "symbol_name": "RefundService", "namespace": "<Project>.Web.Services.Payment",
       "file_path": "src/.../RefundService.cs", "start_line": 12, "end_line": 458,
       "centrality_score": 30.60 }
   ],
@@ -155,7 +155,7 @@ mcp__phycool-context__search_god_nodes({
 **5 步整合 SOP(對齊 capability-integration-mandate.md)**:
 
 ```
-Step 1 SKILL 同步: phycool-context-memory v2.8 §3 / §3a god node use case 章節
+Step 1 SKILL 同步: <project>-context-memory v2.8 §3 / §3a god node use case 章節
 Step 2 BMAD 整合: 
   - create-story step-03 §3.0(Glob/Grep 之前先 search_god_nodes 取候選)
   - dev-story step-05 §0.5(實作前注入 mental model)
@@ -191,7 +191,7 @@ RELATION_WEIGHTS = { inherits:1.0, implements:0.9, calls:0.7, uses_inferred:0.4 
 
 **Kill Switch**(對齊 ADR-GOVERNANCE-001 §8.4):
 - Layer 10 加權 δ=0.05,若 retrieval_observations 命中率退化 ≥ 5% → 設 DELTA=0 回退
-- Migration rollback: `sqlite3 phycool.db < .context-db/migrations/2026-05-02-add-symbol-centrality-score-down.sql`
+- Migration rollback: `sqlite3 context-memory.db < .context-db/migrations/2026-05-02-add-symbol-centrality-score-down.sql`
 
 ---
 

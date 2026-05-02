@@ -9,8 +9,8 @@
 ## 同步流向
 
 ```
-[PhyCool-PCPT-MVP] 主 SSoT(完整含業務字面)
-    ↓ 立即同步(脫敏 phycool / PhyCool 字面)
+[<main-ssot-project>] 主 SSoT(完整含業務字面)
+    ↓ 立即同步(脫敏 <project-token> / <project-token-Pascal> 字面)
 [PCPT-MVP] /claude token減量策略研究分析/1.專案部屬必讀/(toolkit 內容鏡像 SSoT)
     ↓ 不定期同步(再次 verify 脫敏)
 [claude-agent-toolkit] /deployment/(對外公開可部屬,獨立 repo)
@@ -21,6 +21,32 @@
 ---
 
 ## 同步紀錄(時間倒序)
+
+### 2026-05-03 — V-8 baseline sanitization(td-toolkit-baseline-sanitization 完成,解 P0-2 partial FAIL)
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `mcp-ecosystem.md`(UPDATE 4 hits) | (toolkit-only,無 PCPT 上游 source) | L132/L147/L158/L194 `<project-token>` / `<project-token-Pascal>` 字面通用化:`mcp__<project>-context__search_god_nodes` / `<Project>.Web.Services.Payment` / `<project>-context-memory v2.8` / `context-memory.db` placeholder |
+| `SYNC-LOG.md`(UPDATE 5 hits + APPEND new entry)| (toolkit-only,無 PCPT 上游 source) | L12-13/L62/L105/L108 既存 entries(2026-05-01 S59 + 2026-05-02 P0-2)字面通用化 `[<main-ssot-project>]` / `<project-token>` / `<Project>.Platform` / `<project-token>-*` Skill / grep pattern 對齊 line 34 新 entry placeholder 範式;歷史 semantic 完整保留(日期 / 動作 / Memory cross-ref 無更動) |
+
+**Verify**:
+- ✅ `node scripts/verify-deployment-docs.cjs` Phase 1 V-8 真正 **0 命中 ALL PASS**(從 partial FAIL → ALL PASS)
+- ✅ git diff line-by-line 比對:9 hits 字面替換完成(mcp-ecosystem.md 4 + SYNC-LOG.md 5),歷史 entries semantic preserved
+- ✅ 5-Phase 結果:Phase 1-2/4-5 ALL PASS;Phase 3 Rules count 24 NOT in [18,22] WARN 屬 out-of-scope(本 Story 不處理,留 deployment-doc-freshness follow-up)
+
+**Phase 3 V-8 規則調整評估結論**: **不加 file-level/line-level allowlist**(AC3+AC4 評估義務 satisfied)。
+- 分支 A 純文字通用化已 100% 解決 9 hits,**無 hit 必須保留 meta-reference**
+- KISS 原則:fix data, not rule;allowlist 引入過寬風險(誤判真實業務字面為 meta-reference)
+- V-8 regex `/<project-token>|<project-token-Pascal>/g`(品牌字面)維持原樣(`scripts/verify-deployment-docs.cjs:57`)
+
+**Memory DB cross-reference**:
+- `context_entries`(待寫入)— td-toolkit-baseline-sanitization 完成 + Phase 3 評估結論
+- 解上游 baseline:`context_entries id=3994`(ADR-GOVERNANCE-001 P0-2 minimal viable + V-8 partial FAIL defer 紀錄)+ `context_entries id=4002`(create-story Reactive Skill Sync 範式 + Self-Contained 模式)
+- 觸發 Story:`td-toolkit-baseline-sanitization`(epic-governance / S / P1-3,實際 ~30 min)
+
+**Self-Dogfood**: 本 entry 自身 semantic 完整保留(2026-05-01/02 既存 entries 字面通用化但日期/動作/cross-ref 無更動)— 對齊 AC6「git diff line-by-line semantic 不變」要求。
+
+---
 
 ### 2026-05-02 — ADR-GOVERNANCE-001 + Capability Integration Mandate + Skill Creation Discipline 立即同步(P0-2 minimal viable)
 
@@ -59,7 +85,7 @@
 | `config-templates/claude/hooks/toolkit-mirror-sync-detector.js` | `.claude/hooks/toolkit-mirror-sync-detector.js` | Stop hook(advisory)偵測未同步鏡像 + stderr 警告 + 部署提示 — 鏡像版 TOOLKIT_MIRROR_ROOT 改為 `deployment-mirror` placeholder + SANITIZATION_PATTERN 通用化 |
 | `config-templates/claude/skills/toolkit-mirror-sync/SKILL.md` v1.0 | `.claude/skills/toolkit-mirror-sync/SKILL.md` v1.0 | action-skill(Mode A 立即同步 + Mode B 月度 Audit)+ 部署提示 5 步 |
 
-**Verify**: 3 file × 脫敏 grep `phycool|PhyCool|IDD-COM-005|IDD-REG-005|IDD-USR|eft-trial|eft-account|eft-batch|qgr-|mqv-|dla-` → 全 0 hits ✅
+**Verify**: 3 file × 脫敏 grep `<project-token>|<project-token-Pascal>|IDD-(COM|REG|USR)|<business-story-prefix>` → 全 0 hits ✅
 
 **Memory DB cross-reference**:
 - `context_entries id=3969`(toolkit-sync 立即同步原則固化 + 4 層守護建立)
@@ -102,10 +128,10 @@
 ### MUST NOT(嚴禁鏡像)
 
 按 `CLAUDE.md` §0.5 FORBIDDEN:
-- ❌ `src/PhyCool.Platform/**` 業務 code
+- ❌ `src/<Project>.Platform/**` 業務 code
 - ❌ `docs/{technical-decisions,implementation-artifacts,project-planning-artifacts}/` 業務 ADR/Stories/Reviews
 - ❌ `memory/` Auto-Memory + IDD(業務 IDD)
-- ❌ `phycool-*` Skill 字面(對齊 toolkit SANITIZATION-POLICY V-8 phycool 字面 0 命中)
+- ❌ `<project-token>-*` Skill 字面(對齊 toolkit SANITIZATION-POLICY V-8 <project-token> 字面 0 命中)
 
 ### 立即同步原則(本 SYNC-LOG 觸發背景)
 
