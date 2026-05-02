@@ -25,6 +25,26 @@ nextStepFile: '{workflow_path}/steps/step-05b-apply-migrations.md'
 
 > **CRITICAL:** FOLLOW THE STORY FILE TASKS/SUBTASKS SEQUENCE EXACTLY AS WRITTEN — NO DEVIATION.
 
+### 0.5 God Node Awareness Pre-Check (Capability Integration ADR + Tianji v1.1.0)
+
+> **Added 2026-05-02**: 啟動 task 實作前,先取本 Story domain 的 god node Top-N。對齊 `capability-integration-mandate.md` Step 2 BMAD 整合 + 整合補全計畫 §6.5。
+
+從 Story `domain` 欄位推斷 namespace:
+
+```
+mcp__pcpt-context__search_god_nodes({
+  domain: "<story.domain>" or "<inferred-from-keywords>",
+  limit: 5
+})
+```
+
+**Output 用途**:
+- 注入 mental model:「本 Story 修改前必先 Read 的核心檔」
+- 替代多輪 grep + Read(每 god node 含 `file_path / start_line / end_line`)
+- 識別高 BlastRadius symbol → 修改前必走 `get_symbol_context(symbol_id, depth=2)` 展開影響鏈
+
+**Fallback**: 若 search_god_nodes 回 0 hit(centrality 未計算 / 非 production code domain)→ 走既有 §1 Story tasks file_list 路徑
+
 ### 1. Review Current Task
 
 Review the current task/subtask from the story file — this is the authoritative implementation guide.

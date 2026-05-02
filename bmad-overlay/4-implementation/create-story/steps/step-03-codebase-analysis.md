@@ -47,6 +47,28 @@ From story requirements, extract keywords for code search:
 - Data models and entity names
 - API endpoint patterns
 
+### 3.0 God Node Priority Scan (Capability Integration ADR + Tianji v1.1.0)
+
+> **Added 2026-05-02**: 在 §3 Glob/Grep 多目錄掃描 **之前**,先用 god node MCP 取候選核心檔。對齊 `capability-integration-mandate.md` Step 2 BMAD 整合 + 整合補全計畫 §6.5。
+
+從 §2 Identify Target Code Areas 抽出的 domain keyword(payment \ member \ editor \ admin \ etc.,依本專案實際業務 module 調整),呼叫:
+
+```
+mcp__pcpt-context__search_god_nodes({
+  domain: "<inferred-namespace-keyword>",
+  limit: 8
+})
+```
+
+**Output**: top-N 高 centrality 的 production god nodes(預設排除 Migrations / ModelSnapshot / Tests namespace)
+
+**用途**:
+- 優先 Read 高 centrality 的核心檔(替代 §3 全 Glob 多目錄)
+- 識別 `BlastRadius` 大的 symbol → 標 dev_notes 提示「修改前必先評估影響範圍」
+- 加入 dev_notes / Background 章節作為「本 Story 必先 Read 核心檔」清單
+
+**Fallback**: 若 search_god_nodes 回 0 hit(centrality 未計算 / domain 無 god node)→ 走 §3 既有 Glob/Grep 路徑
+
 ### 3. Scan Existing Implementation
 
 Use Glob/Grep to find relevant existing files:

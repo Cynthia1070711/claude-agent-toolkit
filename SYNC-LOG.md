@@ -22,6 +22,40 @@
 
 ## 同步紀錄(時間倒序)
 
+### 2026-05-03 S60 — td-toolkit-mirror-godnode-update Phase 1-3.7 完成(12 mirror file + toolkit-mirror-sync v1.1 三引擎升版)
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `config-templates/claude/hooks/pre-prompt-rag.js`(UPDATE)| `.claude/hooks/pre-prompt-rag.js` | Layer 10 god node 4-axis fusion 整合(DELTA=0.05 + RELATION_WEIGHTS SSoT 註解 + searchSymbolsByVector / searchFtsLikeFallback / expandDependencies / calculateSfinal 4 處 centrality_score 傳遞 + maxCentrality normalize + δ·centrality 加權)— 通用化「ADR-GOVERNANCE-001」→「Capability Integration ADR」 |
+| `config-templates/claude/hooks/subagent-context-inject.js`(UPDATE)| `.claude/hooks/subagent-context-inject.js` | Phase 4.5 god node injection 整段(`let godNodes = []` 宣告 + storyId domain 推斷 12 token + namespace LIKE Top-3 query + parts.push god node section)— 通用化 mcp namespace `mcp__<project>-context__` + domainHints 範例改 generic SaaS 命名 + ADR 編號 → Capability Integration ADR |
+| `config-templates/context-db/server.js`(UPDATE)| `.context-db/server.js` | search_god_nodes handler 完整段(tool definition line 508-533 + case dispatcher + handleSearchGodNodes 實作 89 行)— 通用化 description 業務 namespace 範例 `<Project>.Web.Services.Payment` placeholder + stderr prefix `[pcpt-context]` |
+| `config-templates/context-db/scripts/init-db.js`(UPDATE)| `.context-db/scripts/init-db.js` | symbol_index 加 `centrality_score REAL NOT NULL DEFAULT 0.0` 欄位 + `idx_symbol_index_centrality DESC` index — 通用化 ADR 編號 → Capability Integration ADR |
+| `bmad-overlay/4-implementation/create-story/steps/step-03-codebase-analysis.md`(UPDATE)| `_bmad/.../create-story/steps/step-03-codebase-analysis.md` | §3.0 God Node Priority Scan 整段插入(在 §2 Identify + §3 Scan 之間)— mcp tool namespace `mcp__pcpt-context__search_god_nodes` 對齊 mirror 命名 + domainHints 範例「依本專案實際業務 module 調整」註解 |
+| `bmad-overlay/4-implementation/dev-story/steps/step-05-implement-task.md`(UPDATE)| `_bmad/.../dev-story/steps/step-05-implement-task.md` | §0.5 God Node Awareness Pre-Check 整段插入(在 CRITICAL line + §1 Review Current Task 之間)— 同上通用化 mcp 命名 + Fallback 邏輯 |
+| `bmad-overlay/4-implementation/code-review/steps/step-04-present-autofix.md`(UPDATE)| `_bmad/.../code-review/steps/step-04-present-autofix.md` | Phase 0.5 God Node BlastRadius Auto-Lookup 整段插入(在 Phase 0 REF + 「For EACH non-FIXED」之間)+ Priority Score 公式加 `← Phase 0.5 god node MCP 自動補值` 註解 + P95/P75/P50 對照表(centrality_score → BlastRadius)— 通用化 ADR 編號 + F-S9 投機紅線 → 通用「投機紅線守護」 |
+| `scripts/audit-capability-reachability.cjs`(NEW)| `scripts/audit-capability-reachability.cjs` | 通用化版 audit 工具(reachability_score 公式 + 4 sub-system grep + JSON/MD/console 三模式 + --strict / --tool / --skip-schema / --skip-layer)— REPO_ROOT 兩層上對齊 deployer project root + 部署註解 |
+| `scripts/audit-skill-overlap.cjs`(NEW)| `scripts/audit-skill-overlap.cjs` | 通用化版 Skill 重疊偵測(Phase 1 90d 0-trigger retire + Phase 2 triggers Jaccard + Phase 3 description keyword overlap + checkNew 3 題)— DB_PATH placeholder `context-memory.db` + PROJECT_SKILL_PREFIX `pcpt-` 占位符 + STOPWORDS phycool→pcpt |
+| `config-templates/claude/skills/toolkit-mirror-sync/SKILL.md` v1.0→v1.1(UPDATE)| `.claude/skills/toolkit-mirror-sync/SKILL.md` v1.1.0 | §1 觸發情境 9→11 範圍擴展(加 #10 部屬指南文檔本身 + #11 SYNC-LOG.md append-only 不觸發再次 sync 語意)+ frontmatter version + watches glob 加 `<deployment-mirror-root>/**/*.md` + Version History v1.1.0 row — 通用化 placeholder 維持 |
+| `.toolkit-publish-exclude.txt`(UPDATE)| (toolkit-only,無上游)| 加 `SYNC-LOG.md` exclude 條目(防 mirror 同步紀錄推送公開 toolkit repo;主 SSoT 路徑 reference 不可避免) |
+| **新建** `.gemini/skills/toolkit-mirror-sync/SKILL.md` v1.1.0(主 SSoT 三引擎補完)| `.claude/skills/toolkit-mirror-sync/SKILL.md` v1.1.0 | Phase 1 ultrathink 揭示 v1.0 只在 .claude/ 存在,新建 .gemini 三引擎同步補完 — md5 identical 對齊 .claude(屬主 SSoT 範圍,不在 mirror) |
+| **新建** `.agent/skills/toolkit-mirror-sync/SKILL.md` v1.1.0(主 SSoT 三引擎補完)| `.claude/skills/toolkit-mirror-sync/SKILL.md` v1.1.0 | 同上,新建 .agent 三引擎同步補完 — md5 identical(屬主 SSoT 範圍,不在 mirror) |
+
+**Verify**:
+- ✅ 我新加範圍 10 mirror file 各自脫敏 grep `phycool|PhyCool|IDD-(COM|REG|USR)|eft-|qgr-|mqv-|dla-` **0 命中**(BR-MIR-008 PASS)
+- ✅ baseline 既有 7 hits(server.js 3 + init-db.js 1 + step-04 3,IDD framework 範例字面)— 對齊 Story dev_notes Q3 scope creep 防線,**不在本 Story 範圍**(留另批 baseline-sanitization Story 處理)
+- ✅ `node scripts/verify-deployment-docs.cjs` 5-phase **ALL PASS, 1 WARN**(Rules count 24 NOT in [18,22] 屬 deployment-doc-freshness 範圍 out-of-scope)
+- ✅ Phase 1 V-8 phycool/PhyCool 字面 **0 命中**(BR-MIR-009 PASS)
+- ✅ toolkit-mirror-sync v1.1.0 三引擎 md5 identical PASS(`C17022537E93BDDCF20461B8F63120E2`,Phase 3.7.5)
+- ✅ Phase 3.7 透過 **`Skill(skill="saas-to-skill")` 字面 Skill tool 調用**啟動 Mode B(skill-tool-invocation-mandatory.md v1.0 強制要求,對齊 2026-04-28 Session 55 lesson)
+
+**Memory DB cross-reference**:
+- `context_entries`(待寫入)— td-toolkit-mirror-godnode-update Phase 1-3.7 完成
+- 上游觸發:`context_entries id=3994`(ADR-GOVERNANCE-001 P0-2 minimal viable)+ Phase 1 ultrathink 7 維度比對揭示 7 mirror file 全 0 命中 god node + toolkit-mirror-sync skill 三引擎缺漏
+
+**Self-Dogfood**: 本 entry 自身對齊 toolkit-mirror-immediate-sync.md 立即同步原則(同 session 內完成 Phase 1-4.4)+ skill-tool-invocation-mandatory.md 字面 Skill tool 調用(Phase 3.7 走 Mode B)+ toolkit-mirror-sync v1.1 §1 #11 自身 append-only 範式(本 entry 即是 sync 動作 commit log)。
+
+---
+
 ### 2026-05-03 — V-8 baseline sanitization(td-toolkit-baseline-sanitization 完成,解 P0-2 partial FAIL)
 
 | 同步檔案 | 來源 | 變更摘要 |

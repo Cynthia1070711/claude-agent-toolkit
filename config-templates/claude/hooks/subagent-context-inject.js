@@ -126,6 +126,7 @@ async function main() {
 
   // 4. Query Context DB for recent sessions (best-effort)
   let recentSessions = [];
+  let godNodes = [];
   try {
     if (fs.existsSync(DB_PATH)) {
       // Use better-sqlite3 (synchronous, available in .context-db/node_modules)
@@ -140,12 +141,48 @@ async function main() {
            WHERE category = 'session'
            ORDER BY created_at DESC LIMIT 3`
         ).all();
-        db.close();
         recentSessions = rows.map(r => `${r.title}: ${(r.content || '').slice(0, 120)}`);
+
+        // 4.5 God Node Awareness Injection (Capability Integration ADR + Tianji v1.1.0)
+        // 從 storyId 推斷 epic / domain,取 top-3 god node
+        // 對齊 capability-integration-mandate.md Step 3 Pipeline 注入 + 整合補全計畫 §6.6
+        try {
+          const cols = db.prepare(`PRAGMA table_info(symbol_index)`).all();
+          const hasCentrality = cols.some(c => c.name === 'centrality_score');
+          if (hasCentrality && storyId) {
+            // Extract domain hint from story_id pattern (e.g., "<epic>-payment-xxx" → "Payment")
+            // domainHints 為通用 SaaS 命名範例,部署時依專案實際 module 命名替換
+            const tokens = storyId.toLowerCase().split('-');
+            const domainHints = ['payment', 'member', 'editor', 'admin', 'auth', 'announcement',
+                                 'asset', 'invoice', 'license', 'subscription', 'feature1', 'feature2'];
+            const matched = tokens.find(t => domainHints.includes(t));
+            if (matched) {
+              const cap = matched.charAt(0).toUpperCase() + matched.slice(1);
+              const stmt = db.prepare(`
+                SELECT symbol_name, full_name, namespace, file_path,
+                       start_line, end_line, centrality_score
+                FROM symbol_index
+                WHERE centrality_score > 0
+                  AND namespace NOT LIKE '%Migrations%'
+                  AND namespace NOT LIKE '%ModelSnapshot%'
+                  AND namespace NOT LIKE '%Tests%'
+                  AND namespace LIKE ?
+                ORDER BY centrality_score DESC
+                LIMIT 3
+              `);
+              godNodes = stmt.all(`%${cap}%`);
+            }
+          }
+        } catch (_) {
+          // god node injection failure should never block pipeline
+        }
+
+        db.close();
       }
     }
   } catch (_) {
     recentSessions = [];
+    godNodes = [];
   }
 
   // 5. Assemble additionalContext
@@ -174,6 +211,18 @@ async function main() {
   if (recentSessions.length > 0) {
     parts.push(`\n=== Recent Sessions ===`);
     recentSessions.forEach(s => parts.push(`  ${s}`));
+  }
+
+  // God Node Awareness (Capability Integration ADR + Tianji v1.1.0, since 2026-05-02)
+  if (godNodes.length > 0) {
+    parts.push(`\n=== God Node Awareness for ${storyId} ===`);
+    parts.push(`(High centrality production symbols — 修改前必先 Read 並評估 BlastRadius)`);
+    godNodes.forEach(g => {
+      const score = Number(g.centrality_score).toFixed(1);
+      parts.push(`  centrality=${score}  ${g.symbol_name} [${g.namespace}]`);
+      parts.push(`    ${g.file_path}:${g.start_line}-${g.end_line}`);
+    });
+    parts.push(`(Use search_god_nodes / get_symbol_context MCP tool for full context)`);
   }
 
   const additionalContext = parts.join('\n');

@@ -73,12 +73,16 @@ const DEFAULT_CODE_KEYWORDS = [
   'Entity', 'Hook', 'Store',
 ];
 
-// S_final 融合權重（CC-Agent 報告 §21.6）
+// S_final 融合權重（融合 §21.6 + Capability Integration ADR 加 DELTA）
 const ALPHA = 0.6;  // 向量相似度
 const BETA = 0.2;   // 依賴圖相似度
 const GAMMA = 0.2;  // FTS5 文字相似度
+const DELTA = 0.05; // ★ NEW: centrality_score 微幅加權,漸進不破壞既有 0.6/0.2/0.2 主軸
+                    // 對齊 Capability Integration ADR Layer 3 + 整合補全計畫 §6.4
+                    // Kill switch: retrieval_observations 命中率退化 ≥ 5% → 設 DELTA=0 即可回退
 
 // Graph 關係類型權重（Phase 4: 量化 graph score 取代二值 0/0.5）
+// ★ SSoT: 此處改 → 必同步 .context-db/scripts/compute-centrality.cjs RELATION_WEIGHTS
 const RELATION_WEIGHTS = {
   inherits: 1.0,
   implements: 0.9,
@@ -111,7 +115,7 @@ function searchSymbolsByVector(db, queryVec, limit) {
   const rows = db.prepare(`
     SELECT se.symbol_id, se.embedding,
            si.symbol_name, si.full_name, si.file_path, si.symbol_type,
-           si.start_line, si.end_line,
+           si.start_line, si.end_line, si.centrality_score,
            SUBSTR(si.code_snippet, 1, 1000) AS code_snippet
     FROM symbol_embeddings se
     JOIN symbol_index si ON se.symbol_id = si.id
@@ -133,6 +137,7 @@ function searchSymbolsByVector(db, queryVec, limit) {
         code_snippet: row.code_snippet,
         vec_score: score,
         fts_score: 0,
+        centrality_score: row.centrality_score || 0,  // Capability Integration ADR Layer 3
         is_dependency: false,
         relation_type: null,
       });
@@ -150,7 +155,7 @@ function searchFtsLikeFallback(db, query, limit) {
   const kw = `%${query.replace(/[%_]/g, '').trim()}%`;
   return db.prepare(`
     SELECT id AS symbol_id, symbol_name, full_name, file_path, symbol_type,
-           start_line, end_line,
+           start_line, end_line, centrality_score,
            SUBSTR(code_snippet, 1, 1000) AS code_snippet
     FROM symbol_index
     WHERE symbol_name LIKE ? OR full_name LIKE ?
@@ -160,6 +165,7 @@ function searchFtsLikeFallback(db, query, limit) {
     ...r,
     vec_score: 0,
     fts_score: 1.0,
+    centrality_score: r.centrality_score || 0,  // Capability Integration ADR Layer 3
     is_dependency: false,
     relation_type: null,
   }));
@@ -177,6 +183,7 @@ function expandDependencies(db, symbols) {
     SELECT d.relation_type,
            si.id AS symbol_id, si.symbol_name, si.full_name,
            si.file_path, si.symbol_type, si.start_line, si.end_line,
+           si.centrality_score,
            SUBSTR(si.code_snippet, 1, 500) AS code_snippet
     FROM symbol_dependencies d
     JOIN symbol_index si ON si.full_name = d.target_symbol
@@ -198,6 +205,7 @@ function expandDependencies(db, symbols) {
           vec_score: 0,
           fts_score: 0,
           graph_score: RELATION_WEIGHTS[dep.relation_type] || 0.3,
+          centrality_score: dep.centrality_score || 0,  // Capability Integration ADR Layer 3
           distance: 1,
           is_dependency: true,
         };
@@ -219,6 +227,7 @@ function expandDependencies(db, symbols) {
           vec_score: 0,
           fts_score: 0,
           graph_score: (RELATION_WEIGHTS[dep.relation_type] || 0.3) * 0.5,
+          centrality_score: dep.centrality_score || 0,  // Capability Integration ADR Layer 3
           distance: 2,
           is_dependency: true,
         });
@@ -231,16 +240,18 @@ function expandDependencies(db, symbols) {
 
 // ──────────────────────────────────────────────
 // S_final 融合分數計算
-// S_final = α·vec + β·graph + γ·fts
+// S_final = α·vec + β·graph + γ·fts + δ·centrality(Capability Integration ADR Layer 3)
 // ──────────────────────────────────────────────
 function calculateSfinal(symbols) {
   const maxVec = Math.max(...symbols.map(s => s.vec_score || 0), 0.001);
+  const maxCentrality = Math.max(...symbols.map(s => s.centrality_score || 0), 0.001);
 
   return symbols.map(sym => {
     const vecNorm  = (sym.vec_score || 0) / maxVec;
     const graphNorm = sym.graph_score || (sym.is_dependency ? 0.5 : 0);
     const ftsNorm  = sym.fts_score || 0;
-    const s_final  = ALPHA * vecNorm + BETA * graphNorm + GAMMA * ftsNorm;
+    const centralityNorm = (sym.centrality_score || 0) / maxCentrality;  // 0~1 normalize
+    const s_final  = ALPHA * vecNorm + BETA * graphNorm + GAMMA * ftsNorm + DELTA * centralityNorm;
     return { ...sym, s_final };
   }).sort((a, b) => b.s_final - a.s_final);
 }

@@ -1,14 +1,15 @@
 ---
 name: toolkit-mirror-sync
-description: 主 SSoT 配置 / 工具改動立即同步至部屬鏡像 SSoT(`<deployment-mirror-root>/`)action-skill。對齐 toolkit-mirror-immediate-sync.md 立即同步原則 + SYNC-LOG.md 紀錄機制。Mode A 執行同步 + Mode B 月度 Audit 校驗。觸發詞:toolkit 同步 / mirror sync / 部屬鏡像同步 / SYNC-LOG / immediate-sync。
-version: 1.0.0
-updated: 2026-05-01
+description: 主 SSoT 配置 / 工具改動立即同步至部屬鏡像 SSoT(`<deployment-mirror-root>/`)action-skill。對齊 toolkit-mirror-immediate-sync.md 立即同步原則 + SYNC-LOG.md 紀錄機制。Mode A 執行同步 + Mode B 月度 Audit 校驗。觸發詞:toolkit 同步 / mirror sync / 部屬鏡像同步 / SYNC-LOG / immediate-sync。
+version: 1.1.0
+updated: 2026-05-03
 watches:
   - glob: ".context-db/**/*.{js,cjs,mjs}"
   - glob: ".claude/{rules,hooks,agents,commands}/*.md"
   - glob: ".claude/hooks/*.{js,cjs,mjs}"
   - glob: "_bmad/bmm/workflows/4-implementation/**/*.{md,xml}"
   - glob: "scripts/*.{ps1,cjs,js}"
+  - glob: "<deployment-mirror-root>/**/*.md"
 triggers:
   - toolkit 同步
   - mirror sync
@@ -21,7 +22,7 @@ created: 2026-05-01
 
 # Toolkit Mirror Sync — 主 SSoT → 部屬鏡像 SSoT 立即同步 Skill
 
-主 SSoT 配置 / 工具改動立即同步至部屬鏡像 SSoT(`<deployment-mirror-root>/`)的 action-skill。對齐 `.claude/rules/toolkit-mirror-immediate-sync.md` v1.0 立即同步原則。
+主 SSoT 配置 / 工具改動立即同步至部屬鏡像 SSoT(`<deployment-mirror-root>/`)的 action-skill。對齊 `.claude/rules/toolkit-mirror-immediate-sync.md` v1.0 立即同步原則。
 
 ---
 
@@ -40,6 +41,8 @@ created: 2026-05-01
 | 7 | BMAD overlay workflows | `<deployment-mirror-root>/bmad-overlay/4-implementation/` |
 | 8 | 通用 PowerShell / Node scripts | `<deployment-mirror-root>/scripts/` |
 | 9 | `.mcp.json` 改動 | `<deployment-mirror-root>/.mcp.json` |
+| 10 | `<deployment-mirror-root>/*.md` 部屬指南文檔(README.md / mcp-ecosystem.md / hooks-events-deep-dive.md / 等)| (本身即 SSoT,無下游;手動 Edit 後走 Mode A Step 4 SYNC-LOG.md update)|
+| 11 | `<deployment-mirror-root>/SYNC-LOG.md` 自身(append-only mirror SSoT)| (本身即同步紀錄,寫入 entry 即是 sync 動作的最後一步,**不觸發再次 sync**)|
 
 ---
 
@@ -106,7 +109,7 @@ diff -r .claude/rules/ "<deployment-mirror-root>/config-templates/claude/rules/"
 
 ### Step 2: 列補同步遺漏
 
-每個 file diff 不為 0 → 列為待補同步,對齐 §2 Mode A 流程處理。
+每個 file diff 不為 0 → 列為待補同步,對齊 §2 Mode A 流程處理。
 
 ### Step 3: 報告
 
@@ -114,7 +117,7 @@ diff -r .claude/rules/ "<deployment-mirror-root>/config-templates/claude/rules/"
 ## Toolkit Mirror Audit Report (YYYY-MM-DD)
 | Range | Source 改動 | 鏡像同步? | Action |
 |:-----|:----:|:----:|:-----|
-| .context-db/server.js | ✅ | ✅ | 對齐 |
+| .context-db/server.js | ✅ | ✅ | 對齊 |
 | .claude/rules/ | ✅ 5 file | ⚠️ 2 file 未同步 | 待補同步 |
 ```
 
@@ -126,7 +129,7 @@ diff -r .claude/rules/ "<deployment-mirror-root>/config-templates/claude/rules/"
 - ❌ batch 同步多次改動(累積容易遺漏)
 - ❌ 跳過脫敏 grep(公開部署 → 業務字面外洩風險)
 - ❌ 跳過 SYNC-LOG.md 更新(失去同步歷程追溯)
-- ❌ 同步業務 code / Stories / ADR / Memory(對齐 CLAUDE.md FORBIDDEN)
+- ❌ 同步業務 code / Stories / ADR / Memory(對齊 CLAUDE.md FORBIDDEN)
 
 ---
 
@@ -154,3 +157,4 @@ diff -r .claude/rules/ "<deployment-mirror-root>/config-templates/claude/rules/"
 | 版本 | 日期 | 變更 |
 |:---:|:---:|------|
 | 1.0.0 | 2026-05-01 | 初版建立。固化「立即同步」原則為 4 層機械守護(rule + memory + hook + skill)的 action-skill 層。觸發背景:延後 toolkit 鏡像同步反模式被使用者 ultrathink 指正。 |
+| **1.1.0** | **2026-05-03** | **§1 觸發情境 9→11 範圍擴展**(加 #10 `<deployment-mirror-root>/*.md` 部屬指南文檔本身 + #11 `<deployment-mirror-root>/SYNC-LOG.md` 自身 append-only 不觸發再次 sync 語意)+ watches glob 加 `<deployment-mirror-root>/**/*.md` 偵測 + 三引擎同步補完(.claude/.gemini/.agent md5 identical)。觸發事件:整合補全計畫揭示鏡像範圍需擴展至部屬指南內容層。Mode A/B SOP 不變。|

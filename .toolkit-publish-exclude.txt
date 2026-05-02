@@ -64,6 +64,7 @@ ChatGPT_智能專案開發升級建議方案.md                              # �
 github-toolkit-readme-update/                                    # toolkit 草稿目錄(推送時 README.md + README.zh-TW.md 取代 GitHub repo 根 README,目錄本身不推)
 .toolkit-publish-include.txt                                     # 本檔(僅內部 reference)
 .toolkit-publish-exclude.txt                                     # 本檔(僅內部 reference)
+SYNC-LOG.md                                                      # 同步紀錄含主 SSoT 路徑 reference(內部追溯,不對外公開;V-8 baseline 既有業務字面 6 處屬 td-toolkit-baseline-sanitization 範圍)
 
 # === 環境變數 / 機密 ===
 **/.env

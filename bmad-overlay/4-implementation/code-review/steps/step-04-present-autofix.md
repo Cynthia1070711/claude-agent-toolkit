@@ -134,13 +134,45 @@ If architecture bugs found:
 
 > **REF:** `pcpt-debt-registry` §5
 
+#### Phase 0.5 (NEW 2026-05-02) — God Node BlastRadius Auto-Lookup
+
+> **Added 2026-05-02 (Capability Integration ADR + Tianji v1.1.0)**: BlastRadius **不可主觀估算**(對齊 `cr-debt-doc-audit.md` Phase A2「禁止以估算成本替代實際試修」精神)。對每個 non-FIXED finding,先用 god node MCP 自動補 BlastRadius。
+
+對 `{unified_findings}` 中每個 finding(file:line + symbol_name 識別):
+
+```
+mcp__pcpt-context__get_symbol_context({
+  symbol_id: "<from search_symbols by finding.symbol_name>"
+})
+```
+
+或直接:
+
+```
+mcp__pcpt-context__search_god_nodes({
+  domain: "<finding.namespace>",
+  limit: 5
+})
+```
+
+**對照表**(centrality_score → BlastRadius):
+
+| centrality_score | BlastRadius | 說明 |
+|:---:|:---:|:---|
+| ≥ P95 (≥ 50.0) | **10**(全站) | god node — 修改影響廣 |
+| ≥ P75 (≥ 5.0) | **5**(模組) | 中等中心性 — 影響跨檔 |
+| ≥ P50 (≥ 0.5) | **2**(單檔) | 低中心性 — 影響範圍小 |
+| < P50 (< 0.5) | **1**(單行) | 葉節點 — 影響極小 |
+
+**使用**: `Priority Score = Severity × BlastRadius_auto_lookup × BusinessImpact ÷ FixCost`,**不可繞過**(對齊投機紅線守護)。
+
 For EACH non-FIXED issue in `{deferred_issues}`, calculate:
 
 ```
 Priority Score = (Severity × BlastRadius × BusinessImpact) ÷ FixCost
 
 Severity:    P0=10, P1=7, P2=4, P3=2, P4=1
-BlastRadius: 全站=10, 模組=5, 單檔=2, 單行=1
+BlastRadius: 全站=10, 模組=5, 單檔=2, 單行=1   ← Phase 0.5 god node MCP 自動補值
 BusinessImpact: Revenue=10, Core feature=7, Admin=3, Dev experience=1
 FixCost:     XS(<1h)=1, S(1-3h)=2, M(1d)=5, L(2-3d)=10, XL(>3d)=20
 

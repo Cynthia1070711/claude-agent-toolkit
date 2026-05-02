@@ -505,6 +505,32 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         required: ['symbol_id'],
       },
     },
+    // ── Capability Integration ADR: God Node 識別工具(Tianji-Pavilion v1.1.0 + capability-integration-mandate.md)──
+    {
+      name: 'search_god_nodes',
+      description: '查詢高 centrality 的 god node symbol(被廣泛依賴的核心 service / entity)。用於 dev-story 啟動定位核心檔 / CR 階段 BlastRadius 評估 / cross-Story refactor 影響分析。預設排除 Migrations / ModelSnapshot / Tests namespace(generated code / test code 不算 production god node)。對齊 Capability Integration ADR Layer 3 + compute-centrality.cjs(weighted in/out-degree + RELATION_WEIGHTS)。',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          domain: {
+            type: 'string',
+            description: 'namespace 過濾(選填,e.g., "Payment" / "<Project>.Web.Services.Payment")— LIKE 模糊匹配',
+          },
+          limit: {
+            type: 'number',
+            description: 'top-N god nodes(預設 10,上限 50)',
+          },
+          min_centrality: {
+            type: 'number',
+            description: 'centrality_score 下限門檻(選填)。不指定則回傳 top N',
+          },
+          include_generated: {
+            type: 'boolean',
+            description: '是否包含 generated code(Migrations / ModelSnapshot)和 Tests(預設 false)。設 true 顯示完整 graph centrality',
+          },
+        },
+      },
+    },
     // ── CMI-3: 對話記憶查詢工具 ──
     {
       name: 'search_conversations',
@@ -863,6 +889,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       case 'get_symbol_context':
         result = handleGetSymbolContext(args);
+        break;
+      case 'search_god_nodes':
+        result = handleSearchGodNodes(args);
         break;
       case 'search_conversations':
         result = await handleSearchConversations(args);
@@ -1732,6 +1761,97 @@ function handleGetSymbolContext(args) {
 }
 
 // ──────────────────────────────────────────────
+// search_god_nodes 實作 (Capability Integration ADR + Tianji-Pavilion v1.1.0)
+// 查詢高 centrality 的 god node symbol(被廣泛依賴的核心 service / entity)
+// 預設排除 Migrations / ModelSnapshot / Tests namespace
+// 對齊 capability-integration-mandate.md Step 1 SKILL 同步 + compute-centrality.cjs
+// ──────────────────────────────────────────────
+function handleSearchGodNodes(args) {
+  const { domain = null, limit = 10, min_centrality = null, include_generated = false } = args || {};
+
+  const safeLimit = Math.min(50, Math.max(1, Number(limit) || 10));
+
+  let database;
+  try {
+    database = getDb();
+  } catch (err) {
+    return { isError: true, content: [{ type: 'text', text: err.message }] };
+  }
+
+  try {
+    // 預檢查 schema(post-migration 驗證)
+    const cols = database.prepare(`PRAGMA table_info(symbol_index)`).all();
+    if (!cols.find(c => c.name === 'centrality_score')) {
+      return {
+        isError: true,
+        content: [{ type: 'text', text: 'symbol_index.centrality_score 欄位不存在,請先執行 migration 2026-05-02-add-symbol-centrality-score.sql' }],
+      };
+    }
+
+    let sql = `
+      SELECT id, file_path, symbol_type, symbol_name, full_name, namespace,
+             start_line, end_line, signature, centrality_score
+      FROM symbol_index
+      WHERE centrality_score > 0
+    `;
+    const params = [];
+
+    // 預設排除 generated code(Migrations / ModelSnapshot)和 Tests namespace
+    if (!include_generated) {
+      sql += ` AND namespace NOT LIKE '%Migrations%'`;
+      sql += ` AND namespace NOT LIKE '%ModelSnapshot%'`;
+      sql += ` AND namespace NOT LIKE '%Tests%'`;
+    }
+
+    if (domain) {
+      sql += ` AND namespace LIKE ?`;
+      params.push(`%${domain}%`);
+    }
+
+    if (min_centrality !== null && min_centrality !== undefined) {
+      sql += ` AND centrality_score >= ?`;
+      params.push(Number(min_centrality));
+    }
+
+    sql += ` ORDER BY centrality_score DESC LIMIT ?`;
+    params.push(safeLimit);
+
+    const rows = database.prepare(sql).all(...params);
+
+    // 摘要 metadata 幫助 Agent 解讀
+    const result = {
+      total: rows.length,
+      filter: {
+        domain: domain || null,
+        min_centrality: min_centrality !== null ? Number(min_centrality) : null,
+        include_generated: !!include_generated,
+        excluded_namespaces: include_generated ? [] : ['Migrations', 'ModelSnapshot', 'Tests'],
+      },
+      god_nodes: rows.map(r => ({
+        id: r.id,
+        symbol_name: r.symbol_name,
+        full_name: r.full_name,
+        namespace: r.namespace,
+        file_path: r.file_path,
+        symbol_type: r.symbol_type,
+        start_line: r.start_line,
+        end_line: r.end_line,
+        signature: r.signature,
+        centrality_score: +Number(r.centrality_score).toFixed(2),
+      })),
+      hint: '高 centrality_score = 被多個 symbol 依賴(in-degree)或主動引用多個(out-degree)。修改前必先 Read + 評估 BlastRadius。詳細 dependency 用 get_symbol_context(symbol_id, depth=2)展開。',
+    };
+
+    return {
+      content: [{ type: 'text', text: JSON.stringify(result) }],
+    };
+  } catch (err) {
+    process.stderr.write(`[pcpt-context] search_god_nodes error: ${err.message}\n`);
+    return { isError: true, content: [{ type: 'text', text: `search_god_nodes 失敗：${err.message}` }] };
+  }
+}
+
+// ──────────────────────────────────────────────
 // search_conversations 實作 (CMI-3, AC-4)
 // FTS5 搜尋 conversation_turns，JOIN conversation_sessions
 // ──────────────────────────────────────────────
@@ -2319,7 +2439,7 @@ async function handleSearchStories(args) {
 
       if (isPreciseStoryQuery && include_details) {
         // 精確查詢 + 詳情:回傳完整(無 _preview, 涵蓋全 stories 表 46 欄位)
-        // 對齐 cold-start dev agent 接續完整性 — pipeline_notes / risk_assessment / rollback_plan /
+        // 對齊 cold-start dev agent 接續完整性 — pipeline_notes / risk_assessment / rollback_plan /
         // monitoring_plan / sdd_spec / create_agent / create_started_at / create_completed_at /
         // review_started_at / source_file / affected_files / cr_summary 全可取
         detailCols = `,

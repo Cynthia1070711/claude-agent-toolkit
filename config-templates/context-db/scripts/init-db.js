@@ -158,22 +158,26 @@ function initDb() {
   // ──────────────────────────────────────────────
   db.exec(`
     CREATE TABLE IF NOT EXISTS symbol_index (
-      id              INTEGER PRIMARY KEY AUTOINCREMENT,
-      file_path       TEXT NOT NULL,
-      symbol_type     TEXT NOT NULL,
-      symbol_name     TEXT NOT NULL,
-      full_name       TEXT NOT NULL,
-      namespace       TEXT,
-      parent_symbol   TEXT,
-      start_line      INTEGER NOT NULL,
-      end_line        INTEGER NOT NULL,
-      code_snippet    TEXT NOT NULL,
-      signature       TEXT,
-      return_type     TEXT,
-      parameters      TEXT,
-      modifiers       TEXT,
-      indexed_at      TEXT NOT NULL,
-      file_hash       TEXT
+      id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      file_path        TEXT NOT NULL,
+      symbol_type      TEXT NOT NULL,
+      symbol_name      TEXT NOT NULL,
+      full_name        TEXT NOT NULL,
+      namespace        TEXT,
+      parent_symbol    TEXT,
+      start_line       INTEGER NOT NULL,
+      end_line         INTEGER NOT NULL,
+      code_snippet     TEXT NOT NULL,
+      signature        TEXT,
+      return_type      TEXT,
+      parameters       TEXT,
+      modifiers         TEXT,
+      indexed_at       TEXT NOT NULL,
+      file_hash        TEXT,
+      centrality_score REAL NOT NULL DEFAULT 0.0  -- Capability Integration ADR + Tianji v1.1.0 (2026-05-02)
+                                                  -- migration: 2026-05-02-add-symbol-centrality-score.sql
+                                                  -- compute: scripts/compute-centrality.js (weighted in/out-degree from RELATION_WEIGHTS)
+                                                  -- consume: search_god_nodes MCP tool + Layer 10 S_final δ=0.05 加權
     );
 
     CREATE TABLE IF NOT EXISTS symbol_dependencies (
@@ -185,11 +189,12 @@ function initDb() {
       target_file     TEXT
     );
 
-    CREATE INDEX IF NOT EXISTS idx_symbol_name     ON symbol_index(symbol_name);
-    CREATE INDEX IF NOT EXISTS idx_symbol_fullname ON symbol_index(full_name);
-    CREATE INDEX IF NOT EXISTS idx_symbol_file     ON symbol_index(file_path);
-    CREATE INDEX IF NOT EXISTS idx_dep_source      ON symbol_dependencies(source_symbol);
-    CREATE INDEX IF NOT EXISTS idx_dep_target      ON symbol_dependencies(target_symbol);
+    CREATE INDEX IF NOT EXISTS idx_symbol_name       ON symbol_index(symbol_name);
+    CREATE INDEX IF NOT EXISTS idx_symbol_fullname   ON symbol_index(full_name);
+    CREATE INDEX IF NOT EXISTS idx_symbol_file       ON symbol_index(file_path);
+    CREATE INDEX IF NOT EXISTS idx_symbol_index_centrality ON symbol_index(centrality_score DESC);  -- Capability Integration ADR
+    CREATE INDEX IF NOT EXISTS idx_dep_source        ON symbol_dependencies(source_symbol);
+    CREATE INDEX IF NOT EXISTS idx_dep_target        ON symbol_dependencies(target_symbol);
   `);
 
   // ──────────────────────────────────────────────
