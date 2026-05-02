@@ -34,17 +34,17 @@
 | `bmad-overlay/4-implementation/dev-story/steps/step-05-implement-task.md`(UPDATE)| `_bmad/.../dev-story/steps/step-05-implement-task.md` | §0.5 God Node Awareness Pre-Check 整段插入(在 CRITICAL line + §1 Review Current Task 之間)— 同上通用化 mcp 命名 + Fallback 邏輯 |
 | `bmad-overlay/4-implementation/code-review/steps/step-04-present-autofix.md`(UPDATE)| `_bmad/.../code-review/steps/step-04-present-autofix.md` | Phase 0.5 God Node BlastRadius Auto-Lookup 整段插入(在 Phase 0 REF + 「For EACH non-FIXED」之間)+ Priority Score 公式加 `← Phase 0.5 god node MCP 自動補值` 註解 + P95/P75/P50 對照表(centrality_score → BlastRadius)— 通用化 ADR 編號 + F-S9 投機紅線 → 通用「投機紅線守護」 |
 | `scripts/audit-capability-reachability.cjs`(NEW)| `scripts/audit-capability-reachability.cjs` | 通用化版 audit 工具(reachability_score 公式 + 4 sub-system grep + JSON/MD/console 三模式 + --strict / --tool / --skip-schema / --skip-layer)— REPO_ROOT 兩層上對齊 deployer project root + 部署註解 |
-| `scripts/audit-skill-overlap.cjs`(NEW)| `scripts/audit-skill-overlap.cjs` | 通用化版 Skill 重疊偵測(Phase 1 90d 0-trigger retire + Phase 2 triggers Jaccard + Phase 3 description keyword overlap + checkNew 3 題)— DB_PATH placeholder `context-memory.db` + PROJECT_SKILL_PREFIX `pcpt-` 占位符 + STOPWORDS phycool→pcpt |
+| `scripts/audit-skill-overlap.cjs`(NEW)| `scripts/audit-skill-overlap.cjs` | 通用化版 Skill 重疊偵測(Phase 1 90d 0-trigger retire + Phase 2 triggers Jaccard + Phase 3 description keyword overlap + checkNew 3 題)— DB_PATH placeholder `context-memory.db` + PROJECT_SKILL_PREFIX `pcpt-` 占位符 + STOPWORDS `<project-token>` 替換為 `pcpt` 占位 |
 | `config-templates/claude/skills/toolkit-mirror-sync/SKILL.md` v1.0→v1.1(UPDATE)| `.claude/skills/toolkit-mirror-sync/SKILL.md` v1.1.0 | §1 觸發情境 9→11 範圍擴展(加 #10 部屬指南文檔本身 + #11 SYNC-LOG.md append-only 不觸發再次 sync 語意)+ frontmatter version + watches glob 加 `<deployment-mirror-root>/**/*.md` + Version History v1.1.0 row — 通用化 placeholder 維持 |
 | `.toolkit-publish-exclude.txt`(UPDATE)| (toolkit-only,無上游)| 加 `SYNC-LOG.md` exclude 條目(防 mirror 同步紀錄推送公開 toolkit repo;主 SSoT 路徑 reference 不可避免) |
 | **新建** `.gemini/skills/toolkit-mirror-sync/SKILL.md` v1.1.0(主 SSoT 三引擎補完)| `.claude/skills/toolkit-mirror-sync/SKILL.md` v1.1.0 | Phase 1 ultrathink 揭示 v1.0 只在 .claude/ 存在,新建 .gemini 三引擎同步補完 — md5 identical 對齊 .claude(屬主 SSoT 範圍,不在 mirror) |
 | **新建** `.agent/skills/toolkit-mirror-sync/SKILL.md` v1.1.0(主 SSoT 三引擎補完)| `.claude/skills/toolkit-mirror-sync/SKILL.md` v1.1.0 | 同上,新建 .agent 三引擎同步補完 — md5 identical(屬主 SSoT 範圍,不在 mirror) |
 
 **Verify**:
-- ✅ 我新加範圍 10 mirror file 各自脫敏 grep `phycool|PhyCool|IDD-(COM|REG|USR)|eft-|qgr-|mqv-|dla-` **0 命中**(BR-MIR-008 PASS)
+- ✅ 我新加範圍 10 mirror file 各自脫敏 grep `<project-token>|<project-token-Pascal>|IDD-(COM|REG|USR)|<business-story-prefix>` **0 命中**(BR-MIR-008 PASS)
 - ✅ baseline 既有 7 hits(server.js 3 + init-db.js 1 + step-04 3,IDD framework 範例字面)— 對齊 Story dev_notes Q3 scope creep 防線,**不在本 Story 範圍**(留另批 baseline-sanitization Story 處理)
 - ✅ `node scripts/verify-deployment-docs.cjs` 5-phase **ALL PASS, 1 WARN**(Rules count 24 NOT in [18,22] 屬 deployment-doc-freshness 範圍 out-of-scope)
-- ✅ Phase 1 V-8 phycool/PhyCool 字面 **0 命中**(BR-MIR-009 PASS)
+- ✅ Phase 1 V-8 `<project-token>/<project-token-Pascal>` 字面 **0 命中**(BR-MIR-009 PASS)
 - ✅ toolkit-mirror-sync v1.1.0 三引擎 md5 identical PASS(`C17022537E93BDDCF20461B8F63120E2`,Phase 3.7.5)
 - ✅ Phase 3.7 透過 **`Skill(skill="saas-to-skill")` 字面 Skill tool 調用**啟動 Mode B(skill-tool-invocation-mandatory.md v1.0 強制要求,對齊 2026-04-28 Session 55 lesson)
 

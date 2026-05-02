@@ -13,6 +13,8 @@
  *   - REPO_ROOT 假設 audit script 位於 1.專案部屬必讀/scripts/,deployer project root 在兩層上
  *   - DB_PATH 預設 .context-db/context-memory.db,部署時依本機 DB 命名修改
  *   - PROJECT_SKILL_PREFIX 預設 'pcpt-',部署時依 SaaS skill 命名前綴修改
+ *   - STOPWORDS 內含 'pcpt' 占位符(line 51),deployer 同步替換為自身 skill prefix
+ *     (e.g., 'pcpt' → 'acme'),否則 keyword overlap 計算會把 prefix 字眼當主題詞
  *
  * 用法:
  *   node 1.專案部屬必讀/scripts/audit-skill-overlap.cjs                     # advisory 預設
