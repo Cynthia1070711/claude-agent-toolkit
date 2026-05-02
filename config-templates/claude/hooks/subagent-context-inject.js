@@ -150,11 +150,13 @@ async function main() {
           const cols = db.prepare(`PRAGMA table_info(symbol_index)`).all();
           const hasCentrality = cols.some(c => c.name === 'centrality_score');
           if (hasCentrality && storyId) {
-            // Extract domain hint from story_id pattern (e.g., "<epic>-payment-xxx" → "Payment")
-            // domainHints 為通用 SaaS 命名範例,部署時依專案實際 module 命名替換
+            // Extract domain hint from story_id pattern (e.g., "<epic>-<feature>-xxx" → "Feature")
+            // domainHints 為**部署占位符**(deployment placeholder),部署時 MUST 替換為專案實際業務 module 命名
+            // 例:若部署專案有 payment / member / editor module,deployer 應替換為對應 token
+            // 保持純 generic 占位符避免上游專案 architecture pattern leak (對齊 dev_notes 通用化策略)
             const tokens = storyId.toLowerCase().split('-');
-            const domainHints = ['payment', 'member', 'editor', 'admin', 'auth', 'announcement',
-                                 'asset', 'invoice', 'license', 'subscription', 'feature1', 'feature2'];
+            const domainHints = ['feature1', 'feature2', 'feature3', 'feature4', 'feature5', 'feature6',
+                                 'feature7', 'feature8', 'feature9', 'feature10', 'feature11', 'feature12'];
             const matched = tokens.find(t => domainHints.includes(t));
             if (matched) {
               const cap = matched.charAt(0).toUpperCase() + matched.slice(1);
