@@ -1,7 +1,7 @@
 # Toolkit 鏡像同步紀錄(SYNC-LOG)
 
 > **檔案性質**: PCPT-MVP 主 SSoT → `1.專案部屬必讀/` toolkit 內容鏡像 SSoT 同步歷程
-> **規範**: 對齐 `CLAUDE.md` §0 雙倉庫架構認知 + §0.2 進化路徑(蒸餾流)
+> **規範**: 對齊 `CLAUDE.md` §0 雙倉庫架構認知 + §0.2 進化路徑(蒸餾流)
 > **更新原則**: **PCPT-MVP 主 SSoT 任何改動 → 立即同步至 `1.專案部屬必讀/`**(避免延後忘記細節 / 重新大規模比對驗證)
 
 ---
@@ -16,11 +16,40 @@
 [claude-agent-toolkit] /deployment/(對外公開可部屬,獨立 repo)
 ```
 
-**本 SYNC-LOG 涵蓋第一段同步**(PCPT-MVP → `1.專案部屬必讀/`)。第二段(`1.專案部屬必讀/` → toolkit repo)走 `td-mcp-cmi-12-toolkit-sync` 等 follow-up Story + release branch + gh PR(對齐 `.claude/rules/dual-repo-push-discipline.md`)。
+**本 SYNC-LOG 涵蓋第一段同步**(PCPT-MVP → `1.專案部屬必讀/`)。第二段(`1.專案部屬必讀/` → toolkit repo)走 `td-mcp-cmi-12-toolkit-sync` 等 follow-up Story + release branch + gh PR(對齊 `.claude/rules/dual-repo-push-discipline.md`)。
 
 ---
 
 ## 同步紀錄(時間倒序)
+
+### 2026-05-02 — ADR-GOVERNANCE-001 + Capability Integration Mandate + Skill Creation Discipline 立即同步(P0-2 minimal viable)
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `config-templates/claude/rules/capability-integration-mandate.md` v1.0 (NEW) | 主 SSoT 對應 rules/ | SUPREME 規範新建。MCP/Schema/Hook 5 步整合(SKILL 同步 → BMAD 整合 → Pipeline/Hook 注入分 Path A/B → 部屬範本 → Schema 公告) + 8 條 FORBIDDEN(F1 例外條款)+ Self-Check 5 題 + §6.5 Sync-Gate Execution Order(6 條 SUPREME 並發排序) — 鏡像版通用化(刪業務專案命名前綴 / 業務 IDD 編號 / 業務 Story ID 字面範例) |
+| `config-templates/claude/rules/skill-creation-discipline.md` v1.0 (NEW) | 主 SSoT 對應 rules/ | SUPREME 規範新建。Skill 規模 cap + 新建必檢 3 題 + 90d 0 觸發 retire + audit-skill-overlap.cjs 工具 — 鏡像版通用化(Cap 規則改「以項目實況設定」+ baseline 數字 generic 化) |
+| `config-templates/context-db/scripts/compute-centrality.cjs` (NEW) | 主 SSoT 對應 scripts/ | Symbol centrality 計算腳本(0.6×weighted_in + 0.4×weighted_out)+ Math.min/max 用 reduce() 防 V8 spread overflow + 21 vitest tests + 200K scores stress test — 鏡像版通用化(DB 檔名 → `context-memory.db`,DB_PATH 註解標明部署時依專案 DB 命名修改) |
+
+**Verify**:
+- 3 file × 脫敏 grep `<project-token>|<project-token-Pascal>|IDD-(COM|REG|USR)|<business-story-prefix>` → **全 0 hits ✅**(經 grep 驗證,使用通用脫敏 pattern 表達)
+
+**Memory DB cross-reference**:
+- `context_entries id=3978` ADR-GOVERNANCE-001 主紀錄
+- `context_entries id=3981` capability-integration-mandate v1.0 SUPREME
+- `context_entries id=3982` skill-creation-discipline v1.0 SUPREME
+- `context_entries id=3983` (infrastructure-evolution) symbol_index.centrality_score 啟用
+
+**P0-2 Scope 限縮 + Defer 透明化**(對齊「禁止投機」原則):
+- ✅ 本次同步 minimal viable:2 SUPREME rules + 1 audit script(脫敏 + 通用化完成)
+- ⏸️ **DEFER P1 Story** `td-toolkit-mirror-godnode-update`(規劃中):mirror 端的 hooks(pre-prompt-rag.js Layer N / subagent-context-inject.js god node Phase)+ context-db/server.js search_god_nodes + init-db.js centrality_score schema + bmad-overlay 3 step (step-03/04/05) god node 整合段落 — 涉逐行通用化(避業務範例 + 數字 placeholder),工程量 ~5 hr,本對話 token 預算內無法乾淨完成,留至 P1 follow-up Story 處理(本 SYNC-LOG 紀錄為 deferred 透明化,避免投機聲稱「全部完成」)
+
+**對應 commit**:
+- 主 SSoT commit: `3d6ee8a7` (ADR-GOVERNANCE-001 ~24 files)
+- 字錯防護 commit(另一 agent): `dacbd5be` (CR done + 簡繁字錯防護 + check-traditional-chinese.cjs)
+
+**Self-Dogfood**: 本 SYNC-LOG 紀錄本身即是 capability-integration-mandate.md §3 Step 5 的「Memory DB add_context category=infrastructure-evolution 公告」實踐(透過此 SYNC-LOG entry + Memory id=3983 雙渠道公告)。
+
+---
 
 ### 2026-05-01 S59(Part 2)— 立即同步原則 4 層機械守護(rule + memory + hook + skill)+ SYNC-LOG 自舉
 
@@ -57,7 +86,7 @@
 
 **驗證**:
 - ✅ MCP server 重啟實測 `search_stories({story_id, include_details: true})` 回傳 64.2KB 完整(對比修復前 ~2-3KB)
-- ✅ 對齐 `db-first-no-md-mirror.md` + `context-memory.md` Conversation Start Ritual SSoT 精神
+- ✅ 對齊 `db-first-no-md-mirror.md` + `context-memory.md` Conversation Start Ritual SSoT 精神
 
 ---
 
@@ -76,7 +105,7 @@
 - ❌ `src/PhyCool.Platform/**` 業務 code
 - ❌ `docs/{technical-decisions,implementation-artifacts,project-planning-artifacts}/` 業務 ADR/Stories/Reviews
 - ❌ `memory/` Auto-Memory + IDD(業務 IDD)
-- ❌ `phycool-*` Skill 字面(對齐 toolkit SANITIZATION-POLICY V-8 phycool 字面 0 命中)
+- ❌ `phycool-*` Skill 字面(對齊 toolkit SANITIZATION-POLICY V-8 phycool 字面 0 命中)
 
 ### 立即同步原則(本 SYNC-LOG 觸發背景)
 
