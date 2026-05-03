@@ -22,6 +22,35 @@
 
 ## 同步紀錄(時間倒序)
 
+### 2026-05-04T02:30+08:00 — party-to-pipeline v4.0.0 → v4.1.0 方案 1 一併升級同步
+
+> **改版主軸**: 接續 v4.0.0,方案 1 一併升級 — 5 軸 SSoT 文檔化 (§12-§14) + Effort 機制 spike 修補 (§15) + Phase 2/3 Story closure + 建立 follow-up Story `td-pipeline-completeness-audits` (M, P3, side track) 作為下一個 dogfood 第一槍標的。
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| (本檔)`SYNC-LOG.md` | (本紀錄) | 加 v4.1.0 entry |
+
+**註**: SKILL.md 三引擎 md5 IDENTICAL (E0822E77B02EBC1D5F9AFFF2C009E6AA) 但 toolkit 無 `config-templates/claude/skills/` 目錄結構,party-to-pipeline SKILL.md 不鏡像至 toolkit (workflow tool skill 屬 PCPT-MVP 主 SSoT,使用者透過 Memory + git history 維護)。worker scripts (.ps1) Phase 9 Effort directive 修補同樣不鏡像。Phase 9 spike 結果與 §15 Effort 機制現狀已寫入 SKILL.md (三引擎),不需獨立 toolkit doc。
+
+**Verify**:
+- 三引擎 md5 IDENTICAL: `E0822E77B02EBC1D5F9AFFF2C009E6AA` (vs v4.0.0 `41FEE2EBCFC07E79CE7046F484DBA773`)
+- 0 toolkit file 改動 (SKILL.md 在 .claude/.gemini/.agent 不在 1.專案部屬必讀/)
+- Phase 2/3 Story status=done, follow-up `td-pipeline-completeness-audits` backlog 待 dogfood
+
+**主 SSoT 變更檔案清單 (本對話 commit 2 預期 staged)**:
+1. `.claude/skills/party-to-pipeline/SKILL.md` v4.0.0 → v4.1.0 (+§12-§15 4 章節, +Version History v4.1.0 entry)
+2. `.gemini/skills/party-to-pipeline/SKILL.md` 三引擎同步
+3. `.agent/skills/party-to-pipeline/SKILL.md` 三引擎同步
+4. `.claude/skills/party-to-pipeline/scripts/worker-create.ps1` (Effort directive 修補 + ENV 名稱 CLAUDE_CODE_EFFORT → CLAUDE_CODE_EFFORT_LEVEL)
+5. `.claude/skills/party-to-pipeline/scripts/worker-dev.ps1` 同上
+6. `.claude/skills/party-to-pipeline/scripts/worker-review.ps1` 同上
+
+**Memory DB**: context_entries id 待加 (本紀錄寫入後查)
+**Phase 2/3 Story DB**: status=done with cr_summary 完整紀錄
+**Follow-up Story DB**: td-pipeline-completeness-audits backlog created
+
+---
+
 ### 2026-05-04T01:30+08:00 — party-to-pipeline v3.2.0 → v4.0.0 重大改版同步
 
 > **改版主軸**: party-to-pipeline skill self-contained orchestrator 改版 — 自帶完整 scripts/ 體系(orchestrator + 3 worker + shared-utils + stop-report + protocol-template),不再調用 claude-launcher-interactive。實現雙向 ACK Handshake + 主線/副線分流 + 三重 confirm 子視窗已關。
