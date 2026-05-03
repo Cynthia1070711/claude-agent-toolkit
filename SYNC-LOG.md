@@ -22,6 +22,41 @@
 
 ## 同步紀錄(時間倒序)
 
+### 2026-05-04T01:30+08:00 — party-to-pipeline v3.2.0 → v4.0.0 重大改版同步
+
+> **改版主軸**: party-to-pipeline skill self-contained orchestrator 改版 — 自帶完整 scripts/ 體系(orchestrator + 3 worker + shared-utils + stop-report + protocol-template),不再調用 claude-launcher-interactive。實現雙向 ACK Handshake + 主線/副線分流 + 三重 confirm 子視窗已關。
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `config-templates/claude/rules/pipeline-handshake-protocol.md` | `.claude/rules/pipeline-handshake-protocol.md`(新建)| 新建 ACK handshake 規範:IPC schema 契約(task/status/ack 三 file)+ Mandatory 16 步順序 + 14 條 FORBIDDEN + Self-Check 5 題 + Schema 變更說明 + Migration 路徑。脫敏:`PhyCool` → `App`、`phycool-` → `app-`、`phycool.db` → `app.db`(0 業務字面命中) |
+| `config-templates/context-db/scripts/init-db.js` | `.context-db/scripts/init-db.js`(line 599-601, 909)| Patch 模式同步:(a) storyNewColumns +1 (task_track TEXT DEFAULT 'main'),(b) wfqMigrations +1 (evidence_json TEXT NULLABLE)。對齊 v2.3 Schema 擴充。脫敏 0 命中(line 987 IDD-COM/STR/REG/USR 為 framework 分類縮寫,非業務編號,既有 stale 不歸本次)|
+
+**Verify**: pipeline-handshake-protocol.md 脫敏 0 業務字面 / init-db.js 兩欄位確認在位(line 600-601 task_track / line 909 evidence_json)/ Forbidden literal regression 0(既有 line 987 IDD-COM/STR/REG/USR 為 framework 標籤非業務編號)
+**Skill 升版**: party-to-pipeline v3.2.0 → v4.0.0 三引擎 md5 IDENTICAL `41FEE2EBCFC07E79CE7046F484DBA773`
+**Schema 變更**: `.context-db/migrations/2026-05-04-add-task-track-and-evidence-json.sql` (up + down 雙向)— 對齊 capability-integration-mandate.md §3 Step 5 義務
+**主 SSoT 變更檔案清單**:
+1. `.claude/skills/party-to-pipeline/SKILL.md` v4.0.0 三引擎(.claude/.gemini/.agent identical)
+2. `.claude/skills/party-to-pipeline/scripts/` 7 新建 (orchestrator + 3 worker + shared-utils + stop-report + protocol-template)
+3. `.claude/settings.json` Stop hook chain 第 2 順位插入 stop-report.ps1 (timeout 1500ms + env guard)
+4. `scripts/pipeline-config.json` 新增 handshake section (enabled false 漸進啟用)
+5. `.context-db/scripts/init-db.js` storyNewColumns + wfqMigrations 各 +1
+6. `.context-db/migrations/2026-05-04-add-task-track-and-evidence-json{,-down}.sql` 新建
+7. `.claude/ipc/.gitignore` 新建
+8. `.claude/rules/pipeline-handshake-protocol.md` v1.0.0 新建
+9. `.claude/skills/skills_list.md` party-to-pipeline 行更新 v4.0.0 description
+
+**Toolkit 鏡像範圍 (本次同步)**:
+- ✅ `pipeline-handshake-protocol.md` (config-templates/claude/rules/) — 通用 ACK protocol 規範
+- ✅ `init-db.js` (config-templates/context-db/scripts/) — Schema 變更 patch
+- ⏳ `settings.json.template` (config-templates/claude/) — 不同步(toolkit 模板精簡無 hooks 配置,使用者自定)
+- ⏳ `pipeline-config.json` (config-templates/scripts/) — handshake section 屬 PhyCool 主 SSoT,後續 follow-up evaluate 是否升 v 同步
+- ⏳ `migrations/*.sql` — toolkit 不鏡像 migrations (使用者部屬時走 init-db.js idempotent)
+- ❌ `party-to-pipeline/scripts/*.ps1` — toolkit 無 skills/ 目錄結構,workflow tool skill 不鏡像 (使用者透過 PCPT-MVP 主 SSoT 維護或 follow-up Story 評估抽 generic 鏡像範本)
+
+**Memory DB**: 待 add_context category=infrastructure-evolution 公告 (Phase 6 Memory writeback)
+
+---
+
 ### 2026-05-03T16:26+08:00 — td-pipeline-model-routing-foundation Phase 1 完成同步
 
 | 同步檔案 | 來源 | 變更摘要 |

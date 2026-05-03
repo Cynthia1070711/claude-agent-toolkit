@@ -596,6 +596,9 @@ function initDb() {
       { name: 'create_agent',          sql: 'ALTER TABLE stories ADD COLUMN create_agent TEXT' },
       { name: 'create_started_at',     sql: 'ALTER TABLE stories ADD COLUMN create_started_at TEXT' },
       { name: 'create_completed_at',   sql: 'ALTER TABLE stories ADD COLUMN create_completed_at TEXT' },
+      // --- Schema 擴充 v2.3: party-to-pipeline v4.0.0 main/side track ---
+      // task_track: 'main' = SaaS business code | 'side' = toolkit/env/workflow upgrade
+      { name: 'task_track',            sql: "ALTER TABLE stories ADD COLUMN task_track TEXT DEFAULT 'main'" },
     ];
     for (const col of storyNewColumns) {
       if (!storiesColumns.includes(col.name)) {
@@ -902,6 +905,8 @@ function initDb() {
     { col: 'cache_creation_tokens', ddl: 'ALTER TABLE workflow_executions ADD COLUMN cache_creation_tokens INTEGER DEFAULT 0' },
     { col: 'cost_usd',              ddl: 'ALTER TABLE workflow_executions ADD COLUMN cost_usd REAL DEFAULT 0.0' },
     { col: 'model',                 ddl: 'ALTER TABLE workflow_executions ADD COLUMN model TEXT' },
+    // party-to-pipeline v4.0.0 ACK handshake: full evidence JSON from stop-report.ps1
+    { col: 'evidence_json',         ddl: 'ALTER TABLE workflow_executions ADD COLUMN evidence_json TEXT' },
   ];
   for (const { ddl } of wfqMigrations) {
     try { db.exec(ddl); } catch (_) { /* 欄位已存在，忽略 */ }
