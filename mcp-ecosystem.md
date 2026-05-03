@@ -193,6 +193,48 @@ RELATION_WEIGHTS = { inherits:1.0, implements:0.9, calls:0.7, uses_inferred:0.4 
 - Layer 10 加權 δ=0.05,若 retrieval_observations 命中率退化 ≥ 5% → 設 DELTA=0 回退
 - Migration rollback: `sqlite3 context-memory.db < .context-db/migrations/2026-05-02-add-symbol-centrality-score-down.sql`
 
+### 5.3 search_intentional_decisions — dev-story Pre-Edit IDD Awareness Gate(2026-05-03 G5 capability-integration §3 Step 2)
+
+**對齊**: `.claude/rules/capability-integration-mandate.md` v1.0.0 §3 Mandatory 5 步 Step 2 BMAD 整合(Latent Capability Trap rescue)。Story: `td-bmad-search-idd-pre-edit-dev-story`(epic-devcons P3/S)。
+
+**MCP Tool**: `mcp__phycool-context__search_intentional_decisions({file_path?, idd_type?, criticality?, status?, limit?})` — file_path LIKE 反查 `related_files`,正確 edit-time IDD constraint check 工具(注意:`verify_intentional_annotations` 是 IDD 健康度 audit,**不是** edit-time 工具)。
+
+**Pattern**:
+
+```
+For each file in Story file_list:
+  search_intentional_decisions({
+    file_path: "{file}",
+    status: "active",
+    limit: 5
+  })
+
+合併命中 → idd_id dedupe → union forbidden_changes
+```
+
+**Output 用途**:
+- 注入 mental model:「本 Story 修改前必意識的 IDD 約束」
+- 主動補強 Hook Layer 6 IDD 注入(被動消費 → 主動 query 雙保險)
+- Critical IDD 命中 → advisory HALT(non-blocking)讓 Agent 確認不違反 forbidden_changes
+- 與 code-review `skill-idd-sync-gate.md` retrospective 後置兜底互補
+
+**Implementation 位置**:
+- `_bmad/bmm/workflows/4-implementation/dev-story/steps/step-05-implement-task.md` §0.6(在 §0.5 God Node 之後 + §1 Review Current Task 之前)
+- 原 create-story step-06 §8.5 IDD Warning 為 pattern source(首發應用)
+- dev-story §0.5 God Node Pre-Check 為 template source(結構對齊)
+
+**Token Budget**:
+- file_list 5-15 files × ~500-1500 tokens / query
+- idd_id dedupe → 通常 0-3 unique critical IDDs
+- Total 增量 ~3K-15K tokens(與 §0.5 god_node 5-call ~5K 同量級)
+
+**Fallback**:
+- 0 hit(file_list 不涉 active IDD related_files)→ silent skip(對齊 step-06 §8.5)
+- search_intentional_decisions 連線失敗 → log warning + continue(non-fatal)
+- Critical IDD HIT → advisory HALT non-blocking,Agent 自我確認後繼續
+
+**Skill 升版**: `phycool-intentional-decisions` v1.3.0 → v1.4.0(2026-05-03 G5 Story 升版,§9.2 重寫 + §16.5 Troubleshooting 新增)
+
 ---
 
 ## 6. MCP 內部 RAG 優先 6 步(External Source Citation Mandate)
