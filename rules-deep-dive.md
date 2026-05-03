@@ -3,7 +3,7 @@
 > **版本**: 1.0.0
 > **建立日期**: 2026-05-01
 > **資料快照日**: 2026-05-01
-> **驗證指令**: `(Get-ChildItem .claude\rules\*.md).Count` 應 = 19
+> **驗證指令**: `(Get-ChildItem .claude\rules\*.md).Count` 應 = 24
 
 ---
 
@@ -16,13 +16,13 @@
 | 載入時機 | 每次對話固定 | 觸發關鍵字 / Workflow 主動 Read |
 | Token 成本 | 固定開銷 | 零成本(未觸發不載入)|
 | 內容性質 | 憲政級 / 跨領域 / 機械強制 | 領域 SOP / Pattern / Forbidden |
-| 數量 | **19**(精簡為主) | 74(可擴展)|
+| 數量 | **24**(精簡為主) | 75(可擴展)|
 
 > **Token 量化**:Rules 約 ~5,400 tokens(497 行 / ~31 KB),佔 Always-On 總量 ~28%。
 
 ---
 
-## 2. 20 Rules 完整索引
+## 2. 24 Rules 完整索引
 
 | # | 檔案 | 嚴重度 | 觸發場景 | 一句話用途 |
 |:-:|:----|:----:|:----|:----|
@@ -45,6 +45,11 @@
 | **17** | `tasks-backfill.md` | H | dev-story / code-review 結束 | 必呼叫 `/tasks-backfill-verify {story-id}` 把 file:line 證據填回 DB tasks |
 | **18** | `testing.md` | M | 任何測試 | 80%+ coverage / TDD RED-GREEN-REFACTOR / Test Pyramid |
 | **19** | `verification-protocol.md` | C | 跨檔變更 / 全面檢查 | 5-step flow:impact list → glob enumerate → read each → verification table → user confirmation |
+| **20** | `capability-integration-mandate.md` | C | **SUPREME** | MCP/Schema/Hook 5 步整合(SKILL 同步 → BMAD 整合 → Pipeline/Hook 注入分 Path A/B → 部屬範本 → Schema 公告)+ 8 條 FORBIDDEN + §6.5 Sync-Gate Execution Order(6 條 SUPREME 並發排序)|
+| **21** | `deployment-doc-freshness.md` | M | toolkit deployment 配置變更 | Skills/Rules/Hooks/Schema 任一變更時提示檢查部屬指南是否需更新(`1.專案部屬必讀/`)|
+| **22** | `dual-repo-push-discipline.md` | C | **SUPREME** | 雙倉庫(PCPT-MVP 主 SSoT 私人 vs `<public-toolkit-repo>` 公開)推送紀律,8 條 FORBIDDEN 防業務字面外洩 / 強制 release branch + gh PR / pre-push verify-deployment-docs.cjs 5-phase ALL PASS |
+| **23** | `skill-creation-discipline.md` | C | **SUPREME** | Skill 規模 cap(`pcpt-*` ≤ 50 / 通用 ≤ 30 / 總 ≤ 80)+ 新建必檢 3 題 + 90d 0 觸發 retire + 5 條 FORBIDDEN(Scale-Stale Reciprocity 防線)|
+| **24** | `toolkit-mirror-immediate-sync.md` | C | **SUPREME** | PCPT-MVP 主 SSoT 配置改動立即同步至 `1.專案部屬必讀/` toolkit 內容鏡像(9 類觸發範圍 + 4 步流程 + 立即同步原則禁延後)|
 
 > **嚴重度分級**:**C**(Critical / SUPREME)/ **H**(High)/ **M**(Medium)/ **L**(Low)
 
@@ -251,4 +256,5 @@ Select-String .claude\rules\constitutional-standard.md -Pattern "Mandate" |
 
 | 版本 | 日期 | 變更 |
 |:----|:----|:----|
+| **1.0.1** | **2026-05-03** | **24 Rules numeric drift sweep**(原 20 → 24,§2 表格擴 5 rows:capability-integration-mandate / deployment-doc-freshness / dual-repo-push-discipline / skill-creation-discipline / toolkit-mirror-immediate-sync 5 條 SUPREME / Medium 規範)+ L6 驗證指令 19 → 24 + L19 數量 19 → 24 + Skills 74 → 75。觸發 Story:`td-toolkit-baseline-sanitization` CR R1 → R2 rescue F-CR-2(原 DEFER → 真實 spike 試修 → 改 FIXED inline,對齊 `<project-token>-debt-registry` §18.2 黃金期 FixCost ≤ S=2 禁 DEFER mandate + cr-debt-doc-audit Phase A2 試修挑戰)|
 | 1.0.0 | 2026-05-01 | 初版建立。20 Rules 完整索引 + 5 Mandate + 9 Lifecycle Invariants + 3-Tier Boundary + 三層 Sync Gates |

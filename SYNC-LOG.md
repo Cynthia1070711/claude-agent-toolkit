@@ -9,7 +9,7 @@
 ## 同步流向
 
 ```
-[<main-ssot-project>] 主 SSoT(完整含業務字面)
+[PCPT-MVP] 主 SSoT(完整含業務字面)
     ↓ 立即同步(脫敏 <project-token> / <project-token-Pascal> 字面)
 [PCPT-MVP] /claude token減量策略研究分析/1.專案部屬必讀/(toolkit 內容鏡像 SSoT)
     ↓ 不定期同步(再次 verify 脫敏)
@@ -21,6 +21,67 @@
 ---
 
 ## 同步紀錄(時間倒序)
+
+### 2026-05-03 — td-toolkit-baseline-sanitization CR R1→R2 ultrathink rescue PASS(Score 98→100 / 5 findings ALL FIXED inline / zero-defer)
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `rules-deep-dive.md`(R2 FIX 4 inline + 5 rows append + Version 1.0.1) | (toolkit-only) | F-CR-2 R2 真實 spike 試修:L6 驗證指令 19→24 / L19 數量 19→24 + Skills 74→75 / L25 章節 20→24 / §2 表格擴 5 rows(capability-integration-mandate / deployment-doc-freshness / dual-repo-push-discipline / skill-creation-discipline / toolkit-mirror-immediate-sync 5 條 SUPREME / Medium 規範)+ Version 1.0.1 row 紀錄 |
+| `README.md`(R2 FIX 1 line) | (toolkit-only) | L125 Skills 74→75 + L126 Rules 20→24 |
+| `scripts/verify-deployment-docs.cjs`(R2 FIX 1 line) | (toolkit-only) | L202 Rules expectedRange [18, 22] → [22, 26] |
+| `td-deployment-doc-numeric-drift-sweep` Story | (DB stub) | 標 status=done + cr_summary 標明 R2 rescue superseded(parent CR 內完成,實際工作不需另開 dev-story)|
+| `TD-CR-2026-05-03-001` debt entry | (DB) | 標 RESOLVED(by CC-OPUS, in td-toolkit-baseline-sanitization)|
+
+**R2 Verify**:
+- ✅ `node scripts/verify-deployment-docs.cjs` Phase 1-5 ALL PASS **0 warnings**(原 R1 1 WARN Phase 3 Rules drift 已修)
+- ✅ V-8 0 命中維持(R2 過程引入 3 V-8 hits regression `<project-token-Pascal>-PCPT-MVP` / `<project-token>-*` / `<project-token>-debt-registry` 立即 Grep 捉 + Edit 修補對齊白名單範式 PCPT-MVP / pcpt-* / `<project-token>-debt-registry`)
+- ✅ Phase 3 Rules: actual=24 in range [22, 26] PASS
+- ✅ Phase 3 Skills: actual=75 in range [70, 80] PASS
+
+**R2 觸發背景**: 使用者 ultrathink 三題挑戰(「該 Story 技術債有沒有全部修復?延後到什麼時候?有相對應 Story 註記嗎?修復的有回原 Story 註記嗎?」)觸發 cr-debt-doc-audit.md Phase A 重審。R1 spike 試修為 grep + 估算行數判定「跨 3 檔 ~13 lines 違反 5-Min Rule blacklist」屬隱性投機(對齊 Hot Rule #1 mandate「禁估算成本替代實際試修」+ `<project-token>-debt-registry` §18.2「黃金期 FixCost ≤ S=2 禁 DEFER」mandate 強化)。R2 真實 Edit 試修實測 ~5 min 跨 3 檔 ~12 lines numeric drift sweep,verify ALL PASS 0 warnings,改 FIXED inline + 退役 stub。
+
+**Memory DB cross-reference**:
+- `context_entries id=4018`(R1 完成決策)+ 待寫入(R2 rescue 完成決策)
+- 上游觸發:`id=4005`(dev-story 完成)+ `id=4002`(create-story)+ `id=3994`(P0 ADR-GOVERNANCE-001)
+- Follow-up Story stub:`td-deployment-doc-numeric-drift-sweep`(已 superseded by R2 rescue,標 done)
+
+**CR Report**: `docs/implementation-artifacts/reviews/epic-governance/td-toolkit-baseline-sanitization-code-review-report.md`(R2 rescue update Score 98→100)
+
+**Self-Dogfood**: 本 entry 自身 V-8 字面 0 命中(對齊 R2 rescue 引入的「sanitization 紀錄文件本身也須遵守 sanitization rule」第二輪 grep verify)+ 對齊 toolkit-mirror-sync v1.1.0 §1 #11 SYNC-LOG.md 自身 append-only 範式(本 entry 即是 R2 rescue sync 動作的最後一步)+ 對齊 cr-debt-doc-audit Phase A2「實際試修 evidence-based 試修挑戰」mandate(R1 隱性投機 → R2 真實 spike rescue,固化「黃金期 FixCost ≤ S=2 禁 DEFER」教訓)。
+
+---
+
+### 2026-05-03 — td-toolkit-baseline-sanitization CR R1 PASS(Score 98 / 5 findings 4 FIXED + 1 DEFERRED with target_story stub)— **後 R2 rescue 升級 Score 100 zero-defer,本 entry 保留作為 R1 single-pass 紀錄**
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `mcp-ecosystem.md`(CR FIX 2 lines) | (toolkit-only) | F-CR-1 inline FIX:L132 `mcp__<project>-context__` → `mcp__pcpt-context__` + L158 `<project>-context-memory v2.8` → `pcpt-context-memory v2.8`(對齊 SANITIZATION-POLICY §3 第 3+5 條白名單通用代稱,消解同檔內 placeholder 表達分裂)|
+| `SYNC-LOG.md`(CR FIX 2 lines) | (toolkit-only) | F-CR-3 inline FIX:L12 `[<main-ssot-project>]` → `[PCPT-MVP]`(對齊 L14 + SANITIZATION-POLICY §3 第 1 條白名單)+ F-CR-4 inline FIX:L77 `context_entries(待寫入)` → `context_entries id=4005` |
+| `知識圖譜/story-ADR-GOVERNANCE-001-...md`(CR FIX) | docs/technical-decisions/ADR-GOVERNANCE-001 | F-CR-5 inline FIX:Line 544 表格 §14.3 status `⬜ backlog` → `✅ done` + line 862-863 列表加 `✅ done 2026-05-03 CR R1/R2 PASS`(對齊 ADR 推進樹狀圖.md 既有狀態) |
+
+**CR Verify**:
+- ✅ V-8 字面 0 命中維持 ALL PASS(post-CR fix)
+- ✅ verify-deployment-docs.cjs 5-phase ALL PASS, 1 warnings(Phase 3 Rules drift WARN deferred 至 `td-deployment-doc-numeric-drift-sweep` stub)
+- ✅ Production Gates ALL PASS(0 BLOCK / 0 WARN / 0 CRITICAL / 0 HIGH / 1 MEDIUM FIXED / 4 LOW: 3 FIXED + 1 DEFERRED)
+- ✅ SaaS Readiness Score: **98/100**
+
+**CR Findings(5 個)**:
+- F-CR-1 [MEDIUM] FIXED inline — mcp-ecosystem.md 同檔 placeholder 不一致
+- F-CR-2 [LOW] DEFERRED → `td-deployment-doc-numeric-drift-sweep`(P3/S/backlog stub),Debt ID `TD-CR-2026-05-03-001`(spike 試修 ~10 min 跨 3 檔超 5-Min Rule blacklist + out-of-Story-scope)
+- F-CR-3 [LOW] FIXED inline — SYNC-LOG.md L12 vs L14 placeholder 不一致
+- F-CR-4 [LOW] FIXED inline — APPEND entry Memory DB id stale
+- F-CR-5 [LOW] FIXED inline — story-ADR §14.3 status 未更新
+
+**Memory DB cross-reference**:
+- `context_entries id=4018`(本 CR 完成決策 + lessons)
+- 上游觸發:`id=4005`(dev-story 完成)+ `id=4002`(create-story)+ `id=3994`(P0 ADR-GOVERNANCE-001)
+- Follow-up Story stub:`td-deployment-doc-numeric-drift-sweep`(F-CR-2 target_story)
+
+**CR Report**: `docs/implementation-artifacts/reviews/epic-governance/td-toolkit-baseline-sanitization-code-review-report.md`(本次新建)
+
+**Self-Dogfood**: 本 CR fix 對齊 SANITIZATION-POLICY.md §3 白名單通用代稱優先 generic placeholder 原則 — 既有檔內 `pcpt-context` 已 stable 廣泛使用(14+ 處),dev-story 用 generic `<project>-context` 過度脫敏創造同檔分裂,CR R1 修補對齊。對齊 toolkit-mirror-sync v1.1.0 §1 #11 SYNC-LOG.md 自身 append-only 範式(本 entry 即是 CR R1 sync 動作的最後一步)。
+
+---
 
 ### 2026-05-03 S60 — td-toolkit-mirror-godnode-update Phase 1-3.7 完成(12 mirror file + toolkit-mirror-sync v1.1 三引擎升版)
 
@@ -74,7 +135,7 @@
 - V-8 regex `/<project-token>|<project-token-Pascal>/g`(品牌字面)維持原樣(`scripts/verify-deployment-docs.cjs:57`)
 
 **Memory DB cross-reference**:
-- `context_entries`(待寫入)— td-toolkit-baseline-sanitization 完成 + Phase 3 評估結論
+- `context_entries id=4005`(td-toolkit-baseline-sanitization dev-story 完成 + Phase 3 評估結論,2026-05-03 01:11)
 - 解上游 baseline:`context_entries id=3994`(ADR-GOVERNANCE-001 P0-2 minimal viable + V-8 partial FAIL defer 紀錄)+ `context_entries id=4002`(create-story Reactive Skill Sync 範式 + Self-Contained 模式)
 - 觸發 Story:`td-toolkit-baseline-sanitization`(epic-governance / S / P1-3,實際 ~30 min)
 

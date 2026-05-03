@@ -129,7 +129,7 @@ PCPT 對 Chrome 的自動化有兩套工具,**不可混用**:
 **Tool 簽章**:
 
 ```javascript
-mcp__<project>-context__search_god_nodes({
+mcp__pcpt-context__search_god_nodes({
   domain: "Payment",        // optional, namespace LIKE filter
   limit: 10,                 // optional, top-N(預設 10,上限 50)
   min_centrality: 50.0,      // optional, P95 threshold
@@ -155,7 +155,7 @@ mcp__<project>-context__search_god_nodes({
 **5 步整合 SOP(對齊 capability-integration-mandate.md)**:
 
 ```
-Step 1 SKILL 同步: <project>-context-memory v2.8 §3 / §3a god node use case 章節
+Step 1 SKILL 同步: pcpt-context-memory v2.8 §3 / §3a god node use case 章節
 Step 2 BMAD 整合: 
   - create-story step-03 §3.0(Glob/Grep 之前先 search_god_nodes 取候選)
   - dev-story step-05 §0.5(實作前注入 mental model)

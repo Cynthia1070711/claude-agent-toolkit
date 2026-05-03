@@ -122,8 +122,8 @@ docs/專案部屬必讀/
 │
 │  ─────── 2026-05-01 新增 9 篇深度補全（v2.1.0）───────
 ├── SANITIZATION-POLICY.md                 ← 脫敏政策 SSoT（7 類映射 + 7 條 grep 終審）
-├── skills-deep-dive.md                    ← 74 Skills 全景 + 17 Domain Profile + 三引擎 + 三層 Sync Gates
-├── rules-deep-dive.md                     ← 20 Rules 完整索引 + 5 SUPREME Mandate + 9 Lifecycle Invariants + 3-Tier Boundary
+├── skills-deep-dive.md                    ← 75 Skills 全景 + 17 Domain Profile + 三引擎 + 三層 Sync Gates
+├── rules-deep-dive.md                     ← 24 Rules 完整索引 + 5 SUPREME Mandate + 9 Lifecycle Invariants + 3-Tier Boundary
 ├── idd-framework.md                       ← IDD 4 層標註（Code/ADR/DB/Memory）+ COM/STR/REG/USR + forbidden_changes
 ├── hooks-events-deep-dive.md              ← 14 Hooks + 11 層 RAG 注入 + 10 Hook event 矩陣 + Block vs Advisory
 ├── memory-system-deep-dive.md             ← Context Memory DB 30+ tables schema + 23 MCP tools + 82 scripts + DevConsole + agent-memory
