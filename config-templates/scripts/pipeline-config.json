@@ -1,0 +1,135 @@
+{
+  "phaseTargetStatus": {
+    "create-story": ["ready-for-dev"],
+    "dev-story": ["review"],
+    "dev-story-fix-R1": ["review"],
+    "dev-story-fix-R2": ["review"],
+    "code-review": ["done"],
+    "code-review-R1": ["done"],
+    "code-review-R2": ["done"]
+  },
+  "modelPricing": {
+    "haiku": {
+      "input": 0.80,
+      "output": 4.00,
+      "cache_create": 1.00,
+      "cache_read": 0.08
+    },
+    "sonnet": {
+      "input": 3.00,
+      "output": 15.00,
+      "cache_create": 3.75,
+      "cache_read": 0.30
+    },
+    "opus": {
+      "input": 15.00,
+      "output": 75.00,
+      "cache_create": 18.75,
+      "cache_read": 1.50
+    },
+    "fast-opus": {
+      "input": 30.00,
+      "output": 150.00,
+      "cache_create": 37.50,
+      "cache_read": 3.00
+    }
+  },
+  "quota": {
+    "plan_type": "max",
+    "extra_usage_enabled": false,
+    "heartbeat_stale_minutes": 8,
+    "max_429_attempts_before_abort": 5
+  },
+  "phaseTimeouts": {
+    "create-story": {
+      "S": 900000,
+      "M": 1500000,
+      "L": 2100000,
+      "XL": 3000000
+    },
+    "dev-story": {
+      "S": 1200000,
+      "M": 2100000,
+      "L": 3000000,
+      "XL": 4200000
+    },
+    "code-review": {
+      "S": 1200000,
+      "M": 2100000,
+      "L": 3000000,
+      "XL": 4200000
+    }
+  },
+  "phaseModelMapping": {
+    "create-story": {
+      "model_id": "claude-opus-4-7[1m]",
+      "effort": "max",
+      "model_alias": "opus",
+      "reasoning": "create-story requires maximum depth for AC/architecture analysis and Party Mode ultrathink",
+      "estimated_cost_usd": { "S": 0.30, "M": 0.75, "L": 1.50, "XL": 2.50 }
+    },
+    "dev-story": {
+      "model_id": "claude-sonnet-4-6[1m]",
+      "effort": "default",
+      "model_alias": "sonnet",
+      "reasoning": "dev-story balances cost and quality for implementation tasks",
+      "estimated_cost_usd": { "S": 0.20, "M": 0.80, "L": 2.00, "XL": 5.00 }
+    },
+    "code-review": {
+      "model_id": "claude-opus-4-7[1m]",
+      "effort": "max",
+      "model_alias": "opus",
+      "reasoning": "code-review requires maximum depth for production quality analysis and CR findings",
+      "estimated_cost_usd": { "S": 0.25, "M": 0.80, "L": 1.80, "XL": 3.50 }
+    },
+    "dev-story-fix-Rn": {
+      "model_id": "claude-sonnet-4-6[1m]",
+      "effort": "max",
+      "model_alias": "sonnet",
+      "reasoning": "retry dev-story upgrades to max effort to address CR-driven fixes more deeply",
+      "estimated_cost_usd": { "S": 0.25, "M": 0.90, "L": 2.20, "XL": 5.50 }
+    },
+    "subagent": {
+      "model_id": "claude-haiku-4-5-20251001",
+      "effort": "default",
+      "model_alias": "haiku",
+      "reasoning": "subagent exploration tasks are fast and cost-effective with Haiku",
+      "estimated_cost_usd": { "S": 0.02, "M": 0.05, "L": 0.10, "XL": 0.20 }
+    }
+  },
+  "model_purity_enforcement": {
+    "allowFallback": false,
+    "fallbackChain": [],
+    "exempt_models": ["claude-haiku-4-5-20251001"],
+    "match_mode": "full_model_id",
+    "strict_effort": true
+  },
+  "otelCollector": {
+    "portRange": { "min": 49152, "max": 65535 },
+    "maxPortRetries": 10,
+    "portFileTimeoutSec": 5,
+    "healthCheckIntervalSec": 30,
+    "shutdownTimeoutMs": 5000,
+    "script": "scripts/otel-micro-collector.js"
+  },
+  "budgetPerPhase": {
+    "create-story": {
+      "S": 0.50,
+      "M": 1.00,
+      "L": 2.00,
+      "XL": 3.00
+    },
+    "dev-story": {
+      "S": 1.00,
+      "M": 2.50,
+      "L": 5.00,
+      "XL": 10.00
+    },
+    "code-review": {
+      "S": 1.00,
+      "M": 2.50,
+      "L": 5.00,
+      "XL": 10.00
+    }
+  }
+}

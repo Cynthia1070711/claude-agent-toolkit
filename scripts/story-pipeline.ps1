@@ -5,17 +5,17 @@
 # 每個階段開新 Claude 會話，完成後自動關閉，最後產出報告。
 #
 # Usage:
-#   .\scripts\story-pipeline.ps1 -StoryId "qgr-e7"                          # 每階段開新視窗（預設）
-#   .\scripts\story-pipeline.ps1 -StoryId "qgr-e7" -NewWindow $false        # 同一視窗背景執行
-#   .\scripts\story-pipeline.ps1 -StoryId "qgr-e7" -DryRun
-#   .\scripts\story-pipeline.ps1 -StoryId "qgr-e7" -SkipCreate              # 已有 Story，跳過 create
-#   .\scripts\story-pipeline.ps1 -StoryId "qgr-e7" -SkipDev                 # 已開發完，只跑 review
-#   .\scripts\story-pipeline.ps1 -StoryId "qgr-e7" -TimeoutMin 60
+#   .\scripts\story-pipeline.ps1 -StoryId "my-story-01"                          # 每階段開新視窗（預設）
+#   .\scripts\story-pipeline.ps1 -StoryId "my-story-01" -NewWindow $false        # 同一視窗背景執行
+#   .\scripts\story-pipeline.ps1 -StoryId "my-story-01" -DryRun
+#   .\scripts\story-pipeline.ps1 -StoryId "my-story-01" -SkipCreate              # 已有 Story，跳過 create
+#   .\scripts\story-pipeline.ps1 -StoryId "my-story-01" -SkipDev                 # 已開發完，只跑 review
+#   .\scripts\story-pipeline.ps1 -StoryId "my-story-01" -TimeoutMin 60
 # ============================================================================
 
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory = $true, HelpMessage = "Story ID, e.g. qgr-e7, qgr-ba-5")]
+    [Parameter(Mandatory = $true, HelpMessage = "Story ID, e.g. my-story-01, my-story-02")]
     [string]$StoryId,
 
     [Parameter(HelpMessage = "Dry-run mode — only show what would execute")]
@@ -61,7 +61,7 @@ if (-not (Test-Path $sprintStatusPath)) {
     exit 1
 }
 
-# Derive Epic ID from Story ID (e.g. "qgr-e7" → "qgr")
+# Derive Epic ID from Story ID (e.g. "my-story-01" → "qgr")
 $EpicId = ($StoryId -split "-")[0]
 
 $LogDir = Join-Path $ProjectRoot "logs"
@@ -99,8 +99,8 @@ function Get-StoryStatus {
     $lines = Get-Content $sprintStatusPath -Encoding UTF8
     foreach ($l in $lines) {
         $trimmed = $l.Trim()
-        # Support both full ID (qgr-e7-color-picker-recent-colors) and short ID (qgr-e7)
-        # Suffix must start with hyphen+letter to avoid qgr-ba-1 matching qgr-ba-10
+        # Support both full ID (my-story-01-color-picker-recent-colors) and short ID (my-story-01)
+        # Suffix must start with hyphen+letter to avoid story-ba-1 matching story-ba-10
         if ($trimmed -match "^${StoryId}(-[a-z][\w-]*)?\s*:\s+([\w-]+)") {
             return $Matches[2]
         }
@@ -108,10 +108,54 @@ function Get-StoryStatus {
     return "not-found"
 }
 
+
+# Read-PhaseModel — phaseModelMapping SSoT helper (BR-MR-02)
+# Reads pipeline-config.json phaseModelMapping and returns model_id + effort.
+# RetryCount > 0 (dev-story-fix-Rn) automatically upgrades effort to 'max'.
+function Read-PhaseModel {
+    param(
+        [string]$PhaseName,
+        [string]$Complexity = 'M',
+        [int]$RetryCount = 0
+    )
+
+    $cfgPath = Join-Path $ProjectRoot 'scripts/pipeline-config.json'
+    $cfg = Get-Content $cfgPath -Raw | ConvertFrom-Json
+
+    $phaseKey = switch -Regex ($PhaseName) {
+        '^create-story'   { 'create-story' }
+        '^dev-story-fix'  { 'dev-story-fix-Rn' }
+        '^dev-story'      { 'dev-story' }
+        '^code-review'    { 'code-review' }
+        '^subagent'       { 'subagent' }
+        default           { throw "Read-PhaseModel: unknown phase '$PhaseName'" }
+    }
+
+    $phaseInfo = $cfg.phaseModelMapping.$phaseKey
+    if (-not $phaseInfo) { throw "Read-PhaseModel: no phaseModelMapping entry for '$phaseKey'" }
+
+    $validComplexity = @('S', 'M', 'L', 'XL')
+    if ($Complexity -notin $validComplexity) {
+        Write-Log "Read-PhaseModel: unknown complexity '$Complexity', falling back to M" 'WARN'
+        $Complexity = 'M'
+    }
+
+    $effort = $phaseInfo.effort
+    if ($RetryCount -gt 0) { $effort = 'max' }
+
+    return @{
+        model_id    = $phaseInfo.model_id
+        effort      = $effort
+        model_alias = $phaseInfo.model_alias
+        phase_key   = $phaseKey
+    }
+}
+
 function Invoke-Phase {
     param(
         [string]$PhaseName,
         [string]$Model,
+        [string]$Effort = "default",
         [string]$Prompt
     )
 
@@ -154,13 +198,15 @@ function Invoke-Phase {
     Write-Log "Log: $stdoutFile"
 
     # --append-system-prompt 強制 BMAD workflow 完整執行
+    # +CR R2 F2a FIXED: Effort directive (BR-MR-03 boring tech) — phaseModelMapping[$PhaseName].effort='max' 時注入
+    $effortDirective = if ($Effort -eq 'max') { "`n`n本任務必用最大思考深度 ultrathink" } else { "" }
     $enforcePrompt = @"
 MANDATORY: Execute ALL workflow steps in EXACT order. Do NOT skip any step.
 Step 9 metadata sync MUST update BOTH:
   1. Story file "## Story 資訊" table Status field
   2. sprint-status.yaml development_status entry
 Also update: tracking file, H1 emoji.
-Skipping ANY metadata step is a CRITICAL violation.
+Skipping ANY metadata step is a CRITICAL violation.$effortDirective
 "@
     # 轉為單行避免 PowerShell 命令列跳脫問題
     $enforcePromptOneLine = ($enforcePrompt -replace "`r`n", " " -replace "`n", " " -replace '"', '\"')
@@ -179,6 +225,8 @@ Write-Host '  [$PhaseName] $StoryId — Model: $Model' -ForegroundColor Cyan
 Write-Host '============================================================' -ForegroundColor Cyan
 Write-Host ''
 Set-Location '$ProjectRoot'
+# +CR R2 F2a FIXED: $env:CLAUDE_CODE_EFFORT inject (BR-MR-03 boring tech) — toolkit-mirror parity
+`$env:CLAUDE_CODE_EFFORT = '$Effort'
 Start-Transcript -Path '$stdoutFile' -Force | Out-Null
 `$promptText = @'
 $Prompt
@@ -215,6 +263,8 @@ exit `$code
             $scriptContent = @"
 Remove-Item Env:CLAUDECODE -ErrorAction SilentlyContinue
 Set-Location '$ProjectRoot'
+# +CR R2 F2a FIXED: $env:CLAUDE_CODE_EFFORT inject (BR-MR-03 boring tech) — toolkit-mirror parity
+`$env:CLAUDE_CODE_EFFORT = '$Effort'
 Start-Transcript -Path '$stdoutFile' -Force | Out-Null
 `$promptText = @'
 $Prompt
@@ -380,7 +430,8 @@ Write-Log "Initial status: $initialStatus"
 # ── Phase 1: create-story (Opus) ──
 if (-not $SkipCreate) {
     if ($initialStatus -eq "backlog" -or $initialStatus -eq "not-found") {
-        $result = Invoke-Phase -PhaseName "create-story" -Model "opus" -Prompt (Build-CreatePrompt)
+        $csPhaseModel = Read-PhaseModel -PhaseName "create-story" -Complexity "M"
+        $result = Invoke-Phase -PhaseName "create-story" -Model $csPhaseModel.model_id -Effort $csPhaseModel.effort -Prompt (Build-CreatePrompt)
         $PhaseResults += $result
 
         if (-not $result.Success) {
@@ -413,7 +464,8 @@ if ($pipelineAborted) {
 } elseif (-not $SkipDev) {
     $currentStatus = Get-StoryStatus
     if ($currentStatus -eq "ready-for-dev" -or $currentStatus -eq "in-progress") {
-        $result = Invoke-Phase -PhaseName "dev-story" -Model "sonnet" -Prompt (Build-DevPrompt)
+        $dsPhaseModel = Read-PhaseModel -PhaseName "dev-story" -Complexity "M"
+        $result = Invoke-Phase -PhaseName "dev-story" -Model $dsPhaseModel.model_id -Effort $dsPhaseModel.effort -Prompt (Build-DevPrompt)
         $PhaseResults += $result
 
         if (-not $result.Success) {
@@ -460,7 +512,8 @@ if ($pipelineAborted) {
         }
 
         Write-Log "Code review attempt $reviewAttempt / $MaxReviewRetries" "PHASE"
-        $result = Invoke-Phase -PhaseName "code-review-R$reviewAttempt" -Model "opus" -Prompt (Build-ReviewPrompt)
+        $crPhaseModel = Read-PhaseModel -PhaseName "code-review" -Complexity "M"
+        $result = Invoke-Phase -PhaseName "code-review-R$reviewAttempt" -Model $crPhaseModel.model_id -Effort $crPhaseModel.effort -Prompt (Build-ReviewPrompt)
         $PhaseResults += $result
 
         if (-not $result.Success) {
@@ -478,7 +531,8 @@ if ($pipelineAborted) {
             # Re-run dev + review if retries remain
             if ($reviewAttempt -lt $MaxReviewRetries) {
                 Write-Log "Re-running dev-story before next review..." "PHASE"
-                $devResult = Invoke-Phase -PhaseName "dev-story-fix-R$reviewAttempt" -Model "sonnet" -Prompt (Build-DevPrompt)
+                $fixPhaseModel = Read-PhaseModel -PhaseName "dev-story-fix-Rn" -Complexity "M" -RetryCount $reviewAttempt
+                $devResult = Invoke-Phase -PhaseName "dev-story-fix-R$reviewAttempt" -Model $fixPhaseModel.model_id -Effort $fixPhaseModel.effort -Prompt (Build-DevPrompt)
                 $PhaseResults += $devResult
                 if (-not $devResult.Success) {
                     Write-Log "dev-story fix FAILED. Pipeline aborted." "ERROR"
