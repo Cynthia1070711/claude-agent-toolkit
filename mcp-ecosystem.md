@@ -251,11 +251,24 @@ For each file in Story file_list:
 | **(b) include_details:true** | 下游需讀取 _preview 截斷欄位(cr_summary/tasks/AC/dev_notes 等)做決策 | `search_stories({story_id, include_details: true})` |
 | **(c) fallback CLI** | 需超大欄位(8000+ chars) + token budget 緊張 + stale risk 可接受 | `node .context-db/scripts/query-stories.js --id {id} --format json` |
 
-**BMAD 已驗證調用點**:
-- **(a) 10 個**: dev-story step-09 L77 / code-review step-06 L221/L271/L279/L310/L315 / create-story instructions.xml L708 / dev-story instructions.xml L28 / create-story step-00 L48 / create-story instructions.xml L34
-- **(b) 1 個 patch**: code-review `step-06-report-archive.md:312` Gate 2 cr_summary 長度判斷 → 加 `include_details: true`
+**BMAD 已驗證調用點(v2.11.1 corrected post-patch line numbers + 完整分類)**:
 
-**Skill 升版**: `phycool-context-memory` v2.10.0 → v2.11(2026-05-03 G8 Story 升版,加 §16 CMI-12 _preview 三策略指南 + FORBIDDEN NEW v2.11 + references/mcp-tool-reference.md include_details 行為說明)
+- **(a) 預設 _preview OK,7 sites**:
+  - `code-review/step-06-report-archive.md` L221 / L272 / L280 / L311 / L316(metadata-only / fields 顯式篩選)
+  - `dev-story/steps/step-09-completion.md` L77(lifecycle status / dev_agent / completed_at)
+  - `create-story/instructions.xml` L708(`fields="story_id,status,acceptance_criteria_preview,tasks_preview"` 顯式篩選)
+- **(b) include_details:true,5 sites**(1 patched + 4 already-correct):
+  - `code-review/step-06-report-archive.md` L312 Gate 2 cr_summary 長度 > 200 chars(本 Story 加 `include_details: true`)
+  - `dev-story/steps/step-00-db-first-query.md` L39-40(已有,manual-mode DB-first AC/tasks 入口)
+  - `dev-story/instructions.xml` L28-29(已有,manual-mode DB-first AC/tasks 入口)
+  - `create-story/steps/step-00-db-first-query.md` L48-49(已有,DB-first 重複 Story precheck)
+  - `create-story/instructions.xml` L34-35(已有,Step 0 DB-first 比對基準)
+
+**Cold-start handoff 防護**: 4 個 DB-first precheck 入口已有 `include_details: true`,全 cold-start 場景防護到位。
+
+**Skill 升版**: `phycool-context-memory` v2.10.0 → v2.11 → **v2.11.1**(2026-05-03)
+- v2.11 (G8 Story 升版): 加 §16 CMI-12 _preview 三策略指南 + FORBIDDEN NEW v2.11 + references/mcp-tool-reference.md include_details 行為說明
+- v2.11.1 (CR R1 文檔精度修補): §16 (a) 補完 7 sites + post-patch line numbers / (b) 補完 5 sites / cold-start 4 sites 全列。Pure documentation accuracy patch,無 schema/API 變更。三引擎 md5 03cb34c5。
 
 ---
 

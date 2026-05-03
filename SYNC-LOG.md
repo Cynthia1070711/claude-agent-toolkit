@@ -22,6 +22,18 @@
 
 ## 同步紀錄(時間倒序)
 
+### 2026-05-03T14:08+08:00 — td-bmad-cmi12-preview-fallback-audit CR R1 文檔精度修補(Skill v2.11 → v2.11.1)
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `mcp-ecosystem.md §5.4` | (直接更新部屬範本) | (a) 10 個 → 7 個 / (b) 1 個 → 5 個 (1 patched + 4 already-correct);post-patch line numbers (L271/L279/L310/L315 → L272/L280/L311/L316);新增 Cold-start handoff 4 sites 防護說明;Skill 升版記錄擴充 v2.11.1 |
+
+**主 SSoT 同步來源**: `.claude/skills/phycool-context-memory/SKILL.md` v2.11 → v2.11.1 § 16 + Version History 已修補 + 三引擎 md5 IDENTICAL `03CB34C511E08107D362CC779F0FCB0A`(Phase B 三面向同步:.claude / .gemini / .agent SKILL.md)
+**Verify**: 0 業務字面命中(`phycool|PhyCool|IDD-(COM|REG|USR)|eft-|qgr-|mqv-|dla-` grep 0)| Pure documentation accuracy patch
+**CR Story**: `td-bmad-cmi12-preview-fallback-audit` R1 7 findings(F1-F7 = 2 MEDIUM + 4 LOW + 1 INFO)→ F1+F2+F3+F4 全 FIXED inline via Skill(saas-to-skill) Mode B
+
+---
+
 ### 2026-05-03T13:52:42+08:00 — td-bmad-cmi12-preview-fallback-audit G8 capability-integration Step 2 BMAD 整合
 
 | 同步檔案 | 來源 | 變更摘要 |
