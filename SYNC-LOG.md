@@ -22,6 +22,18 @@
 
 ## 同步紀錄(時間倒序)
 
+### 2026-05-03T13:52:42+08:00 — td-bmad-cmi12-preview-fallback-audit G8 capability-integration Step 2 BMAD 整合
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `bmad-overlay/4-implementation/code-review/steps/step-06-report-archive.md` | `_bmad/bmm/workflows/4-implementation/code-review/steps/step-06-report-archive.md` | CMI-12 三策略標記：L221 strategy-a 注釋 / L271 fields 策略 / L279 dependencies 策略 / L310 Gate 1 strategy-a / **L312 Gate 2 include_details:true 真 patch** / L315 test_count strategy-a。脫敏：`mcp__phycool-context__` → `mcp__pcpt-context__`(2 處，意圖性差異) |
+| `mcp-ecosystem.md §5.4` | (直接更新部屬範本) | 加 §5.4 CMI-12 _preview 三策略 BMAD audit 結果章節(三策略決策矩陣 + 10/1 調用點統計 + Skill v2.11 升版記錄) |
+
+**Verify**: diff 2 lines(意圖性脫敏差異 `mcp__phycool-context__` → `mcp__pcpt-context__`) | 脫敏 0 命中業務字面
+**Memory DB**: context_entries id=4031 (infrastructure-evolution)
+
+---
+
 ### 2026-05-03 — td-toolkit-baseline-sanitization CR R1→R2 ultrathink rescue PASS(Score 98→100 / 5 findings ALL FIXED inline / zero-defer)
 
 | 同步檔案 | 來源 | 變更摘要 |

@@ -237,6 +237,28 @@ For each file in Story file_list:
 
 ---
 
+### 5.4 search_stories CMI-12 _preview 三策略 BMAD Audit 結果(2026-05-03 G8 capability-integration §3 Step 2)
+
+**對齊**: `.claude/rules/capability-integration-mandate.md` v1.0.0 §3 Mandatory 5 步 Step 2 BMAD 整合。Story: `td-bmad-cmi12-preview-fallback-audit`(epic-devcons P3/S)。
+
+**背景**: 2026-05-01 CMI-12 修復後，BMAD workflow 16 個 `search_stories` 調用點未同步 audit 是否相容新 _preview 預設行為。本 Story 完成 12 真實調用點 audit + 1 真 patch。
+
+**三策略決策矩陣**:
+
+| 策略 | 適用條件 | 調用範例 |
+|:----:|---------|---------|
+| **(a) 預設 _preview OK** | 下游只消費 22 欄完整回傳欄位(lifecycle/cr_*/dependencies/tags) 或 `fields` 已篩選 | `search_stories({story_id})` |
+| **(b) include_details:true** | 下游需讀取 _preview 截斷欄位(cr_summary/tasks/AC/dev_notes 等)做決策 | `search_stories({story_id, include_details: true})` |
+| **(c) fallback CLI** | 需超大欄位(8000+ chars) + token budget 緊張 + stale risk 可接受 | `node .context-db/scripts/query-stories.js --id {id} --format json` |
+
+**BMAD 已驗證調用點**:
+- **(a) 10 個**: dev-story step-09 L77 / code-review step-06 L221/L271/L279/L310/L315 / create-story instructions.xml L708 / dev-story instructions.xml L28 / create-story step-00 L48 / create-story instructions.xml L34
+- **(b) 1 個 patch**: code-review `step-06-report-archive.md:312` Gate 2 cr_summary 長度判斷 → 加 `include_details: true`
+
+**Skill 升版**: `phycool-context-memory` v2.10.0 → v2.11(2026-05-03 G8 Story 升版,加 §16 CMI-12 _preview 三策略指南 + FORBIDDEN NEW v2.11 + references/mcp-tool-reference.md include_details 行為說明)
+
+---
+
 ## 6. MCP 內部 RAG 優先 6 步(External Source Citation Mandate)
 
 依 `.claude/rules/constitutional-standard.md` §External Source Citation Mandate v2,引用內部資訊**必先**走 6 步順序:

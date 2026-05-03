@@ -220,6 +220,7 @@ node scripts/record-phase-timestamp.js {story_key} review-complete
 ```
 Tool: mcp__pcpt-context__search_stories
 Parameters: { "story_id": "{story_key}" }
+# CMI-12 strategy-a: _preview OK — cr_score/review_completed_at/cr_issues_total 屬 22 欄完整回傳欄位(lifecycle + cr_* 統計)，無截斷
 ```
 
 確認：`cr_score` 非 NULL + `review_completed_at` 非 NULL + `status` = `{new_status}`。
@@ -268,7 +269,7 @@ Parameters: { "story_id": "{story_key}" }
 
 1. Query: `search_debt({story_id: story_key})` 取得本 CR push 的 non-FIXED debts
 2. **對每個有 `target_story` 的 debt:**
-   - `search_stories({story_id: target_story, fields: "dependencies, dev_notes"})`
+   - `search_stories({story_id: target_story, fields: "dependencies, dev_notes"})`  <!-- CMI-12 strategy-a: fields 參數顯式篩選，CMI-12 完整回傳(行為不變) -->
    - 若 `dependencies` 不含 `{debt_id}` → `upsert-story.js --merge {target_story}` append:
      ```
      dependencies: 現有值 + "; {debt_id} (from {source_story} CR, {status}, consumed by this Story)"
@@ -276,7 +277,7 @@ Parameters: { "story_id": "{story_key}" }
      ```
 
 3. **驗證(step-06 §7.5 gate):**
-   - 對每個 debt:`search_stories({target_story}).dependencies` 包含 `{debt_id}` → PASS
+   - 對每個 debt:`search_stories({target_story}).dependencies` 包含 `{debt_id}` → PASS  <!-- CMI-12 strategy-a: dependencies 屬 22 欄完整回傳欄位，無截斷 -->
    - 任一 FAIL → HARD BLOCK,自動補寫後重新驗證
 
 **Output:** `🔗 Target Story Cross-Sync: {N} debts 已雙向註記至 {M} target stories`
@@ -307,12 +308,12 @@ Parameters:
 
 | # | 目標 | 驗證方式 | 門檻 |
 |:-:|------|---------|------|
-| 1 | **stories CR 欄位** | `search_stories({story_id})` | `cr_score` 非 NULL + `review_completed_at` 非 NULL + `cr_issues_total` ≥ 1 |
-| 2 | **cr_summary 品質** | `search_stories({story_id})` 讀取 `cr_summary` | 長度 > 200 字元（≤200 = 過於簡略） |
+| 1 | **stories CR 欄位** | `search_stories({story_id})` <!-- CMI-12 strategy-a: cr_score/review_completed_at/cr_issues_total 屬 22 欄完整回傳欄位 --> | `cr_score` 非 NULL + `review_completed_at` 非 NULL + `cr_issues_total` ≥ 1 |
+| 2 | **cr_summary 品質** | `search_stories({story_id, include_details: true})` 讀取 `cr_summary` <!-- CMI-12 strategy-b: cr_summary 屬 _preview 截斷欄位，需 include_details:true 取完整文字長度避免 Gate 邊界模糊 --> | 長度 > 200 字元（≤200 = 過於簡略） |
 | 3 | **cr_issues 完整性** | `add_cr_issue` 已為每個 finding 呼叫 | 筆數 = `cr_issues_total`（FIXED + DEFERRED + DISMISSED 全數） |
 | 4 | **context_entries 審查紀錄** | `search_context({story_id, category: "review"})` | ≥ 1 筆 CR 結果摘要 |
 | 5 | **tech_entries 技術知識** | `search_tech` 確認 review/pattern/architecture 分類 | ≥ 1 筆（finding 含技術教訓時必寫） |
-| 6 | **tasks-backfill-verify Skill 已調用** | `search_stories({story_id}).test_count` 非 NULL + CR report 含 `[tasks-backfill-verify invoked]` marker | 兩者皆 PASS(Skill Step 6 產出的 side effect) |
+| 6 | **tasks-backfill-verify Skill 已調用** | `search_stories({story_id}).test_count` 非 NULL <!-- CMI-12 strategy-a: test_count 屬 22 欄完整回傳欄位 --> + CR report 含 `[tasks-backfill-verify invoked]` marker | 兩者皆 PASS(Skill Step 6 產出的 side effect) |
 | 7 | **Upstream Doc + Target Story Cross-Sync** | §6.5 驗證通過 + §6.7 驗證通過 | 每個 CR 修改的 ADR/Spec 有當日 Review History row + 每個 target_story debt 已雙向註記 |
 | **8** | **Defer Audit 自檢(2026-04-14 新增)** | CR 完成前必答 4 問:(Q1) diff 含 UI 變更(.tsx/.css/DOM)? → 是 → Q2;(Q2) server 在跑(curl 7135/5173)? → 是 → Q3;(Q3) CR report 含 `[Chrome MCP Live Verification]` marker? → 否 → **FAIL**;(Q4) 跨 plan(至少 Free+1 付費)驗證? → 否 → **FAIL** | 所有 UI Story 必經 Q1-Q4 自檢 + 對應 marker 必寫入 CR report |
 
