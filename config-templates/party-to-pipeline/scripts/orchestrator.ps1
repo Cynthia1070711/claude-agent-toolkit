@@ -11,11 +11,6 @@
 #   .\orchestrator.ps1 -StoryId "..." -SkipCreate -SkipReview
 # ==============================================================================
 #Requires -Version 5.1
-# ---- (T2.4 v5.0.0) PS 5.1 繁中 UTF-8 init -- 對齊 phycool-windows-ps-encoding ----
-[Console]::OutputEncoding            = [System.Text.Encoding]::UTF8
-[Console]::InputEncoding             = [System.Text.Encoding]::UTF8
-$PSDefaultParameterValues['*:Encoding'] = 'utf8'
-# ---------------------------------------------------------------------------------
 [CmdletBinding()]
 param(
     [string]$StoryId = "",                 # v5.0.0: Optional (use either StoryId OR StoryIds)
@@ -32,6 +27,12 @@ param(
     [int]$WorkerTimeoutSec = 1800,
     [int]$WindowCloseTimeoutSec = 30
 )
+
+# ---- (T2.4 v5.0.0) PS 5.1 繁中 UTF-8 init -- 對齊 phycool-windows-ps-encoding ----
+[Console]::OutputEncoding            = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding             = [System.Text.Encoding]::UTF8
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+# ---------------------------------------------------------------------------------
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"

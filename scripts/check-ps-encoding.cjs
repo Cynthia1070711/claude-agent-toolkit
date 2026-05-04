@@ -56,7 +56,11 @@ function checkFile(filePath) {
     const content = buf.toString('utf8');
     const hasNonAscii = /[-￿]/.test(content);
     const hasBom = buf.length >= 3 && buf[0] === 0xEF && buf[1] === 0xBB && buf[2] === 0xBF;
-    const head30 = content.split('\n').slice(0, 30).join('\n');
+    // Scan first 60 lines (extended from 30 to handle [CmdletBinding()]+param() blocks
+    // — UTF-8 init must be AFTER param() closing `)` per PowerShell parser requirement,
+    // not before as originally documented. Larger param blocks (e.g., orchestrator.ps1 v5.0.0
+    // with 13 params) push UTF-8 init past line 30. Story 1 dogfood discovered this.
+    const head30 = content.split('\n').slice(0, 60).join('\n');
 
     // Check 1: BOM required when non-ASCII present
     if (hasNonAscii && !hasBom) {

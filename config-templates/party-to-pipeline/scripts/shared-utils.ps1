@@ -966,7 +966,7 @@ function Invoke-PhycoolMcpSafe {
                 Remove-Item $tmp -Force -ErrorAction SilentlyContinue
                 return ($result | ConvertFrom-Json)
             }
-            throw "mcp-cli-wrapper exit $LASTEXITCODE: $result"
+            throw "mcp-cli-wrapper exit ${LASTEXITCODE}: $result"
         } catch {
             if ($_ -match 'SQLITE_BUSY|database is locked') {
                 Write-PpLog "MCP SQLite busy, retry $i/$RetryMax (exponential backoff)" "WARN"

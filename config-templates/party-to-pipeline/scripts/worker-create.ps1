@@ -6,11 +6,6 @@
 # Runs claude in FULL interactive mode (no -p, MCP/Skills/Hooks all loaded).
 # ==============================================================================
 #Requires -Version 5.1
-# ---- (T2.4 v5.0.0) PS 5.1 繁中 UTF-8 init -- 對齊 phycool-windows-ps-encoding ----
-[Console]::OutputEncoding            = [System.Text.Encoding]::UTF8
-[Console]::InputEncoding             = [System.Text.Encoding]::UTF8
-$PSDefaultParameterValues['*:Encoding'] = 'utf8'
-# ---------------------------------------------------------------------------------
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$StoryId,
@@ -19,6 +14,12 @@ param(
     [Parameter(Mandatory)][string]$Complexity,
     [string]$Phase = 'create-story'
 )
+
+# ---- (T2.4 v5.0.0) PS 5.1 繁中 UTF-8 init -- 對齊 phycool-windows-ps-encoding ----
+[Console]::OutputEncoding            = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding             = [System.Text.Encoding]::UTF8
+$PSDefaultParameterValues['*:Encoding'] = 'utf8'
+# ---------------------------------------------------------------------------------
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"

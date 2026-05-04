@@ -8,6 +8,26 @@
 
 ## 同步紀錄
 
+### 2026-05-04 18:35+08:00 — Story 1 Dogfood Discovery: 2 CRITICAL Bugs Fixed (orchestrator/3 worker UTF-8 init position + shared-utils $LASTEXITCODE) + check-ps-encoding head scan extend
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:----|:----|:----|
+| `1.專案部屬必讀/config-templates/party-to-pipeline/scripts/orchestrator.ps1` | `.claude/skills/party-to-pipeline/scripts/orchestrator.ps1` | UTF-8 init 從 line 15 (param() 之前 — 違反 PowerShell 語法) 移到 line 32 (param() 之後) |
+| `1.專案部屬必讀/config-templates/party-to-pipeline/scripts/worker-create.ps1` | `.claude/skills/.../worker-create.ps1` | 同 (line 10 → 19) |
+| `1.專案部屬必讀/config-templates/party-to-pipeline/scripts/worker-dev.ps1` | `.claude/skills/.../worker-dev.ps1` | 同 (line 10 → 19) |
+| `1.專案部屬必讀/config-templates/party-to-pipeline/scripts/worker-review.ps1` | `.claude/skills/.../worker-review.ps1` | 同 (line 10 → 19) |
+| `1.專案部屬必讀/config-templates/party-to-pipeline/scripts/shared-utils.ps1` | `.claude/skills/.../shared-utils.ps1` | line 969 `$LASTEXITCODE:` parser fail → `${LASTEXITCODE}:` |
+| `1.專案部屬必讀/scripts/check-ps-encoding.cjs` | `scripts/check-ps-encoding.cjs` | head scan 30 → 60 lines (容納 [CmdletBinding()]+大 param block) |
+
+**Story**: td-pipeline-completeness-audits (P0/M dogfood 第二槍 — 揭示 v5.0.0 orchestrator.ps1 從未真正 parse 過,UTF-8 init 必須在 param() 之後而非之前)
+**Discovery**: orchestrator.ps1 -DryRun 失敗 → parser 找不到 [CmdletBinding()] (因 executable code 在 attribute 之前) + shared-utils.ps1 line 969 變數參考無效 (`$LASTEXITCODE:` PS 視為 drive prefix)
+**Fix**: 4 ps1 files restructure (UTF-8 init 5 lines 移到 param() 後) + shared-utils.ps1 1 line ${} 包覆 + check-ps-encoding head scan extend
+**Verify**: orchestrator.ps1 -DryRun PASS / smoke-test 35/35 PASS / check-ps-encoding STRICT 7/7 PASS
+**TODO follow-up**: phycool-windows-ps-encoding SKILL.md / encoding-discipline.md SUPREME rule 規範修正 (param() 之前 → param() 之後 if [CmdletBinding()] used)
+**Verify**: diff 5 file 0(意圖性同步)| 脫敏 0 命中(`phycool|PhyCool|IDD-(COM|REG|USR)|eft-|qgr-|mqv-|dla-` grep)| 對齊 toolkit-mirror-immediate-sync.md SUPREME
+
+---
+
 ### 2026-05-04 16:45+08:00 — Epic-pipeline-v5 Wave 1 Story 8 toolkit sync (check-ps-encoding.cjs + check-hygiene.ps1 chain)
 
 | 同步檔案 | 來源 | 變更摘要 |
