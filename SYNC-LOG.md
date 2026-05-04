@@ -22,6 +22,43 @@
 
 ## 同步紀錄(時間倒序)
 
+### 2026-05-04T14:30+08:00 — party-to-pipeline v4.1.0 → v5.0.0 大改版(4 commits / 34 task / Skills+Rules+Scripts 全鏡像)
+
+> **改版主軸**: epic-governance party-to-pipeline v4.1.0→v5.0.0,使用者 ultrathink 4 layer 補充收斂(4-Tuple Identity / 並行批次衝突隔離 / UTF-8 防雷 / MCP 式錯防範)→ 4 commits 完成 32 task (T5.3/T5.4 split follow-up Story)。
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:-----|:-----|:-----|
+| `1.專案部屬必讀/config-templates/claude/skills/phycool-windows-ps-encoding/` (4 檔) | `.claude/skills/phycool-windows-ps-encoding/` | NEW Skill v1.0.0 (12 章 + 2 references + 1 template, 三引擎 md5 identical) |
+| `1.專案部屬必讀/config-templates/claude/skills/phycool-mcp-discipline/` (1 檔) | `.claude/skills/phycool-mcp-discipline/` | NEW Skill v1.0.0 (23 MCP tools + 30+ tables + 6 式錯根因) |
+| `1.專案部屬必讀/config-templates/claude/rules/parallel-batch-conflict-isolation.md` | `.claude/rules/` | NEW SUPREME (5 軸 conflict matrix + 4-Layer Defense + 7 衝突源 + 7 FORBIDDEN) |
+| `1.專案部屬必讀/config-templates/claude/rules/mcp-payload-discipline.md` | `.claude/rules/` | NEW SUPREME (Mandatory action 矩陣 + 8 FORBIDDEN + 5 步 Pre-Write Flow) |
+| `1.專案部屬必讀/config-templates/claude/rules/encoding-discipline.md` | `.claude/rules/` | NEW SUPREME pointer (主規範 in phycool-windows-ps-encoding Skill) |
+| `1.專案部屬必讀/config-templates/claude/rules/parallel-worker-identity.md` | `.claude/rules/` | NEW SUPREME pointer (4-Tuple Identity, 主機械 in shared-utils.ps1) |
+| `1.專案部屬必讀/config-templates/party-to-pipeline/scripts/*.ps1` × 7 | `.claude/skills/party-to-pipeline/scripts/` | v5.0.0 全 7 ps1 同步 (orchestrator + 3 worker + shared-utils + stop-report + smoke-test) |
+| `1.專案部屬必讀/config-templates/scripts/check-ps-encoding.cjs` | `scripts/` | NEW CI guard (5 條 PS encoding 檢查, STRICT/LEGACY split) |
+
+**4 commits 對應**:
+- `58db828d` C1: 4-Tuple Identity + Conflict Matrix (T1+T4 12 task / smoke 35/35 PASS)
+- `777a06b3` C2-partial-1: phycool-windows-ps-encoding Skill + 6 ps1 UTF-8 init (T2.1-T2.4)
+- `a9aba563` C2-final: T2.5/T2.6 + T5 MCP Discipline (8 task)
+- `76fcf54c` C3: --chrome flag + 機械守護 SUPREME rules (T3.1-T3.4)
+
+**Verify**:
+- diff line-by-line: 0 (cp 即時同步)
+- 脫敏 grep `phycool|PhyCool` → 含 `phycool-windows-ps-encoding` / `phycool-mcp-discipline` skill names (符合既有 toolkit pattern,如 phycool-context-memory / phycool-debt-registry / 等已存在)
+- ⚠️ verify-deployment-docs.cjs Phase 1 1 FAIL (skill name 字面命中) → follow-up Story `td-toolkit-verify-skill-naming-allow` 修 verify rule 區分 phycool-* skill name vs 業務字面
+- Phase 2/4/5 ALL PASS;Phase 3 WARN (Rules 29 / range [22,26] 需 docs update — follow-up)
+
+**Follow-up Stories**:
+- `td-pipeline-mcp-validator-bridge-impl`: T5.3 + T5.4 (validate-mcp-payload.cjs + mcp-cli-wrapper.js 完整實作)
+- `td-pipeline-legacy-ps1-encoding-cleanup`: 24 legacy ps1 補 BOM + UTF-8 init + em dash replace
+- `td-toolkit-verify-skill-naming-allow`: 修 verify-deployment-docs.cjs Phase 1 區分 phycool-* skill name
+- `td-pipeline-shared-utils-split`: shared-utils.ps1 894 行 violates code-quality 800 line max,split 為 sub-utils
+- `td-pipeline-multi-story-parallel-spawn`: Layer 3+4 ready 後實際 parallel spawn (當前 sequential per-Story)
+- `td-pipeline-completeness-audits`: dogfood 第二槍 (新對話 fresh session retry)
+
+---
+
 ### 2026-05-04T02:30+08:00 — party-to-pipeline v4.0.0 → v4.1.0 方案 1 一併升級同步
 
 > **改版主軸**: 接續 v4.0.0,方案 1 一併升級 — 5 軸 SSoT 文檔化 (§12-§14) + Effort 機制 spike 修補 (§15) + Phase 2/3 Story closure + 建立 follow-up Story `td-pipeline-completeness-audits` (M, P3, side track) 作為下一個 dogfood 第一槍標的。
