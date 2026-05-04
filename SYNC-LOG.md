@@ -6,6 +6,20 @@
 
 ---
 
+## 同步紀錄
+
+### 2026-05-04 16:45+08:00 — Epic-pipeline-v5 Wave 1 Story 8 toolkit sync (check-ps-encoding.cjs + check-hygiene.ps1 chain)
+
+| 同步檔案 | 來源 | 變更摘要 |
+|:----|:----|:----|
+| `1.專案部屬必讀/scripts/check-ps-encoding.cjs` (NEW) | `scripts/check-ps-encoding.cjs` | v5.0.0 T3.2 STRICT (party-to-pipeline 7 ps1) + LEGACY warning-only,首次 mirror |
+| `1.專案部屬必讀/scripts/check-hygiene.ps1` | `scripts/check-hygiene.ps1` | 加 PowerShell 5.1 UTF-8 Encoding Check section 在 Summary 之前(調用 check-ps-encoding.cjs,STRICT BLOCK / LEGACY warn) |
+
+**Story**: td-pipeline-check-hygiene-integrate (P3/XS, done CR:95)
+**Verify**: diff 0(意圖性同步)| 脫敏 0 命中(`phycool|PhyCool|IDD-(COM|REG|USR)|eft-|qgr-|mqv-|dla-` grep)| 對齊 toolkit-mirror-immediate-sync.md SUPREME 立即同步原則
+
+---
+
 ## 同步流向
 
 ```

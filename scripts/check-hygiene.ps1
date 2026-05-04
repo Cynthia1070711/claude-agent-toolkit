@@ -61,6 +61,31 @@ foreach ($File in $Files) {
     catch { }
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# PowerShell 5.1 UTF-8 Encoding Check (party-to-pipeline v5.0.0)
+# Calls scripts/check-ps-encoding.cjs — STRICT scope (party-to-pipeline scripts)
+# BLOCKS commit on violations. LEGACY scope (scripts/, .claude/hooks) warn-only.
+# Reference: phycool-windows-ps-encoding + .claude/rules/encoding-discipline.md SUPREME
+# ─────────────────────────────────────────────────────────────────────────────
+Write-Host "`n--- PowerShell 5.1 UTF-8 Encoding Check ---" -ForegroundColor Cyan
+$nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+if ($null -eq $nodeCmd) {
+    Write-Host "[SKIP] Node.js not found - skipping PS encoding check" -ForegroundColor Yellow
+} else {
+    $psEncodingScript = Join-Path $SearchPath "scripts\check-ps-encoding.cjs"
+    if (Test-Path $psEncodingScript) {
+        & node $psEncodingScript
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "PS ENCODING CHECK FAILED - STRICT violations in party-to-pipeline scripts!" -ForegroundColor Red
+            Write-Host "Reference: .claude/skills/phycool-windows-ps-encoding/SKILL.md" -ForegroundColor Yellow
+            Write-Host "Run: node scripts/check-ps-encoding.cjs --strict for details" -ForegroundColor Yellow
+            exit 1
+        }
+    } else {
+        Write-Host "[SKIP] check-ps-encoding.cjs not found at $psEncodingScript" -ForegroundColor Yellow
+    }
+}
+
 Write-Host "`n--- Summary ---" -ForegroundColor Cyan
 Write-Host "Total files scanned: $TotalFiles"
 if ($CorruptedFiles.Count -eq 0) {
