@@ -1,4 +1,4 @@
-# PhyCool（飛酷）— BMAD × ECC 的 Claude Code 開發環境
+# PHYCOOL（飛酷）— BMAD × ECC 的 Claude Code 開發環境
 
 > **版本** 3.3.0 ｜ **更新** 2026-08-08 ｜ **語言** 繁體中文 ｜ [English](README.en.md)
 
