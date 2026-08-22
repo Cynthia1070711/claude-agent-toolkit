@@ -1,0 +1,105 @@
+# CLAUDE.md (Project: {{PROJECT_NAME}})
+
+> Extends `~/.claude/CLAUDE.md` (Global). {{DEPLOY_PLATFORM}} deployment.
+
+---
+
+## 1. Triggers (Workflow 執行前必讀)
+
+**E2E/Browser**: 先讀 `docs/spec-templates/chrome-mcp/e2e-test-preflight-sop.md`，確認 Port 可用。
+
+**UI/Frontend**: 先讀 `docs/project-planning-artifacts/technical-specs/front-end-spec.md` (Design Tokens)。禁止硬編碼 Hex 色碼，一律用 CSS Variable。
+
+**dev-story / create-story / code-review**:
+1. 解析 Story ID → `docs/tracking/active/{story-id}.track.md`，不存在則從 template 建立
+2. Skills 自動化：`create-story` 自動分析 `.claude/skills/skills_list.md` 寫入 Required Skills；`dev-story`/`code-review` 自動載入
+3. **SDD+ATDD+TDD 自動判斷**（所有建立 Story 的入口均適用）：
+   - **複雜度判斷時機**：當確定 Story 複雜度為 M/L/XL 時（無論來自 create-story workflow、直接討論、或 Party Mode）
+   - **自動觸發 spec-gen**：複雜度 M/L/XL → 檢查 `{{SPEC_DIR}}` 下是否已有對應 Spec → 無則**自動執行** `/sdd-spec-generator` 產出 `{id}-spec.md`，完成後才繼續 Story 建立
+   - **S 複雜度跳過**：直接建 Story，AC 內嵌 BR 定義即可（BR 不需獨立 Spec 文件）
+   - **直接修 Bug / 快速修復**：不需要 Spec，但 AC 仍須附 `[Verifies: BR-XXX]` 格式
+   - `create-story`: AC 必須使用 ATDD 格式 + `[Verifies: BR-XXX]` 映射
+   - `dev-story`: M/L/XL Story 從 Spec BR 驅動 TDD（ATDD First → Unit Test → Green → Refactor）；Debug ≤ 3 輪
+   - `code-review`: M/L/XL Story 啟用 VSDD 簡化版（Spec vs Code 比對）
+   - BDD Given-When-Then 僅允許在 PRD/Epic 層級作為需求溝通輔助，不進入開發迴圈
+
+**code-review 深度審查**: 標記「設計選擇」或「延後」前，必須驗證 useState 與 Zustand 是否重複定義。
+
+**Commit/Push**: 先執行 `.\scripts\check-hygiene.ps1`，通過後才 commit。
+
+**文檔建立/修改**: 自我掃描禁止模式 — `/\(\d+h\)/`、`/\d+小時/`、`/工時/`、`/預計.*天/`。用複雜度 S/M/L/XL 取代時間估算。
+
+---
+
+## 2. Skill 索引
+
+> 詳細規範在各 Skill 內，workflow 執行時自動載入。
+
+| 領域 | Skill | 觸發關鍵字 |
+|------|-------|------------|
+| {{DOMAIN_1}} | `/{{skill-name-1}}` | {{keyword1, keyword2}} |
+| {{DOMAIN_2}} | `/{{skill-name-2}}` | {{keyword3, keyword4}} |
+
+### 核心禁止事項
+
+- ❌ {{列出專案絕對不可違反的規則}}
+
+### Canonical Source
+
+```
+Frontend: {{列出 TypeScript 型別定義權威路徑}}
+Backend: {{列出後端 Model/Enum 權威路徑}}
+```
+
+---
+
+## 3. Test Accounts
+
+| Plan | Email | Password |
+|------|-------|----------|
+| {{Plan_1}} | `{{email}}` | `{{password}}` |
+
+Seeder: `{{seeder_path}}`
+
+---
+
+## 4. Document Locations
+
+| Type | Path |
+|------|------|
+| Stories | `docs/implementation-artifacts/stories/epic-X/` |
+| Reviews | `docs/implementation-artifacts/reviews/epic-X/` |
+| ADR | `docs/technical-decisions/` |
+| Active tracking | `docs/tracking/active/` |
+| Archived tracking | `docs/tracking/archived/epic-X/` |
+| Sprint status | `docs/implementation-artifacts/sprint-status.yaml` |
+| Project context | `docs/project-context.md` |
+| Front-end spec | `docs/project-planning-artifacts/technical-specs/front-end-spec.md` |
+
+---
+
+## 5. Workflow Completion Checklists
+
+**After dev-story**: 更新 Story file list + Story 狀態 (`review`) + sprint-status.yaml + tracking file
+
+**After code-review**: 建立 CR report + 更新 Story 狀態 (`done`) + sprint-status.yaml + archive tracking
+
+**After create-story**: 建立 Story file + tracking file + 更新 sprint-status.yaml (`ready-for-dev`)
+
+---
+
+## 6. Project Status
+
+執行任務前，主動讀取：
+- `docs/project-context.md` — Epic 進度、當前工作、架構決策
+- `docs/implementation-artifacts/sprint-status.yaml` — Story 層級狀態
+
+---
+
+## 7. BMAD Workflow Commands
+
+```
+Format: /bmad:module:type:name
+常用: workflow-status, create-story, dev-story, code-review, sprint-planning
+Agents: analyst, pm, architect, sm, dev, tea, ux-designer
+```

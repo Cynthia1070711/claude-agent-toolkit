@@ -1,0 +1,383 @@
+/* ============================================================
+   documents.css — 文檔瀏覽頁樣式
+   CMI-4: Document Browser + Party Mode 改進
+   ============================================================ */
+
+/* ── 分類群組卡片 ── */
+.doc-group-cards {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.doc-group-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  min-width: 100px;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  cursor: pointer;
+  transition: all var(--dvc-transition);
+}
+
+.doc-group-card:hover {
+  border-color: var(--dvc-accent);
+  transform: translateY(-1px);
+}
+
+.doc-group-card--active {
+  border-color: var(--dvc-accent);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.doc-group-card__icon {
+  font-size: 20px;
+}
+
+.doc-group-card__label {
+  font-size: 11px;
+  color: var(--dvc-text-secondary);
+  font-weight: 500;
+  text-align: center;
+}
+
+.doc-group-card--active .doc-group-card__label {
+  color: var(--dvc-accent);
+}
+
+.doc-group-card__count {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+  font-family: var(--dvc-font-mono);
+}
+
+/* ── 搜尋列 ── */
+.doc-search-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.doc-search-input {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  color: var(--dvc-text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--dvc-transition);
+}
+
+.doc-search-input:focus {
+  border-color: var(--dvc-accent);
+}
+
+.doc-search-input::placeholder {
+  color: var(--dvc-text-muted);
+}
+
+.doc-search-btn {
+  padding: 10px 18px;
+  background: var(--dvc-accent);
+  border: none;
+  border-radius: var(--dvc-radius);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dvc-transition);
+  white-space: nowrap;
+}
+
+.doc-search-btn:hover {
+  background: var(--dvc-accent-hover);
+}
+
+/* ── Category Chips（保留舊樣式供 clear 按鈕使用）── */
+.doc-chip {
+  padding: 4px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--dvc-border);
+  background: transparent;
+  color: var(--dvc-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--dvc-transition);
+}
+
+.doc-chip:hover {
+  border-color: var(--dvc-accent);
+  color: var(--dvc-text-primary);
+}
+
+.doc-chip--active {
+  background: var(--dvc-accent);
+  border-color: var(--dvc-accent);
+  color: #fff;
+}
+
+/* ── 關鍵字高亮 ── */
+.doc-highlight {
+  background: rgba(250, 204, 21, 0.35);
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
+/* ── 文檔列表 ── */
+.doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  cursor: pointer;
+  transition: border-color var(--dvc-transition);
+}
+
+.doc-item:hover {
+  border-color: var(--dvc-accent);
+}
+
+.doc-item__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-item__path {
+  font-size: 11px;
+  color: var(--dvc-text-muted);
+  font-family: var(--dvc-font-mono);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-item__stat {
+  font-size: 11px;
+  color: var(--dvc-text-secondary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.doc-item__badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── 搜尋結果 Chunk 卡片 ── */
+.doc-chunk {
+  padding: 14px 16px;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  transition: border-color var(--dvc-transition);
+}
+
+.doc-chunk:hover {
+  border-color: var(--dvc-accent);
+}
+
+.doc-chunk__heading {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dvc-accent);
+  margin-bottom: 6px;
+  font-family: var(--dvc-font-mono);
+}
+
+.doc-chunk__content {
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── 文檔詳情 ── */
+.doc-detail {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 24px;
+}
+
+.doc-detail__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.doc-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--dvc-accent);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.doc-detail__back:hover {
+  color: var(--dvc-accent-hover);
+}
+
+/* ── VS Code 開啟按鈕 ── */
+.doc-vscodebtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(0, 122, 204, 0.12);
+  border: 1px solid rgba(0, 122, 204, 0.3);
+  border-radius: var(--dvc-radius);
+  color: #007acc;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dvc-transition);
+}
+
+.doc-vscodebtn:hover {
+  background: rgba(0, 122, 204, 0.22);
+  border-color: #007acc;
+}
+
+.doc-vscodebtn__icon {
+  font-family: var(--dvc-font-mono);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.doc-detail__meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.doc-detail__content {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--dvc-text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.doc-detail__content h1,
+.doc-detail__content h2,
+.doc-detail__content h3 {
+  color: var(--dvc-text-primary);
+  margin: 16px 0 8px;
+}
+
+/* ── 分頁 ── */
+.doc-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.doc-pagination button {
+  padding: 6px 12px;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  color: var(--dvc-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.doc-pagination button:hover:not(:disabled) {
+  border-color: var(--dvc-accent);
+  color: var(--dvc-text-primary);
+}
+
+.doc-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.doc-pagination__info {
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+}
+
+/* ── 狀態提示 ── */
+.doc-status {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--dvc-text-muted);
+  font-size: 13px;
+}
+
+/* ── 總計 bar ── */
+.doc-total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+}
+
+@media (max-width: 768px) {
+  .doc-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .doc-group-cards {
+    gap: 6px;
+  }
+
+  .doc-group-card {
+    min-width: 70px;
+    padding: 8px 10px;
+  }
+
+  .doc-detail__toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

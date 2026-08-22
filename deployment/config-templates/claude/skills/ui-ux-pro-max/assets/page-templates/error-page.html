@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- error-page.html — 錯誤頁脫殼範本（BS5 + zh-TW）
+     蒸餾自 deskapp 404.html:110-169（MIT © 2018 DeskApp）取「脫殼原則」捨 BS4/jQuery 形。
+     神：error 頁不含 app shell（無 sidebar/topbar），置中極簡 + 單一主 CTA。
+     5 碼套用：400 請求錯 / 403 無權限 / 404 找不到 / 500 伺服器錯 / 503 維護中（對齊 phycool-maintenance-mode）。
+     ⚠️ 不洩 stack trace（對齊 phycool-error-handling 不洩敏）。完整見 references/17-page-templates.md。 -->
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>找不到頁面 · 404</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* 脫殼：全螢幕置中，不套 .admin-shell */
+    .error-page { min-height: 100vh; display: grid; place-items: center; text-align: center; padding: 1.5rem; }
+    .error-page__code { font-size: clamp(4rem, 12vw, 8rem); font-weight: 700; line-height: 1; color: var(--bs-primary, #2563eb); }
+  </style>
+</head>
+<body>
+  <div class="error-page">
+    <div>
+      <p class="error-page__code">404</p>
+      <h1 class="h4 mb-2">找不到頁面</h1>
+      <p class="text-secondary mb-4">您要找的頁面不存在或已移除。</p>
+      <a class="btn btn-primary" href="/">返回首頁</a>
+    </div>
+  </div>
+</body>
+</html>

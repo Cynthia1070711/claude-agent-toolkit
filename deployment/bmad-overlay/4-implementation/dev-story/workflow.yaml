@@ -14,12 +14,11 @@ date: system-generated
 
 # Workflow components
 installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/dev-story"
-instructions: "{installed_path}/instructions.xml"
+instructions: "{installed_path}/workflow.md"
 validation: "{installed_path}/checklist.md"
 
 story_file: "" # Explicit story path; auto-discovered if empty
 implementation_artifacts: "{config_source}:implementation_artifacts"
-sprint_status: "{implementation_artifacts}/sprint-status.yaml"
 project_context: "**/project-context.md"
 
 standalone: true

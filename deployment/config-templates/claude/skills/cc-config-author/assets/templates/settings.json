@@ -1,0 +1,183 @@
+{
+  "_comment_": "PhyCool settings.json 範本 (2026 Apr 規範)。複製到 .claude/settings.json 並依需求調整。",
+  "_comment_paths_": "Windows 路徑用正斜線或 $CLAUDE_PROJECT_DIR,不要硬編碼 absolute path。",
+
+  "permissions": {
+    "allow": [
+      "Edit(.claude/**)",
+      "Write(.claude/**)",
+      "Edit(docs/**)",
+      "Write(docs/**)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(dotnet:*)",
+      "Bash(pwsh:*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/appsettings.Production.json)",
+      "Read(**/credentials*)",
+      "Read(**/secrets*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/id_rsa*)",
+      "Bash(rm -rf /)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | bash)",
+      "Bash(git push --force main)",
+      "Bash(git push -f main)"
+    ],
+    "ask": [
+      "Write(appsettings.*.json)",
+      "Edit(appsettings.*.json)",
+      "Bash(git push*)",
+      "Bash(git reset --hard*)"
+    ]
+  },
+
+  "env": {
+    "_comment_autocompact_": "依模型 context window 調整。1M 模型(Opus 4.8 / Sonnet 5 / Fable 5)設 95(= CLI 原生預設):window 夠大,提早壓縮反而浪費可用空間,且 compaction 本身有損(摘要不可盡信),少壓縮優於早壓縮。小 window 模型才調低以避 lost-in-the-middle。",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "95",
+
+    "_comment_powershell_": "Windows 11 + PowerShell 5.1 環境",
+    "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1",
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
+    "BASH_DEFAULT_TIMEOUT_MS": "120000",
+
+    "_comment_mcp_": "MCP 工具呼叫上限",
+    "MCP_TIMEOUT": "40000",
+    "MAX_MCP_OUTPUT_TOKENS": "50000",
+
+    "_comment_deprecated_": "以下變數已 deprecated,Opus 4.7 不支援,請勿加回:",
+    "_deprecated_MAX_THINKING_TOKENS": "use /effort xhigh instead",
+    "_deprecated_DISABLE_NONESSENTIAL_MODEL_CALLS": "removed in 4.7"
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/dangerous-cmd-block.js\"",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/read-before-edit-guard.js\"",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/cc-config-guard.js\"",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/encoding-bom-guard.js\"",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/track-reads.js\"",
+            "timeout": 2000,
+            "async": true
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Evaluate whether Claude truly verified the task before stopping. Check: (1) tests/build executed for code changes, (2) read-before-modify followed, (3) claims backed by file:line citations, (4) docs/schema alignment confirmed. Return strict JSON {\"ok\": bool, \"reason\"?: \"...\"}.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-context-inject.js\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.context-db/scripts/log-session.js\"",
+            "timeout": 3000,
+            "async": true
+          }
+        ]
+      }
+    ],
+
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/handshake-bridge.js\"",
+            "timeout": 2000
+          }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/handshake-bridge.js\"",
+            "timeout": 2000
+          }
+        ]
+      }
+    ]
+  },
+
+  "_comment_mcp_servers_": "MCP servers 建議放 .mcp.json (跨 IDE 共用),settings.json 只放 Claude Code 專用配置",
+
+  "disableAllHooks": false,
+  "allowManagedHooksOnly": false
+}

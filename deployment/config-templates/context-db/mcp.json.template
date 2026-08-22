@@ -1,9 +1,53 @@
 {
+  "_comment": [
+    "複製本檔為專案根目錄的 .mcp.json 後填入自己的憑證。本包不含任何 API key。",
+    "",
+    "⚠ phycool-context 這個名稱請勿更改 —— 打包的 rules 與 skills 全部以",
+    "mcp__phycool-context__* 引用這些工具（36 個），改名會讓所有引用失效。",
+    "它是工具識別名，與你的專案叫什麼無關。",
+    "",
+    "下方 github / context7 / azure / chrome-devtools 為選用，不需要的整段刪除即可。"
+  ],
+
   "mcpServers": {
-    "{{PROJECT_NAME}}-context": {
+    "phycool-context": {
       "type": "stdio",
       "command": "node",
       "args": [".context-db/server.js"]
+    },
+
+    "github": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "填入你的 GitHub PAT"
+      }
+    },
+
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "env": {
+        "CONTEXT7_API_KEY": "填入你的 Context7 API Key"
+      }
+    },
+
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest", "--autoConnect"]
+    },
+
+    "azure": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@azure/mcp@latest", "server", "start"]
     }
   }
 }

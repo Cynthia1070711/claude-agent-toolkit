@@ -1,0 +1,66 @@
+<!-- ============================================================
+模組總覽卡片六要素範式 · HTML 模板(複製即用)
+SSoT: report-paradigm skill references/module-card-paradigm.md
+CSS: 校正報告/report-assets/css/report.css §Module Card v2(新體系整段複製該區塊)
+規格: ① NO 序號(純數字流水號依序排開 1,2,3…非代號) ② 名稱(「{名稱} · {代號}」) ③ 三組標籤(類型×校正階段×開發狀態,可複選,事件標籤註時間)
+      ④ 說明 ≤5 行 ⑤ 備註 ≤3 行 ⑥ 最後更新時間(日期+時間) · 全卡等高 · 按序號排序
+============================================================ -->
+
+<!-- 容器(整個卡片區用一個 mgrid) -->
+<div class="mgrid">
+
+  <!-- 範例 A:已有報告連結的卡(a 元素)· 校正完成 -->
+  <a class="mcard" href="report-assets/pages/module-XXX.html">
+    <div class="mcard-head"><span class="mcard-no">1</span><span class="mcard-name">模組名稱 · M0-1</span></div>
+    <div class="mcard-tags">
+      <span class="mtag mt-type mt-type-func">▣ 功能層</span>
+      <span class="mtag mt-corr-done">✅ 校正完成<i>2026-06-05 21:50</i></span>
+      <span class="mtag mt-dev-wait">▢ 待開發</span>
+    </div>
+    <div class="mcard-desc">用途說明(白話,該模組主要用途與任務內容,不超過五行;詳情進報告頁查看)。</div>
+    <div class="mcard-note">
+      <div class="mcard-note-clamp"><b>備註</b>注意事項(白話,不超過三行;無備註寫「—」保持等高)。</div>
+    </div>
+    <div class="mcard-updated">最後更新 2026-06-05 21:50</div>
+  </a>
+
+  <!-- 範例 B:複選雙標籤(已規畫 + 暫緩施工,各註時間) -->
+  <a class="mcard" href="report-assets/pages/module-YYY.html">
+    <div class="mcard-head"><span class="mcard-no">21</span><span class="mcard-name">模組名稱(暫緩範例) · G10</span></div>
+    <div class="mcard-tags">
+      <span class="mtag mt-type mt-type-gov">⬡ 治理層</span>
+      <span class="mtag mt-corr-planned">📐 已規畫<i>2026-06-05</i></span>
+      <span class="mtag mt-corr-hold">⏸ 暫緩施工<i>2026-06-05</i></span>
+      <span class="mtag mt-dev-wait">▢ 待開發</span>
+    </div>
+    <div class="mcard-desc">⋯</div>
+    <div class="mcard-note">
+      <div class="mcard-note-clamp"><b>備註</b>⋯</div>
+    </div>
+    <div class="mcard-updated">最後更新 2026-06-05</div>
+  </a>
+
+  <!-- 範例 C:規劃中無報告連結的卡(div + mcard-static,待態標籤不註時間) -->
+  <div class="mcard mcard-static">
+    <div class="mcard-head"><span class="mcard-no">22</span><span class="mcard-name">模組名稱(待規畫) · ①</span></div>
+    <div class="mcard-tags">
+      <span class="mtag mt-type mt-type-base">◆ 地基</span>
+      <span class="mtag mt-corr-unplanned">⏳ 待規畫</span>
+      <span class="mtag mt-dev-wait">▢ 待開發</span>
+    </div>
+    <div class="mcard-desc">⋯</div>
+    <div class="mcard-note">
+      <div class="mcard-note-clamp"><b>備註</b>詳細規劃報告待建。</div>
+    </div>
+    <div class="mcard-updated">最後更新 —(報告待建)</div>
+  </div>
+
+</div>
+
+<!-- 標籤速查:
+類型(虛線·不註時間): mt-type-base ◆地基 | mt-type-func ▣功能層 | mt-type-adv ◈進階功能層
+                      | mt-type-tool ⬢工具箱 | mt-type-gov ⬡治理層 | mt-type-cfg ▤配置層 | mt-type-future ✦未來產品
+校正階段(事件註時間): mt-corr-done ✅校正完成 | mt-corr-review 🔄審查中 | mt-corr-pending 📋待審查
+                      | mt-corr-planned 📐已規畫 | mt-corr-hold ⏸暫緩施工 | mt-corr-unplanned ⏳待規畫(不註)
+開發狀態:             mt-dev-wait ▢待開發(不註) | mt-dev-doing ⚒開發中(註) | mt-dev-done ✦開發完成(註)
+-->

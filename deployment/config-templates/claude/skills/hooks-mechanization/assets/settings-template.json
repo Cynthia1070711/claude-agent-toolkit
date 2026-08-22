@@ -1,0 +1,229 @@
+{
+  "_comment_": "Reference settings.json template — copy hook blocks you need into your actual .claude/settings.json",
+  "_comment_2_": "Windows paths use forward slashes. Use $CLAUDE_PROJECT_DIR to avoid hardcoding paths.",
+  "_comment_3_": "Async hooks for non-blocking telemetry; sync for anything that must influence Claude's behavior.",
+
+  "permissions": {
+    "allow": [
+      "Edit(.claude/**)",
+      "Write(.claude/**)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(git:*)"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/appsettings.Development.json)",
+      "Read(**/appsettings.Production.json)",
+      "Read(**/credentials*)",
+      "Read(**/secrets*)"
+    ]
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "_purpose_": "Block dangerous shell commands (rm -rf /, force push, etc.)",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/template-a-pre-tool-block.js\"",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "_purpose_": "Enforce read-before-modify",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/read-before-edit-guard.js\"",
+            "timeout": 3000
+          },
+          {
+            "_purpose_": "Ask before modifying settings.json",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/settings-edit-policy.js\"",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__phycool-context",
+        "hooks": [
+          {
+            "_purpose_": "Validate MCP payload schema",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/mcp-payload-validator.js\"",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "_purpose_": "Inject context for generated/IDD/config files",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/template-b-post-tool-warn.js\"",
+            "timeout": 3000
+          },
+          {
+            "_purpose_": "Enforce UTF-8 BOM for PowerShell/C# files",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/encoding-bom-guard.js\"",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "_purpose_": "Track read history for read-before-modify enforcement",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/track-reads.js\"",
+            "timeout": 2000,
+            "async": true
+          }
+        ]
+      }
+    ],
+
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "_purpose_": "Inject RAG context (gate with keyword check to save tokens)",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-prompt-rag.js\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "_purpose_": "LLM verification — did Claude actually verify?",
+            "type": "prompt",
+            "prompt": "Evaluate whether Claude truly verified the task before stopping. Return strict JSON {\"ok\": bool, \"reason\"?: \"...\"}.",
+            "timeout": 30
+          },
+          {
+            "_purpose_": "Async telemetry — does not block",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/template-e-async-log.js\"",
+            "timeout": 5000,
+            "async": true
+          }
+        ]
+      }
+    ],
+
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "_purpose_": "Inject git state and feature flags",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/template-c-session-start-inject.js\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "_purpose_": "Consolidate session telemetry",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.context-db/scripts/log-session.js\"",
+            "timeout": 3000,
+            "async": true
+          }
+        ]
+      }
+    ],
+
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "_purpose_": "Handshake init signal",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/handshake-bridge.js\"",
+            "timeout": 2000
+          }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "_purpose_": "Handshake ack signal",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/handshake-bridge.js\"",
+            "timeout": 2000
+          }
+        ]
+      }
+    ],
+
+    "InstructionsLoaded": [
+      {
+        "matcher": "session_start|path_glob_match|nested_traversal",
+        "hooks": [
+          {
+            "_purpose_": "Audit which rules actually loaded (observability)",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/audit-rules-loaded.js\"",
+            "timeout": 2000,
+            "async": true
+          }
+        ]
+      }
+    ],
+
+    "FileChanged": [
+      {
+        "matcher": "SKILL.md",
+        "hooks": [
+          {
+            "_purpose_": "Detect skill change and trigger re-index",
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/skill-change-detector.js\"",
+            "timeout": 3000
+          }
+        ]
+      }
+    ]
+  },
+
+  "env": {
+    "_comment_max_thinking_": "MAX_THINKING_TOKENS deprecated on Opus 4.7 — use /effort xhigh instead. Removed from this template.",
+    "_comment_autocompact_": "Scale to the model's context window. On 1M-context models (Opus 4.8 / Sonnet 5 / Fable 5) use 95 (= CLI native default): the window is large enough that early compaction wastes usable space, and compaction is itself lossy — fewer compactions beat earlier ones. Lower it only for small-window models where lost-in-the-middle bites sooner.",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "95",
+    "BASH_DEFAULT_TIMEOUT_MS": "120000",
+    "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1",
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
+    "MCP_TIMEOUT": "40000",
+    "MAX_MCP_OUTPUT_TOKENS": "50000",
+    "PHYCOOL_RULE_VIOLATION_HINT_ENABLED": "true"
+  }
+}

@@ -1,0 +1,448 @@
+/* ============================================================
+   Kanban 看板樣式 — DVS-03
+   命名空間: .dvc-kanban-*
+   色彩: 延伸 --dvc-* CSS Variable 系統
+   ============================================================ */
+
+/* ── 狀態色 CSS 變數（延伸 variables.css）── */
+:root {
+  --dvc-status-backlog: var(--dvc-slate-600);
+  --dvc-status-ready: var(--dvc-indigo-500);
+  --dvc-status-dev: #f59e0b;
+  --dvc-status-review: #8b5cf6;
+  --dvc-status-done: var(--dvc-status-ok);
+  --dvc-status-cancelled: var(--dvc-slate-700);
+}
+
+/* ── 統計列 ── */
+.dvc-kanban-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.dvc-kanban-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  min-width: 80px;
+  gap: 2px;
+}
+
+.dvc-kanban-stat-card .stat-count {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dvc-kanban-stat-card .stat-label {
+  font-size: 11px;
+  color: var(--dvc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dvc-kanban-stat-card.stat-backlog .stat-count { color: var(--dvc-status-backlog); }
+.dvc-kanban-stat-card.stat-ready   .stat-count { color: var(--dvc-status-ready); }
+.dvc-kanban-stat-card.stat-dev     .stat-count { color: var(--dvc-status-dev); }
+.dvc-kanban-stat-card.stat-review  .stat-count { color: var(--dvc-status-review); }
+.dvc-kanban-stat-card.stat-done    .stat-count { color: var(--dvc-status-done); }
+.dvc-kanban-stat-card.stat-total   .stat-count { color: var(--dvc-text-primary); }
+
+/* ── Epic 篩選 ── */
+.dvc-kanban-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dvc-kanban-filter label {
+  font-size: 13px;
+  color: var(--dvc-text-secondary);
+}
+
+.dvc-kanban-filter select {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  color: var(--dvc-text-primary);
+  font-size: 13px;
+  padding: 6px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--dvc-transition);
+}
+
+.dvc-kanban-filter select:focus {
+  border-color: var(--dvc-accent);
+}
+
+/* ── 看板主體（五欄水平滾動）── */
+.dvc-kanban-board {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  align-items: flex-start;
+}
+
+/* ── 單欄 ── */
+.dvc-kanban-column {
+  flex: 1;
+  min-width: 240px;
+  max-width: 400px;
+  background: var(--dvc-bg-secondary);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dvc-kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--dvc-border);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dvc-kanban-col-header .col-name {
+  color: var(--dvc-text-secondary);
+}
+
+.dvc-kanban-col-badge {
+  background: var(--dvc-bg-card);
+  color: var(--dvc-text-secondary);
+  border-radius: 10px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* 欄位狀態條 */
+.dvc-kanban-column[data-status="backlog"] .dvc-kanban-col-header { border-top: 2px solid var(--dvc-status-backlog); }
+.dvc-kanban-column[data-status="ready-for-dev"] .dvc-kanban-col-header { border-top: 2px solid var(--dvc-status-ready); }
+.dvc-kanban-column[data-status="in-progress"] .dvc-kanban-col-header { border-top: 2px solid var(--dvc-status-dev); }
+.dvc-kanban-column[data-status="review"] .dvc-kanban-col-header { border-top: 2px solid var(--dvc-status-review); }
+.dvc-kanban-column[data-status="done"] .dvc-kanban-col-header { border-top: 2px solid var(--dvc-status-done); }
+
+/* BR-001: 獨立欄位捲動 — 卡片區域限高，超出時顯示滾動條 */
+.dvc-kanban-col-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 8px;
+  min-height: 60px;
+  max-height: calc(100vh - 320px);
+  overflow-y: auto;
+}
+
+/* 捲軸樣式（深色主題適配）*/
+.dvc-kanban-col-cards::-webkit-scrollbar {
+  width: 5px;
+}
+.dvc-kanban-col-cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dvc-kanban-col-cards::-webkit-scrollbar-thumb {
+  background: var(--dvc-slate-600);
+  border-radius: 3px;
+}
+.dvc-kanban-col-cards::-webkit-scrollbar-thumb:hover {
+  background: var(--dvc-slate-500);
+}
+
+/* ── Story 卡片 ── */
+.dvc-kanban-card {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition:
+    border-color var(--dvc-transition),
+    box-shadow var(--dvc-transition);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dvc-kanban-card:hover {
+  border-color: var(--dvc-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dvc-kanban-card.is-cancelled {
+  opacity: 0.45;
+}
+
+.dvc-kanban-card-key {
+  font-family: var(--dvc-font-mono);
+  font-size: 11px;
+  color: var(--dvc-accent-text);
+  font-weight: 600;
+}
+
+.dvc-kanban-card-title {
+  font-size: 12px;
+  color: var(--dvc-text-primary);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.dvc-kanban-card-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.dvc-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.3px;
+}
+
+.dvc-badge-complexity-XS { background: rgba(100, 116, 139, 0.3); color: var(--dvc-slate-300); }
+.dvc-badge-complexity-S  { background: rgba(99, 102, 241, 0.2); color: var(--dvc-indigo-200); }
+.dvc-badge-complexity-M  { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.dvc-badge-complexity-L  { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.dvc-badge-complexity-XL { background: rgba(239, 68, 68, 0.35); color: #fca5a5; }
+
+.dvc-badge-priority-P0 { background: rgba(239, 68, 68, 0.25); color: #f87171; }
+.dvc-badge-priority-P1 { background: rgba(245, 158, 11, 0.25); color: #fbbf24; }
+.dvc-badge-priority-P2 { background: rgba(99, 102, 241, 0.2); color: var(--dvc-indigo-200); }
+.dvc-badge-priority-P3 { background: rgba(100, 116, 139, 0.3); color: var(--dvc-slate-300); }
+
+.dvc-badge-sdd {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.dvc-badge-rerun {
+  background: transparent;
+  border: 1px solid var(--dvc-status-warning);
+  color: var(--dvc-status-warning);
+}
+
+.dvc-kanban-card-footer {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.dvc-kanban-card-epic {
+  font-size: 10px;
+  color: var(--dvc-text-muted);
+}
+
+.dvc-kanban-card-agent {
+  font-size: 10px;
+  color: var(--dvc-text-muted);
+  font-family: var(--dvc-font-mono);
+}
+
+.dvc-kanban-card-cr {
+  font-size: 10px;
+  color: var(--dvc-status-ok);
+  font-weight: 600;
+}
+
+/* ── 詳情面板（展開在卡片下方）── */
+.dvc-kanban-detail {
+  background: var(--dvc-bg-primary);
+  border: 1px solid var(--dvc-accent);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dvc-kanban-detail-comment {
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+  font-family: var(--dvc-font-mono);
+  word-break: break-all;
+}
+
+.dvc-kanban-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dvc-kanban-detail-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--dvc-border);
+  background: var(--dvc-bg-card);
+  color: var(--dvc-text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--dvc-transition),
+    color var(--dvc-transition),
+    border-color var(--dvc-transition);
+}
+
+.dvc-kanban-detail-btn:hover {
+  background: var(--dvc-accent-bg-subtle);
+  border-color: var(--dvc-accent);
+  color: var(--dvc-accent-text);
+}
+
+.dvc-kanban-detail-btn.is-current {
+  background: var(--dvc-accent-bg-subtle);
+  border-color: var(--dvc-accent);
+  color: var(--dvc-accent-text);
+  font-weight: 600;
+}
+
+/* ── 響應式（md 以下欄位垂直堆疊）── */
+@media (max-width: 768px) {
+  .dvc-kanban-board {
+    flex-direction: column;
+    overflow-x: unset;
+  }
+
+  .dvc-kanban-column {
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+  }
+}
+
+/* ── 查看詳情連結（DVS-06）── */
+.dvc-kanban-card-detail-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--dvc-accent-text);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity var(--dvc-transition);
+}
+
+.dvc-kanban-card-detail-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ============================================================
+   DVS-07: Filter Bar + Segmented Control + Search + Empty State
+   ============================================================ */
+
+/* ── Filter Bar 容器（水平排列，自動換行）── */
+.dvc-kanban-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* ── 時間範圍 Segmented Control ── */
+.dvc-date-range-segmented {
+  display: flex;
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  overflow: hidden;
+}
+
+.dvc-segment-btn {
+  background: var(--dvc-bg-card);
+  border: none;
+  border-right: 1px solid var(--dvc-border);
+  color: var(--dvc-text-secondary);
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background var(--dvc-transition), color var(--dvc-transition);
+  white-space: nowrap;
+}
+
+.dvc-segment-btn:last-child {
+  border-right: none;
+}
+
+.dvc-segment-btn:hover {
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-primary);
+}
+
+.dvc-segment-btn.is-active {
+  background: var(--dvc-accent-bg-subtle);
+  color: var(--dvc-accent-text);
+  font-weight: 600;
+}
+
+/* ── 搜尋輸入框 ── */
+.dvc-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dvc-search-input {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  color: var(--dvc-text-primary);
+  font-size: 13px;
+  padding: 6px 28px 6px 10px;
+  width: 200px;
+  outline: none;
+  transition: border-color var(--dvc-transition), width var(--dvc-transition);
+}
+
+.dvc-search-input:focus {
+  border-color: var(--dvc-accent);
+  width: 260px;
+}
+
+.dvc-search-input::placeholder {
+  color: var(--dvc-text-muted);
+}
+
+.dvc-search-clear {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: var(--dvc-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+}
+
+.dvc-search-clear:hover {
+  color: var(--dvc-text-secondary);
+}
+
+/* ── 空狀態訊息 ── */
+.dvc-kanban-empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--dvc-text-muted);
+  font-size: 14px;
+  background: var(--dvc-bg-secondary);
+  border: 1px dashed var(--dvc-border);
+  border-radius: var(--dvc-radius);
+}

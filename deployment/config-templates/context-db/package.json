@@ -1,0 +1,23 @@
+{
+  "name": "phycool-context-db",
+  "version": "0.1.0",
+  "description": "PhyCool AI Agent Context Memory DB — SQLite + FTS5 Phase 0 PoC",
+  "type": "module",
+  "scripts": {
+    "init": "node scripts/init-db.js",
+    "server": "node server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "better-sqlite3": "^11.7.0",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.4",
+    "vitest": "^4.1.4"
+  }
+}

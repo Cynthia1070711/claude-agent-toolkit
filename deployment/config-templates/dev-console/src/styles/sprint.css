@@ -1,0 +1,176 @@
+/* ============================================================
+   sprint.css — Sprint 進度頁樣式
+   DVS-05 AC-5~AC-8
+   使用 --dvc-* CSS Variable，不硬編碼色碼
+   ============================================================ */
+
+/* Sprint 頁面頂部工具列 */
+.dvc-sprint-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dvc-sprint-filter-label {
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+  white-space: nowrap;
+}
+
+.dvc-sprint-filter-select {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: calc(var(--dvc-radius) - 2px);
+  color: var(--dvc-text-primary);
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--dvc-transition);
+}
+
+.dvc-sprint-filter-select:hover,
+.dvc-sprint-filter-select:focus {
+  border-color: var(--dvc-accent);
+}
+
+/* 上方圖表區 Grid（圓餅圖左、柱狀圖右）*/
+.dvc-sprint-charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* 圖表卡片 */
+.dvc-chart-card {
+  background: var(--dvc-bg-secondary);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 20px;
+}
+
+.dvc-chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dvc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.dvc-chart-container {
+  position: relative;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Epic 進度條區域 */
+.dvc-epic-progress {
+  background: var(--dvc-bg-secondary);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 20px;
+}
+
+.dvc-epic-progress-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dvc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.dvc-epic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dvc-epic-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 60px;
+  align-items: center;
+  gap: 12px;
+  transition: opacity var(--dvc-transition);
+}
+
+.dvc-epic-row.completed {
+  opacity: 0.5;
+}
+
+.dvc-epic-id {
+  font-size: 12px;
+  font-family: var(--dvc-font-mono);
+  color: var(--dvc-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 堆疊式進度條 */
+.dvc-progress-bar {
+  height: 16px;
+  background: var(--dvc-slate-800);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+
+.dvc-progress-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+  min-width: 0;
+}
+
+.dvc-seg-done       { background: #22c55e; }
+.dvc-seg-review     { background: #8b5cf6; }
+.dvc-seg-progress   { background: #f59e0b; }
+.dvc-seg-ready      { background: #6366f1; }
+.dvc-seg-backlog    { background: #475569; }
+.dvc-seg-cancelled  { background: #334155; }
+
+.dvc-epic-pct {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  text-align: right;
+  font-family: var(--dvc-font-mono);
+}
+
+/* 完成 Epic 可收合 */
+.dvc-epic-collapse-btn {
+  background: none;
+  border: none;
+  color: var(--dvc-text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.dvc-epic-collapse-btn:hover {
+  color: var(--dvc-text-secondary);
+}
+
+/* 空狀態 */
+.dvc-sprint-empty {
+  text-align: center;
+  color: var(--dvc-text-muted);
+  padding: 32px 0;
+  font-size: 13px;
+}
+
+/* 響應式：圖表垂直堆疊 */
+@media (max-width: 768px) {
+  .dvc-sprint-charts {
+    grid-template-columns: 1fr;
+  }
+
+  .dvc-epic-row {
+    grid-template-columns: 80px 1fr 50px;
+  }
+}

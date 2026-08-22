@@ -1,0 +1,114 @@
+/* ============================================================
+   DevConsole CSS 變數 — 深色主題（與 PhyCool Design System 隔離）
+   色系：Slate + Indigo（延續 --dvc-* 前綴，不使用 --color-*）
+   ============================================================ */
+
+:root {
+  /* Slate 色階 */
+  --dvc-slate-950: #020617;
+  --dvc-slate-900: #0f172a;
+  --dvc-slate-800: #1e293b;
+  --dvc-slate-700: #334155;
+  --dvc-slate-600: #475569;
+  --dvc-slate-500: #64748b;
+  --dvc-slate-400: #94a3b8;
+  --dvc-slate-300: #cbd5e1;
+  --dvc-slate-100: #f1f5f9;
+
+  /* Emerald 色階（Tech Badge 用） */
+  --dvc-emerald-300: #6ee7b7;
+
+  /* Red 色階（Critical Severity 用） */
+  --dvc-red-400: #f87171;
+
+  /* Indigo 色階 */
+  --dvc-indigo-700: #4338ca;
+  --dvc-indigo-600: #4f46e5;
+  --dvc-indigo-500: #6366f1;
+  --dvc-indigo-400: #818cf8;
+  --dvc-indigo-200: #c7d2fe;
+  --dvc-indigo-100: #e0e7ff;
+
+  /* 語意色（Semantic tokens） */
+  --dvc-text-primary: var(--dvc-slate-100);
+  --dvc-text-secondary: var(--dvc-slate-400);
+  --dvc-text-muted: var(--dvc-slate-300);
+  --dvc-bg-primary: var(--dvc-slate-950);
+  --dvc-bg-secondary: var(--dvc-slate-900);
+  --dvc-bg-card: var(--dvc-slate-800);
+  --dvc-border: var(--dvc-slate-700);
+  /* 補未定義 alias(修復裸 var(--dvc-surface/bg/text) → 透明卡片 bug · 2026-05-30) */
+  --dvc-surface: var(--dvc-bg-card);     /* 卡片 surface(實心,等同 live-obs fallback) */
+  --dvc-bg: var(--dvc-bg-secondary);     /* 巢狀內層 panel(recessed,較卡片深一階) */
+  --dvc-text: var(--dvc-text-primary);   /* 主要文字 */
+  --dvc-accent: var(--dvc-indigo-500);
+  --dvc-accent-hover: var(--dvc-indigo-600);
+  --dvc-accent-text: var(--dvc-indigo-200);
+  --dvc-accent-bg-subtle: rgba(99, 102, 241, 0.15);
+  --dvc-accent-bg: rgba(99, 102, 241, 0.15);   /* alias for accent-bg-subtle */
+  --dvc-bg-hover: rgba(255, 255, 255, 0.05);   /* subtle hover highlight */
+  --dvc-border-light: rgba(51, 65, 85, 0.6);   /* lighter than --dvc-border */
+
+  /* 狀態色 */
+  --dvc-status-ok: #22c55e;
+  --dvc-status-error: #ef4444;
+  --dvc-status-warning: #f59e0b;
+  --dvc-status-checking: var(--dvc-slate-500);
+
+  /* 尺寸 */
+  --dvc-sidebar-width: 240px;
+  --dvc-sidebar-collapsed-width: 64px;
+  --dvc-header-height: 56px;
+  --dvc-radius: 8px;
+
+  /* 字體 */
+  --dvc-font-mono: 'Roboto Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  --dvc-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* 過渡 */
+  --dvc-transition: 200ms ease-out;
+
+  /* ── §Epic-ECC-V2 UI v2 tokens (ecc-emergence-ui-v2 2026-05-28) ── */
+  /* 4 池 pool tokens */
+  --dvc-pool-skill-bg: rgba(99, 102, 241, 0.08);
+  --dvc-pool-skill-border: var(--dvc-indigo-600);
+  --dvc-pool-candidate-bg: rgba(52, 211, 153, 0.08);
+  --dvc-pool-candidate-border: #10b981;
+  --dvc-pool-observe-bg: rgba(148, 163, 184, 0.06);
+  --dvc-pool-observe-border: var(--dvc-slate-600);
+  --dvc-pool-rejected-bg: rgba(239, 68, 68, 0.06);
+  --dvc-pool-rejected-border: var(--dvc-red-400);
+
+  /* 技能效果長條 3 色階 */
+  --dvc-bar-effect-green: #166534;
+  --dvc-bar-effect-yellow: #92400e;
+  --dvc-bar-effect-red: #991b1b;
+  --dvc-bar-effect-track: var(--dvc-slate-800);
+
+  /* 衰退警示色 — AAA 9.8:1 verified webaim 2026-05-28 */
+  /* #FEF3C7 (amber-100) × #78350F (amber-900) = 9.8:1 */
+  --dvc-warn-decay-bg: #FEF3C7;
+  --dvc-warn-decay-text: #78350F;
+  --dvc-warn-decay-border: #F59E0B;
+
+  /* Modal */
+  --dvc-modal-backdrop: rgba(2, 6, 23, 0.75);
+  --dvc-modal-bg: var(--dvc-slate-900);
+  --dvc-modal-blur: 4px;
+
+  /* ── §channel tokens (ccb-3-devconsole-channel-page 2026-07-28) ── */
+  /* 5 個軌別 token — 前 4 軌各自獨立色，第 5+ 軌統一套 --dvc-track-other（動態欄數不可預知） */
+  --dvc-track-1: #818cf8;
+  --dvc-track-2: #34d399;
+  --dvc-track-3: #f59e0b;
+  --dvc-track-4: #fb7185;
+  --dvc-track-other: #94a3b8;
+
+  /* 6 個 msg_type token（對齊 ctrl_messages.msg_type CHECK 列舉） */
+  --dvc-msgtype-inform: #94a3b8;
+  --dvc-msgtype-discuss: #38bdf8;
+  --dvc-msgtype-request: #f59e0b;
+  --dvc-msgtype-handoff: #a78bfa;
+  --dvc-msgtype-decision: #34d399;
+  --dvc-msgtype-state: #818cf8;
+}

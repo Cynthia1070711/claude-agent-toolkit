@@ -1,0 +1,177 @@
+/* ============================================================
+   decisions.css — 技術決策頁面樣式（深色主題 --dvc-* 變數）
+   DVS-07 AC-2/AC-5
+   ============================================================ */
+
+.decisions-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.decisions-page__header {
+  margin-bottom: 20px;
+}
+
+.decisions-page__title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  margin: 0 0 6px;
+}
+
+.decisions-page__desc {
+  font-size: 14px;
+  color: var(--dvc-text-secondary);
+  margin: 0;
+}
+
+.decisions-page__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.decisions-page__tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.decisions-tab {
+  padding: 6px 14px;
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  background: transparent;
+  color: var(--dvc-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background var(--dvc-transition), color var(--dvc-transition);
+}
+
+.decisions-tab:hover {
+  background: var(--dvc-bg-card);
+  color: var(--dvc-text-primary);
+}
+
+.decisions-tab--active {
+  background: var(--dvc-accent-bg-subtle);
+  border-color: var(--dvc-accent);
+  color: var(--dvc-accent-text);
+}
+
+.decisions-page__count {
+  font-size: 13px;
+  color: var(--dvc-text-muted);
+  margin-bottom: 12px;
+}
+
+.decisions-page__loading,
+.decisions-page__empty {
+  color: var(--dvc-text-secondary);
+  font-size: 14px;
+  padding: 24px 0;
+}
+
+.decisions-page__error {
+  color: var(--dvc-status-error);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.decisions-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* ── Decision Card ── */
+.decision-card {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 16px;
+}
+
+.decision-card__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.decision-card__badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.decision-card__badge--context {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--dvc-indigo-200);
+}
+
+.decision-card__badge--tech {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--dvc-emerald-300);
+}
+
+.decision-card__date {
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+  margin-left: auto;
+}
+
+.decision-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  margin: 0 0 6px;
+}
+
+.decision-card__meta {
+  display: block;
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+  margin-bottom: 8px;
+}
+
+.decision-card__content {
+  font-size: 13px;
+  color: var(--dvc-text-secondary);
+  line-height: 1.6;
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.decision-card__ellipsis {
+  color: var(--dvc-text-muted);
+}
+
+.decision-card__expand {
+  background: none;
+  border: none;
+  color: var(--dvc-accent);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.decision-card__expand:hover {
+  color: var(--dvc-accent-text);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .decisions-page { padding: 16px; }
+  .decisions-page__tabs { flex-wrap: wrap; }
+  .decision-card__header { flex-wrap: wrap; }
+}
+@media (max-width: 480px) {
+  .decisions-page { padding: 12px; }
+}

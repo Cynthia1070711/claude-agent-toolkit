@@ -1,0 +1,77 @@
+{
+  "_comment": "Tianji-Pavilion v1.2.0 unified hook bundle. Merge the contents of `hooks` into your existing `.claude/settings.json`. If your settings.json already has entries under any of these events with the same matcher, append the tianji-* command objects to the existing `hooks` arrays rather than creating duplicate matcher entries. All 8 hooks must be copied to `.claude/hooks/` with the `tianji-` filename prefix (see SKILL.md Installation section). Run /clear or restart CLI after editing — hook config is snapshotted at session start.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tianji-baseline-snapshot-gate.js\"",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tianji-concurrent-pilot-guard.js\"",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tianji-q4-audit-gate.js\"",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tianji-impulse-cooldown-guard.js\"",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tianji-ssot-sync-checker.js\"",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tianji-scope-creep-detector.js\"",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tianji-pilot-timebox-monitor.js\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tianji-reject-cooldown-check.js\"",
+            "timeout": 3000
+          }
+        ]
+      }
+    ]
+  }
+}

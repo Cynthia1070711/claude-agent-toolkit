@@ -1,0 +1,244 @@
+/* ============================================================
+   DevConsole Layout — Sidebar + Main content
+   響應式：寬度 < 768px 時側邊列可收合
+   ============================================================ */
+
+/* ── Reset ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--dvc-bg-primary);
+  color: var(--dvc-text-primary);
+  font-family: var(--dvc-font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── App shell ── */
+.dvc-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Header / Topbar ── */
+.dvc-header {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 100;
+  height: var(--dvc-header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background-color: var(--dvc-bg-secondary);
+  border-bottom: 1px solid var(--dvc-border);
+  gap: 12px;
+}
+
+.dvc-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--dvc-text-primary);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.dvc-header__badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--dvc-bg-card);
+  color: var(--dvc-text-muted);
+  border: 1px solid var(--dvc-border);
+}
+
+/* 語系切換按鈕 */
+.dvc-lang-toggle {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  color: var(--dvc-text-secondary);
+  cursor: pointer;
+  padding: 3px 10px;
+  border-radius: var(--dvc-radius);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: background-color var(--dvc-transition), color var(--dvc-transition);
+}
+
+.dvc-lang-toggle:hover {
+  background-color: var(--dvc-accent-bg-subtle);
+  color: var(--dvc-accent-text);
+}
+
+/* DB 連線狀態指示燈 */
+.dvc-conn-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+}
+
+.dvc-conn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background-color var(--dvc-transition);
+}
+
+.dvc-conn-dot--ok {
+  background-color: var(--dvc-status-ok);
+}
+
+.dvc-conn-dot--error {
+  background-color: var(--dvc-status-error);
+}
+
+.dvc-conn-dot--checking {
+  background-color: var(--dvc-status-checking);
+  animation: dvc-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes dvc-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* 收合按鈕（所有裝置可見） */
+.dvc-sidebar-toggle {
+  display: flex;
+  background: none;
+  border: none;
+  color: var(--dvc-text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--dvc-radius);
+}
+
+.dvc-sidebar-toggle:hover {
+  background-color: var(--dvc-bg-card);
+  color: var(--dvc-text-primary);
+}
+
+/* ── Main layout (sidebar + content) ── */
+.dvc-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.dvc-sidebar {
+  width: var(--dvc-sidebar-width);
+  flex-shrink: 0;
+  background-color: var(--dvc-bg-secondary);
+  border-right: 1px solid var(--dvc-border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width var(--dvc-transition), transform var(--dvc-transition);
+}
+
+.dvc-sidebar--collapsed {
+  width: var(--dvc-sidebar-collapsed-width);
+}
+
+.dvc-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px;
+  gap: 2px;
+}
+
+.dvc-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--dvc-radius);
+  color: var(--dvc-text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color var(--dvc-transition), color var(--dvc-transition);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dvc-nav__item:hover {
+  background-color: var(--dvc-bg-card);
+  color: var(--dvc-text-primary);
+}
+
+.dvc-nav__item.active {
+  background-color: var(--dvc-accent-bg-subtle);
+  color: var(--dvc-accent-text);
+}
+
+.dvc-nav__icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.dvc-nav__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity var(--dvc-transition);
+}
+
+.dvc-sidebar--collapsed .dvc-nav__label {
+  opacity: 0;
+  width: 0;
+}
+
+/* ── Main content ── */
+.dvc-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  min-width: 0;
+}
+
+/* ── 響應式：< 768px ── */
+@media (max-width: 767px) {
+  .dvc-sidebar-toggle {
+    display: flex;
+  }
+
+  .dvc-sidebar {
+    position: fixed;
+    top: var(--dvc-header-height);
+    left: 0;
+    bottom: 0;
+    z-index: 200;
+    transform: translateX(0);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.4);
+  }
+
+  .dvc-sidebar--mobile-hidden {
+    transform: translateX(-100%);
+  }
+
+  .dvc-content {
+    padding: 16px;
+  }
+}

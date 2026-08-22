@@ -1,0 +1,34 @@
+{
+  "$schema_note": "check-traditional-chinese.cjs 豁免造冊檔(2026-06-06 建立)— 故意簡體(教學範例/zh-CN 資源/違規描述引用)登記於此,掃描標 EXEMPT、--fix 絕不觸碰。新增豁免必附 reason。scope: file=整檔豁免 / line=該檔含 match 子串的行豁免",
+  "$auto_heuristics_note": "工具另內建兩條自動豁免啟發(不需造冊):H-A 同行繁簡並列(如「對齊→对齐」教學箭頭/aria-label 繁簡欄)該字豁免;H-B 行含標記詞(簡體/简体/zh-CN/zh_CN/簡繁)整行豁免。本冊為顯式第二道保險 + 啟發無法覆蓋者",
+  "entries": [
+    {
+      "path": "src/YourApp/Web.Tests/Data/I18nResourceSeederIdentityManageTests.cs",
+      "scope": "file",
+      "reason": "zh-CN i18n 資源測試斷言本體(帐户资料/双因素验证 等為 zh-CN locale 正確內容,改為繁體=測試紅+資源毀損)"
+    },
+    {
+      "path": ".claude/rules/traditional-chinese-discipline.md",
+      "scope": "file",
+      "reason": "繁簡對照教學規則本體(高風險詞彙對照表 19 字 + 漂移範例),簡體字是教學內容非違規"
+    },
+    {
+      "path": "docs/implementation-artifacts/audits/2026-05-17-editor-conformance-audit/_audit-guide.md",
+      "scope": "line",
+      "match": "簡體字符",
+      "reason": "audit 範本自檢題對照範例(無簡體字符如 对齐/验证)— 2026-06-06 --fix 誤傷後還原,造冊凍結"
+    },
+    {
+      "path": "docs/implementation-artifacts/reviews/epic-skl/skl-09-pipeline-subwindow-conventions-skill-code-review-report.md",
+      "scope": "line",
+      "match": "對齐",
+      "reason": "CR 報告 F-E-4 違規描述引用(簡體「對齐」漏網)— 歷史存證,使用者 2026-06-06 指正誤傷後造冊"
+    },
+    {
+      "path": "docs/implementation-artifacts/specs/epic-eft/eft-layer-visibility-correction-spec.md",
+      "scope": "line",
+      "match": "\"zh-CN\"",
+      "reason": "Spec 內 zh-CN locale JSON 範例字串(画布/隐藏 為 zh-CN 正確內容)"
+    }
+  ]
+}

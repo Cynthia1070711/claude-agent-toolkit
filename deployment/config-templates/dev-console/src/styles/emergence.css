@@ -1,0 +1,1689 @@
+/* ============================================================
+   emergence.css — ECC 湧現迴路頁面樣式
+   Epic-ECC-V2 Story A: BEM .emergence-* — 使用 --dvc-* 變數
+   Layout: 漏斗區 (top) → 卡片牆 (main)
+   ============================================================ */
+
+.emergence-page {
+  padding: 1.5rem;
+}
+
+/* ---- Header ---- */
+.emergence-page__header {
+  margin-bottom: 1.25rem;
+}
+
+.emergence-page__header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+.emergence-page__subtitle {
+  color: var(--dvc-text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ── 湧現漏斗 Funnel ──────────────────────────────────────── */
+.emergence-funnel {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.emergence-funnel__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--dvc-bg-card);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  flex: 1 1 160px;
+  min-width: 120px;
+  border: 1px solid var(--dvc-border);
+  position: relative;
+}
+
+.emergence-funnel__stage-icon {
+  font-size: 1.375rem;
+  margin-bottom: 0.25rem;
+}
+
+.emergence-funnel__stage-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+  line-height: 1.2;
+}
+
+.emergence-funnel__stage-label {
+  font-size: 0.75rem;
+  color: var(--dvc-text-muted);
+  text-align: center;
+  margin-top: 0.25rem;
+}
+
+.emergence-funnel__stage-sub {
+  font-size: 0.7rem;
+  color: var(--dvc-text-muted);
+  margin-top: 0.125rem;
+}
+
+.emergence-funnel__arrow {
+  display: flex;
+  align-items: center;
+  color: var(--dvc-text-muted);
+  font-size: 1.25rem;
+  align-self: center;
+  padding-top: 0.5rem;
+}
+
+/* ── 卡片牆 Card Wall ────────────────────────────────────── */
+.emergence-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 0.75rem;
+}
+
+.emergence-card {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.emergence-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Header */
+.emergence-card__header {
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emergence-card__trigger-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.emergence-card__trigger {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  flex: 1;
+  word-break: break-word;
+}
+
+.emergence-card__action {
+  font-size: 0.75rem;
+  color: var(--dvc-text-muted);
+  margin-top: 0.125rem;
+  word-break: break-word;
+}
+
+/* Confidence bar */
+.emergence-card__conf-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emergence-card__conf-track {
+  flex: 1;
+  height: 6px;
+  background: var(--dvc-bg-muted, #e5e7eb);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.emergence-card__conf-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--dvc-accent, #6366f1);
+  transition: width 0.3s ease;
+}
+
+.emergence-card__conf-pct {
+  font-size: 0.7rem;
+  color: var(--dvc-text-muted);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+/* Chips row */
+.emergence-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+/* Verifier badge */
+.emergence-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.emergence-card__badge--approved {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.emergence-card__badge--needs-more-evidence {
+  background: rgba(234, 179, 8, 0.15);
+  color: #a16207;
+}
+
+.emergence-card__badge--rejected {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+/* Adoption chip */
+.emergence-card__adoption {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: var(--dvc-bg-muted, #f3f4f6);
+  color: var(--dvc-text-muted);
+}
+
+/* Domain / scope chip */
+.emergence-card__domain-chip {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: var(--dvc-bg-muted, #f3f4f6);
+  color: var(--dvc-text-secondary, #6b7280);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Star rating */
+.emergence-card__star {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.emergence-card__star[data-source="user"] {
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.emergence-card__star[data-source="machine"] {
+  background: var(--dvc-bg-muted, #f3f4f6);
+  color: var(--dvc-text-muted);
+}
+
+/* description_zh */
+.emergence-card__desc-zh {
+  font-size: 0.75rem;
+  color: var(--dvc-text-secondary, #6b7280);
+  padding: 0 1rem 0.5rem;
+  border-top: 1px solid var(--dvc-border);
+  padding-top: 0.5rem;
+  line-height: 1.5;
+}
+
+.emergence-card__section-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--dvc-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.emergence-card__evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.emergence-card__evidence-item {
+  font-size: 0.75rem;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: 4px;
+  padding: 0.375rem 0.5rem;
+  color: var(--dvc-text-secondary, #6b7280);
+  word-break: break-word;
+}
+
+.emergence-card__verifier-reason {
+  font-size: 0.75rem;
+  color: var(--dvc-text-secondary, #6b7280);
+  line-height: 1.5;
+}
+
+/* Timeline */
+.emergence-card__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.emergence-card__timeline-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--dvc-text-muted);
+}
+
+.emergence-card__timeline-label {
+  min-width: 4.5rem;
+  color: var(--dvc-text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+/* Source */
+.emergence-card__source {
+  font-size: 0.7rem;
+  color: var(--dvc-text-muted);
+  word-break: break-all;
+}
+
+/* user_note textarea */
+.emergence-card__note-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.emergence-card__note-textarea {
+  font-size: 0.8125rem;
+  padding: 0.5rem;
+  border: 1px solid var(--dvc-border);
+  border-radius: 4px;
+  background: var(--dvc-bg-card);
+  color: var(--dvc-text-primary);
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.emergence-card__note-textarea:focus {
+  outline: none;
+  border-color: var(--dvc-accent, #6366f1);
+}
+
+.emergence-card__note-save {
+  align-self: flex-end;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--dvc-accent, #6366f1);
+  background: var(--dvc-accent, #6366f1);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.emergence-card__note-save:hover {
+  opacity: 0.85;
+}
+
+.emergence-card__note-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Empty / Loading States ─────────────────────────────── */
+.emergence-page__loading {
+  text-align: center;
+  padding: 3rem;
+  color: var(--dvc-text-muted);
+}
+
+.emergence-page__error {
+  text-align: center;
+  padding: 2rem;
+  color: #dc2626;
+}
+
+.emergence-page__empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--dvc-text-muted);
+  font-size: 0.875rem;
+}
+
+/* ── 治理按鈕(AC2/AC3) ────────────────────────────────── */
+.emergence-card__gov-actions {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.emergence-card__like-btn,
+.emergence-card__reject-btn {
+  padding: 0.2rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.emergence-card__like-btn {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.emergence-card__like-btn:hover:not(:disabled) {
+  background: #bbf7d0;
+}
+
+.emergence-card__reject-btn {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.emergence-card__reject-btn:hover:not(:disabled) {
+  background: #fecaca;
+}
+
+.emergence-card__like-btn:disabled,
+.emergence-card__reject-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── 否決理由輸入(AC3) ──────────────────────────────── */
+.emergence-card__reject-input {
+  display: flex;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--dvc-border);
+  background: #fff5f5;
+}
+
+.emergence-card__reject-input input {
+  flex: 1;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.emergence-card__reject-input button {
+  padding: 0.25rem 0.625rem;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.emergence-card__reject-input button:hover {
+  background: #b91c1c;
+}
+
+/* ── 曾被否決徽章(AC4) ──────────────────────────────── */
+.emergence-card__rejected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.15rem 0.45rem;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+  color: #92400e;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* ── Layer 12 觀測區(AC5) ────────────────────────────── */
+.emergence-layer12 {
+  background: var(--dvc-surface);
+  border: 1px solid var(--dvc-border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.emergence-layer12__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--dvc-text);
+  margin: 0 0 0.625rem;
+}
+
+/* CR F5 修復:component 使用但原缺失的 class(desc/gauge-row 與 item 內 trigger/arrow/action) */
+.emergence-layer12__desc {
+  font-size: 0.75rem;
+  color: var(--dvc-text-muted);
+  margin: 0 0 0.625rem;
+}
+
+.emergence-layer12__gauge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--dvc-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.emergence-layer12__gauge-row .emergence-layer12__gauge {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.emergence-layer12__gauge {
+  height: 8px;
+  background: var(--dvc-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.375rem;
+}
+
+.emergence-layer12__gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.emergence-layer12__gauge-label {
+  font-size: 0.7rem;
+  color: var(--dvc-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.emergence-layer12__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.emergence-layer12__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  padding: 0.375rem 0.5rem;
+  background: var(--dvc-bg);
+  border-radius: 4px;
+}
+
+.emergence-layer12__score {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #6366f1;
+  color: #fff;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.emergence-layer12__trigger {
+  font-weight: 600;
+  color: var(--dvc-text);
+}
+
+.emergence-layer12__arrow {
+  flex-shrink: 0;
+  color: var(--dvc-text-muted);
+}
+
+.emergence-layer12__action {
+  color: var(--dvc-text-muted);
+}
+
+.emergence-layer12__empty {
+  font-size: 0.8rem;
+  color: var(--dvc-text-muted);
+  text-align: center;
+  padding: 0.75rem 0;
+}
+
+/* ── 採納/衰減趨勢區(AC6) ────────────────────────────── */
+.emergence-trends {
+  background: var(--dvc-surface);
+  border: 1px solid var(--dvc-border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.emergence-trends__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--dvc-text);
+  margin: 0 0 0.75rem;
+}
+
+.emergence-trends__blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.emergence-trends__block {
+  border: 1px solid var(--dvc-border);
+  border-radius: 6px;
+  padding: 0.625rem 0.75rem;
+  background: var(--dvc-bg);
+}
+
+/* AC9 衰退警示色 bug 修 — 強制 amber-100 bg + amber-900 text (AAA 9.8:1 webaim 2026-05-28) */
+.emergence-trends__block--decaying {
+  border-color: var(--dvc-warn-decay-border);
+  background: var(--dvc-warn-decay-bg);
+  /* 強制所有後代色彩 override，不依賴 var(--dvc-text) 繼承 */
+}
+.emergence-trends__block--decaying,
+.emergence-trends__block--decaying .emergence-trends__block-title,
+.emergence-trends__block--decaying .emergence-trends__item,
+.emergence-trends__block--decaying .emergence-trends__label,
+.emergence-trends__block--decaying .emergence-trends__conf,
+.emergence-trends__block--decaying .emergence-trends__decay-at,
+.emergence-trends__block--decaying .emergence-trends__empty {
+  color: var(--dvc-warn-decay-text) !important;
+}
+
+.emergence-trends__block-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dvc-text-muted);
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.emergence-trends__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.emergence-trends__item {
+  font-size: 0.75rem;
+  color: var(--dvc-text);
+  padding: 0.2rem 0;
+  border-bottom: 1px dashed var(--dvc-border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emergence-trends__item:last-child {
+  border-bottom: none;
+}
+
+.emergence-trends__empty {
+  font-size: 0.75rem;
+  color: var(--dvc-text-muted);
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+/* ============================================================
+   emergence-recent-row + emergence-live-obs — 即時原始觀測面板
+   使用者增強(2026-05-30):湧現迴路頁右側即時觀測 feed,純讀 pattern_observations
+   驗證觀測迴路運作(非侵入 · 15s 輪詢 · 點列展開詳情)
+   ============================================================ */
+.emergence-recent-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 900px) {
+  .emergence-recent-row { grid-template-columns: 1fr; }
+}
+
+.emergence-live-obs {
+  background: var(--dvc-surface, var(--dvc-bg-card));
+  border: 1px solid var(--dvc-border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.emergence-live-obs__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.emergence-live-obs__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--dvc-text, var(--dvc-text-primary));
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.45;
+}
+
+.emergence-live-obs__status-text { min-width: 0; }
+
+.emergence-live-obs__status-meta {
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--dvc-text-muted);
+}
+
+.emergence-live-obs__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--dvc-text-muted);
+  flex: none;
+  margin-top: 0.3rem;
+}
+.emergence-live-obs__dot.is-active {
+  background: #22c55e;
+  animation: emergence-live-pulse 1.8s infinite;
+}
+@keyframes emergence-live-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+  70%  { box-shadow: 0 0 0 0.375rem rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .emergence-live-obs__dot.is-active { animation: none; }
+}
+
+.emergence-live-obs__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.emergence-live-obs__auto {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: var(--dvc-text-muted);
+  cursor: pointer;
+}
+.emergence-live-obs__refresh {
+  border: 1px solid var(--dvc-border);
+  background: var(--dvc-bg, transparent);
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.emergence-live-obs__refresh:hover { border-color: var(--dvc-accent, #6366f1); }
+
+.emergence-live-obs__error { font-size: 0.78rem; color: #ef4444; margin: 0.25rem 0; }
+.emergence-live-obs__empty { font-size: 0.78rem; color: var(--dvc-text-muted); margin: 0.25rem 0; }
+
+.emergence-live-obs__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 17rem; /* 約 10 筆列高 · 其餘滾動查看 */
+  overflow-y: auto;
+  /* 滾軸 — 對齊 story-detail/kanban thin slate + Firefox 跨瀏覽器(ui-ux-pro-max) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--dvc-slate-600) transparent;
+}
+.emergence-live-obs__list::-webkit-scrollbar { width: 4px; }
+.emergence-live-obs__list::-webkit-scrollbar-track { background: transparent; }
+.emergence-live-obs__list::-webkit-scrollbar-thumb { background: var(--dvc-slate-600); border-radius: 2px; }
+.emergence-live-obs__list::-webkit-scrollbar-thumb:hover { background: var(--dvc-slate-500); }
+.emergence-live-obs__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  border: none;
+  border-bottom: 1px dashed var(--dvc-border);
+  background: transparent;
+  color: var(--dvc-text, var(--dvc-text-primary));
+  padding: 0.3rem 0.25rem;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.75rem;
+}
+.emergence-live-obs__item:hover { background: var(--dvc-bg-muted, rgba(99, 102, 241, 0.08)); }
+.emergence-live-obs__time {
+  font-variant-numeric: tabular-nums;
+  color: var(--dvc-text-muted);
+  flex: none;
+}
+.emergence-live-obs__domain { font-weight: 600; flex: none; }
+.emergence-live-obs__tool {
+  color: var(--dvc-text-secondary, #6b7280);
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.emergence-live-obs__occ { color: var(--dvc-text-muted); flex: none; }
+
+.emergence-live-obs__path { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; word-break: break-all; }
+
+/* ============================================================
+   emergence-evolve__ + emergence-hitl__ — Story C BEM blocks
+   AC3: EvolveSection · AC4: HITLModal
+   ============================================================ */
+
+/* ── EvolveSection ───────────────────────────────────────── */
+.emergence-evolve {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: var(--dvc-surface); /* 卡片 bg 統一(原 --dvc-bg-card)對齊 canonical */
+  border: 1px solid var(--dvc-border);
+  border-radius: 8px;
+}
+
+.emergence-evolve__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+.emergence-evolve__subtitle {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  color: var(--dvc-text-muted);
+}
+
+.emergence-evolve__wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.emergence-evolve__card {
+  background: var(--dvc-bg);
+  border: 1px solid var(--dvc-border);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emergence-evolve__card-header {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.emergence-evolve__type-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.emergence-evolve__type-badge--skill {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.emergence-evolve__type-badge--agent-hook {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.emergence-evolve__adoption {
+  font-size: 0.75rem;
+  color: var(--dvc-text-muted);
+}
+
+.emergence-evolve__members {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 0.5rem;
+  border-left: 2px solid var(--dvc-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.emergence-evolve__member-trigger {
+  font-size: 0.7rem;
+  color: var(--dvc-text-secondary, #6b7280);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emergence-evolve__card-footer {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--dvc-border);
+}
+
+.emergence-evolve__generate-btn {
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  background: var(--dvc-accent, #3b82f6);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.emergence-evolve__generate-btn:hover {
+  background: var(--dvc-accent-hover, #2563eb);
+}
+
+.emergence-evolve__empty-state {
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+.emergence-evolve__empty {
+  color: var(--dvc-text-muted);
+  font-size: 0.9rem;
+}
+
+.emergence-evolve__empty-hint {
+  font-size: 0.75rem;
+  color: var(--dvc-text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ── HITLModal ───────────────────────────────────────────── */
+.emergence-hitl__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.emergence-hitl__modal {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: 10px;
+  width: min(640px, 95vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.emergence-hitl__header {
+  border-bottom: 1px solid var(--dvc-border);
+  padding-bottom: 0.75rem;
+}
+
+.emergence-hitl__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+.emergence-hitl__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: var(--dvc-bg);
+  border: 1px solid var(--dvc-border);
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.emergence-hitl__summary-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emergence-hitl__label {
+  font-size: 0.75rem;
+  color: var(--dvc-text-muted);
+  min-width: 70px;
+}
+
+.emergence-hitl__members {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.emergence-hitl__member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 0.75rem;
+  border-left: 2px solid var(--dvc-border);
+}
+
+.emergence-hitl__member-item {
+  font-size: 0.7rem;
+  color: var(--dvc-text-secondary, #6b7280);
+  padding: 0.15rem 0;
+}
+
+/* Skill Cap Check */
+.emergence-hitl__cap-check {
+  background: var(--dvc-bg);
+  border: 1px solid var(--dvc-border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emergence-hitl__cap-check--warn {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.emergence-hitl__cap-check--block {
+  border-color: #ef4444;
+  background: #fff1f2;
+}
+
+.emergence-hitl__cap-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+}
+
+.emergence-hitl__cap-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.emergence-hitl__cap-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.emergence-hitl__cap-track {
+  flex: 1;
+  height: 6px;
+  background: var(--dvc-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.emergence-hitl__cap-fill {
+  height: 100%;
+  background: var(--dvc-accent, #3b82f6);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.emergence-hitl__cap-alert {
+  font-size: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.emergence-hitl__cap-alert--warn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.emergence-hitl__cap-alert--block {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.emergence-hitl__cap-questions {
+  font-size: 0.75rem;
+}
+
+.emergence-hitl__cap-questions-title {
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.emergence-hitl__cap-q-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--dvc-text-secondary, #6b7280);
+  line-height: 1.7;
+}
+
+/* Skill Sample */
+.emergence-hitl__sample {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.emergence-hitl__sample-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+}
+
+.emergence-hitl__sample-code {
+  background: var(--dvc-bg);
+  border: 1px solid var(--dvc-border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.7rem;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--dvc-text);
+  margin: 0;
+}
+
+.emergence-hitl__copy-btn {
+  align-self: flex-start;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  background: var(--dvc-bg);
+  border: 1px solid var(--dvc-border);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--dvc-text);
+}
+
+.emergence-hitl__copy-btn:hover {
+  background: var(--dvc-border);
+}
+
+/* Warning */
+.emergence-hitl__warning {
+  font-size: 0.75rem;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  padding: 0.75rem;
+  line-height: 1.5;
+}
+
+/* Footer */
+.emergence-hitl__footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--dvc-border);
+  padding-top: 0.75rem;
+}
+
+.emergence-hitl__close-btn {
+  padding: 0.45rem 1rem;
+  background: var(--dvc-accent, #3b82f6);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.emergence-hitl__close-btn:hover {
+  background: var(--dvc-accent-hover, #2563eb);
+}
+
+/* ── §Epic-ECC-V2 UI v2 — 4 池 BEM (ecc-emergence-ui-v2 2026-05-28) ── */
+
+/* PoolSection 可摺疊池 */
+.emergence-pool {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--dvc-border);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.emergence-pool--skill   { background: var(--dvc-pool-skill-bg);    border-color: var(--dvc-pool-skill-border); }
+.emergence-pool--candidate { background: var(--dvc-pool-candidate-bg); border-color: var(--dvc-pool-candidate-border); }
+.emergence-pool--observe { background: var(--dvc-pool-observe-bg);  border-color: var(--dvc-pool-observe-border); }
+.emergence-pool--rejected { background: var(--dvc-pool-rejected-bg); border-color: var(--dvc-pool-rejected-border); }
+
+.emergence-pool__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+.emergence-pool__header:hover { background: var(--dvc-bg-hover); }
+.emergence-pool__header:focus { outline: 3px solid var(--dvc-accent-text); outline-offset: -2px; }
+
+.emergence-pool__title {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--dvc-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.emergence-pool__icon { font-size: 1.1rem; }
+
+.emergence-pool__count-chip {
+  background: var(--dvc-accent-bg);
+  color: var(--dvc-accent-text);
+  border-radius: 12px;
+  padding: 0.1rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.emergence-pool__chevron {
+  color: var(--dvc-text-muted);
+  font-size: 1rem;
+  transition: transform 0.2s;
+}
+.emergence-pool__chevron--open { transform: rotate(180deg); }
+
+.emergence-pool__body {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--dvc-border-light);
+}
+.emergence-pool__empty { color: var(--dvc-text-muted); font-size: 0.85rem; padding: 0.5rem 0; }
+
+/* reduced-motion: 取消池摺疊 transition */
+@media (prefers-reduced-motion: reduce) {
+  .emergence-pool { transition: none; }
+  .emergence-pool__chevron { transition: none; }
+}
+
+/* ── 卡片星數徽章 (AC2) ── */
+.emergence-card__star-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: var(--dvc-accent-bg);
+  color: var(--dvc-accent-text);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 8px;
+}
+.emergence-card--v2 { padding: 0.875rem 1rem 0.75rem; position: relative; }
+.emergence-card--paused { opacity: 0.6; }
+
+/* 卡片 footer 治理按鈕 */
+.emergence-card__footer {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+.emergence-card__gov-btn {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.7rem;
+  border-radius: 4px;
+  border: 1px solid var(--dvc-border);
+  background: var(--dvc-bg-card);
+  color: var(--dvc-text-secondary);
+  cursor: pointer;
+}
+.emergence-card__gov-btn:hover:not(:disabled) { background: var(--dvc-bg-hover); color: var(--dvc-text-primary); }
+.emergence-card__gov-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.emergence-card__gov-btn--danger { border-color: var(--dvc-red-400); color: var(--dvc-red-400); }
+.emergence-card__gov-btn--restore { border-color: var(--dvc-pool-candidate-border); color: var(--dvc-pool-candidate-border); }
+.emergence-card__gov-btn--generate { border-color: var(--dvc-accent); color: var(--dvc-accent-text); }
+
+/* P1 redundant 候選(已被既有 rule/skill 涵蓋 · 2026-06-08 ECC 優化:evolve 精確度閘) */
+.emergence-card--redundant { opacity: 0.72; border-color: #d97706; background: rgba(217, 119, 6, 0.06); }
+.emergence-card__redundant-badge {
+  display: inline-block; margin: 0.3rem 0; padding: 0.2rem 0.5rem;
+  font-size: 0.72rem; font-weight: 600; color: #b45309;
+  background: rgba(217, 119, 6, 0.14); border: 1px solid rgba(217, 119, 6, 0.4);
+  border-radius: 4px; cursor: help;
+}
+.emergence-card__gov-btn--warn { border-color: #d97706; color: #b45309; }
+
+.emergence-card__chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+.emergence-card__verifier-chip,
+.emergence-card__adoption-chip {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-muted);
+}
+.emergence-card__score-pct {
+  font-size: 0.7rem;
+  color: var(--dvc-text-muted);
+  margin-left: 0.25rem;
+}
+.emergence-card__reject-input {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+.emergence-card__reject-input input {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--dvc-border);
+  border-radius: 4px;
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-primary);
+  font-size: 0.75rem;
+}
+.emergence-card__paused-chip { font-size: 0.7rem; color: var(--dvc-text-muted); }
+.emergence-card__sample-insufficient { font-size: 0.75rem; color: var(--dvc-text-muted); }
+.emergence-card__skill-path { font-size: 0.8125rem; font-weight: 600; color: var(--dvc-text-primary); word-break: break-all; }
+
+/* ── effect bar (AC8 / AC13 色盲安全) ── */
+.emergence-effect-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  transition: width 0.3s ease;
+}
+.emergence-effect-bar__track {
+  width: 100%;
+  min-width: 80px;
+  height: 10px;
+  background: var(--dvc-bar-effect-track, rgba(255, 255, 255, 0.12));
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  display: block;
+}
+.emergence-effect-bar__fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--dvc-pool-observe-border);
+  transition: width 0.3s ease;
+}
+.emergence-effect-bar__fill.emergence-effect-bar--observe { background: var(--dvc-pool-observe-border); }
+.emergence-effect-bar__fill.emergence-effect-bar--rejected { background: var(--dvc-pool-rejected-border); }
+.emergence-effect-bar__svg { display: block; width: 100%; height: 10px; }
+.emergence-effect-bar__label { font-size: 0.7rem; color: var(--dvc-text-muted); }
+.emergence-effect-bar__pattern-stroke { color: var(--dvc-bar-effect-green); }
+.emergence-effect-bar__pattern-dot { color: var(--dvc-bar-effect-yellow); }
+
+@media (prefers-reduced-motion: reduce) {
+  .emergence-effect-bar,
+  .emergence-effect-bar__fill { transition: none; }
+}
+
+/* ============================================================
+   BUG fix patch (2026-05-28)
+   BUG 3: 池色外框統一 — 移除 candidate/skill/rejected 差異
+   BUG 4: 字體加大 + 重要標題粗體 + 深色文字對比
+   ============================================================ */
+.emergence-card { font-size: 0.95rem; color: var(--dvc-text-primary); }
+.emergence-card--candidate, .emergence-card--skill, .emergence-card--rejected {
+  /* 統一外觀 (BUG 3): 退回 --v2 base · 移除各池差異色 */
+  border-color: var(--dvc-border) !important;
+  background: var(--dvc-bg-card) !important;
+}
+.emergence-card__trigger, .emergence-card__skill-path, .emergence-card__domain {
+  font-size: 1.0625rem;  /* ~17px BUG 4 */
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+  line-height: 1.4;
+}
+.emergence-card__action {
+  font-size: 0.9375rem;  /* ~15px BUG 4 */
+  color: var(--dvc-text-secondary);
+}
+.emergence-card__star-badge {
+  font-size: 1.125rem !important;  /* ~18px ⭐ 顯眼 */
+  font-weight: 700;
+  letter-spacing: -2px;  /* ⭐ 緊湊 */
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+}
+.emergence-card__chips span, .emergence-card__type-badge, .emergence-card__meta {
+  font-size: 0.875rem;  /* ~14px BUG 4 */
+  font-weight: 500;
+  color: var(--dvc-text-primary);
+}
+.emergence-card__score-pct {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+/* 湧現迴路清單 BUG 6/7 fix: 字體大 + 可點 + score pill */
+.emergence-recent-list__title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+.emergence-recent-list__item {
+  font-size: 0.75rem; /* 比照 live-obs item 字體大小 */
+  line-height: normal; /* 比照 live-obs item(button 預設),避免 li 繼承 body 1.6 撐高 */
+  color: var(--dvc-text-primary);
+  padding: 0.3rem 0.25rem; /* 比照 live-obs item padding */
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  transition: background 0.15s ease;
+  white-space: nowrap; /* 單行不換行(比照 live-obs item) */
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--dvc-border); /* 分隔線清單設計(比照 live-obs item) */
+}
+.emergence-recent-list__item[role="button"]:hover {
+  background: var(--dvc-bg-hover);
+}
+.emergence-recent-list__item[role="button"]:focus-visible {
+  outline: 2px solid var(--dvc-accent);
+  outline-offset: 2px;
+}
+.emergence-recent-list__star {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.emergence-recent-list__score-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--dvc-accent-text);
+  background: var(--dvc-accent-bg-subtle);
+  padding: 2px 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.emergence-recent-list__text {
+  font-size: 0.75rem; /* 比照 live-obs item 字體大小 */
+  color: var(--dvc-text-primary);
+  flex: 1;
+  min-width: 0; /* 允許 flex 子項收縮以觸發 ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* 超過寬度截斷(同 live-obs item 設計) */
+}
+
+/* ============================================================
+   BUG fix round 2 (2026-05-28 follow-up #2)
+   對齊 ui-ux-pro-max v2 設計方案 (token system + WCAG AA + visual hierarchy)
+   ============================================================ */
+
+/* BUG 1 fix: 卡片內容上方騰 ⭐ badge 空間 (避免星星遮蓋文字) */
+.emergence-card { padding-top: 2.5rem !important; }
+
+/* BUG 2b fix: 4 池容器外框「藍/綠/紅」統一 — 移除 ui-ux-pro-max 設計方案外的色差 */
+.emergence-pool--skill,
+.emergence-pool--candidate,
+.emergence-pool--observe,
+.emergence-pool--rejected {
+  background: var(--dvc-bg-card) !important;
+  border-color: var(--dvc-border) !important;
+  border-style: solid !important;
+}
+
+/* BUG 2a fix: 池內限一排 (顯示一排,第二排之後收合 · 「展開全部/收合一排」切換) */
+.emergence-pool__body--row-limited {
+  max-height: 320px;
+  overflow: hidden;
+  position: relative;
+  -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent);
+  mask-image: linear-gradient(to bottom, black 65%, transparent);
+}
+.emergence-pool__expand-btn {
+  display: block;
+  margin: 0.5rem auto 0.25rem;
+  padding: 0.375rem 1.25rem;
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-primary);
+  border: 1px solid var(--dvc-border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+.emergence-pool__expand-btn:hover { background: var(--dvc-bg-hover); }
+.emergence-pool__expand-btn:focus-visible { outline: 2px solid var(--dvc-accent); outline-offset: 2px; }
+
+/* BUG 3 fix: Layer 12「採用 N」chip 不換行 + 字體 ≥ 14px */
+.emergence-layer12__score {
+  width: auto !important;
+  height: auto !important;
+  min-width: 3.5rem;
+  padding: 4px 10px !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  border-radius: 999px !important;
+  background: var(--dvc-accent) !important;
+}
+.emergence-layer12__trigger,
+.emergence-layer12__action {
+  font-size: 0.9375rem !important;
+  color: var(--dvc-text-primary);
+}
+.emergence-layer12__item {
+  padding: 0.5rem 0.625rem;
+  gap: 0.5rem;
+}
+.emergence-layer12__title,
+.emergence-trends__title {
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  color: var(--dvc-text-primary);
+}
+.emergence-trends__block-title {
+  font-size: 0.9375rem !important;
+  color: var(--dvc-text-primary) !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+}
+.emergence-trends__item,
+.emergence-trends__label,
+.emergence-trends__score,
+.emergence-trends__conf,
+.emergence-trends__time {
+  font-size: 0.9375rem !important;
+  color: var(--dvc-text-primary);
+}
+
+/* BUG 4 fix: Layer12 / Trends 3 blocks li 可點開 Modal · cursor + hover + focus */
+.emergence-layer12__item[role="button"],
+.emergence-trends__item[role="button"] {
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 6px;
+  padding: 0.375rem 0.5rem;
+}
+.emergence-layer12__item[role="button"]:hover,
+.emergence-trends__item[role="button"]:hover {
+  background: var(--dvc-bg-hover);
+}
+.emergence-layer12__item[role="button"]:focus-visible,
+.emergence-trends__item[role="button"]:focus-visible {
+  outline: 2px solid var(--dvc-accent);
+  outline-offset: 2px;
+}
+
+/* BUG 5 fix: 首頁卡片計分長條 fill 顏色顯眼 (取代 slate-600 灰色 fallback) */
+.emergence-effect-bar__fill {
+  background: var(--dvc-accent, #6366f1) !important;  /* indigo 醒目 */
+  min-height: 100%;
+  display: block;
+}
+.emergence-effect-bar__fill.emergence-effect-bar--observe { background: #6366f1 !important; }   /* indigo */
+.emergence-effect-bar__fill.emergence-effect-bar--rejected { background: #94a3b8 !important; } /* slate-400 (休眠) */
+
+/* BUG fix round 2 補充: 計分條軌道完整外框 (使用者反饋 — 之前只見 fill 顏色塊不見 track 100% 外框) */
+.emergence-effect-bar__track {
+  background: rgba(255, 255, 255, 0.08) !important;        /* 軌道底色 (明顯但不搶眼) */
+  border: 1.5px solid rgba(255, 255, 255, 0.4) !important; /* 100% 明顯外框 */
+  height: 12px !important;                                 /* 升高 10→12px 視覺更清楚 */
+  border-radius: 7px !important;
+  box-sizing: border-box !important;                       /* border 不影響寬度 */
+}
+
+/* Modal 計分條同樣需要 track 100% 外框 (使用者反饋 - 之前 wrap=flex 沒 track 層 · 改 JSX 加 __score-bar-track wrapper) */
+.emergence-detail-modal__score-bar-track {
+  flex: 1;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 7px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.emergence-detail-modal__score-bar {
+  height: 100% !important;
+  background: var(--dvc-accent) !important;
+  border-radius: 5px !important;
+}
+.emergence-detail-modal__score-pct {
+  font-size: 0.875rem !important;
+  color: var(--dvc-text-primary) !important;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── InstinctDetailModal (AC3/AC11) ── */
+.emergence-detail-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--dvc-modal-backdrop);
+  backdrop-filter: blur(var(--dvc-modal-blur));
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.emergence-detail-modal {
+  background: var(--dvc-modal-bg);
+  border: 1px solid var(--dvc-border);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.emergence-detail-modal__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--dvc-border-light);
+}
+.emergence-detail-modal__star {
+  background: var(--dvc-accent-bg);
+  color: var(--dvc-accent-text);
+  padding: 0.2rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.emergence-detail-modal__title-area { flex: 1; }
+.emergence-detail-modal__trigger { font-weight: 700; color: var(--dvc-text-primary); }
+.emergence-detail-modal__action { font-size: 0.875rem; color: var(--dvc-text-muted); }
+.emergence-detail-modal__close {
+  background: none; border: none; cursor: pointer;
+  color: var(--dvc-text-muted); font-size: 1rem; padding: 0.2rem 0.4rem;
+}
+.emergence-detail-modal__close:hover { color: var(--dvc-text-primary); }
+.emergence-detail-modal__close:focus { outline: 3px solid var(--dvc-accent-text); }
+
+.emergence-detail-modal__tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--dvc-border-light);
+}
+.emergence-detail-modal__tab {
+  flex: 1; padding: 0.6rem 1rem;
+  background: none; border: none; cursor: pointer;
+  font-size: 0.85rem; color: var(--dvc-text-muted);
+  border-bottom: 2px solid transparent;
+}
+.emergence-detail-modal__tab:hover { color: var(--dvc-text-primary); }
+.emergence-detail-modal__tab--active { color: var(--dvc-accent-text); border-bottom-color: var(--dvc-accent); }
+.emergence-detail-modal__tab:focus { outline: 3px solid var(--dvc-accent-text); }
+
+.emergence-detail-modal__body { padding: 1rem; overflow-y: auto; }
+.emergence-detail-modal__section { margin-bottom: 1rem; }
+.emergence-detail-modal__section-title { font-size: 0.8125rem; font-weight: 700; color: var(--dvc-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.4rem; }
+.emergence-detail-modal__section-body { font-size: 0.9rem; color: var(--dvc-text-primary); line-height: 1.6; }
+.emergence-detail-modal__status-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--dvc-text-primary); }
+.emergence-detail-modal__score-bar-wrap { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+.emergence-detail-modal__score-bar {
+  height: 8px; background: var(--dvc-accent); border-radius: 4px;
+  transition: width 0.3s ease;
+}
+.emergence-detail-modal__score-pct { font-size: 0.75rem; color: var(--dvc-text-muted); }
+.emergence-detail-modal__decay { font-size: 0.8rem; color: var(--dvc-text-muted); }
+.emergence-detail-modal__dl { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 1rem; font-size: 0.85rem; }
+.emergence-detail-modal__dl dt { color: var(--dvc-text-muted); font-weight: 600; }
+.emergence-detail-modal__dl dd { color: var(--dvc-text-primary); margin: 0; }
+.emergence-detail-modal__pre { font-family: monospace; font-size: 0.75rem; white-space: pre-wrap; word-break: break-all; }
+
+@media (prefers-reduced-motion: reduce) {
+  .emergence-detail-modal-backdrop { backdrop-filter: none; }
+  .emergence-detail-modal__score-bar { transition: none; }
+}
+
+/* ── EmergenceRecentList (AC10) ── */
+/* 卡片殼層統一(對齊 layer12/trends/live-obs canonical · --dvc-surface)+ canonical title */
+.emergence-recent-list { background: var(--dvc-surface); border: 1px solid var(--dvc-border); border-radius: 8px; padding: 1rem; }
+.emergence-recent-list__title { font-size: 0.875rem; font-weight: 600; color: var(--dvc-text); margin: 0 0 0.625rem; }
+.emergence-recent-list__items { list-style: none; margin: 0; padding: 0; max-height: 17rem; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--dvc-slate-600) transparent; } /* block(非 flex)比照 live-obs __list,避免 flex-shrink 壓扁項目 */
+.emergence-recent-list__items::-webkit-scrollbar { width: 4px; }
+.emergence-recent-list__items::-webkit-scrollbar-track { background: transparent; }
+.emergence-recent-list__items::-webkit-scrollbar-thumb { background: var(--dvc-slate-600); border-radius: 2px; }
+.emergence-recent-list__items::-webkit-scrollbar-thumb:hover { background: var(--dvc-slate-500); }

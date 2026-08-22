@@ -1,0 +1,207 @@
+{
+  "phaseTargetStatus": {
+    "create-story": ["ready-for-dev"],
+    "dev-story": ["review"],
+    "dev-story-complex": ["review"],
+    "dev-story-fix-R1": ["review"],
+    "dev-story-fix-R2": ["review"],
+    "code-review": ["done"],
+    "code-review-R1": ["done"],
+    "code-review-R2": ["done"]
+  },
+  "modelPricing": {
+    "haiku": {
+      "input": 1.00,
+      "output": 5.00,
+      "cache_create": 1.25,
+      "cache_read": 0.10
+    },
+    "sonnet": {
+      "input": 3.00,
+      "output": 15.00,
+      "cache_create": 3.75,
+      "cache_read": 0.30
+    },
+    "opus": {
+      "input": 5.00,
+      "output": 25.00,
+      "cache_create": 6.25,
+      "cache_read": 0.50
+    },
+    "fable": {
+      "input": 10.00,
+      "output": 50.00,
+      "cache_create": 12.50,
+      "cache_read": 1.00
+    },
+    "fast-opus": {
+      "input": 30.00,
+      "output": 150.00,
+      "cache_create": 37.50,
+      "cache_read": 3.00
+    }
+  },
+  "quota": {
+    "plan_type": "max",
+    "extra_usage_enabled": false,
+    "heartbeat_stale_minutes": 8,
+    "max_429_attempts_before_abort": 5
+  },
+  "phaseTimeouts": {
+    "create-story": {
+      "S": 900000,
+      "M": 1500000,
+      "L": 2100000,
+      "XL": 3000000
+    },
+    "dev-story": {
+      "S": 1200000,
+      "M": 2100000,
+      "L": 3000000,
+      "XL": 4200000
+    },
+    "code-review": {
+      "S": 1200000,
+      "M": 2100000,
+      "L": 3000000,
+      "XL": 4200000
+    }
+  },
+  "phaseModelMapping": {
+    "_comment": "2026-07-16: estimated_cost_usd rescaled to corrected modelPricing (opus 15/75 -> 5/25 => ~1/3; haiku 0.8/4 -> 1/5 => x1.25). budgetPerPhase rescaled ~1/3 accordingly (same gate headroom). Safe: Read-PhaseModel accesses phases by fixed key, never iterates keys (shared-utils.ps1:517-548). 2026-07-25: create-story/code-review model_id renamed claude-opus-4-8[1m] -> claude-opus-5[1m] (CLI /model picker now surfaces Opus 5 as the current Opus tier; Opus 4.8 -> Opus 5 is a same-price upgrade, modelPricing.opus unchanged). CLI 2.1.219 live-verified: claude-opus-5[1m] -> modelUsage.contextWindow=1000000, canonicalModel=claude-opus-5.",
+    "create-story": {
+      "model_id": "claude-opus-5[1m]",
+      "effort": "max",
+      "model_alias": "opus",
+      "reasoning": "create-story requires maximum depth for AC/architecture analysis and Party Mode ultrathink. 2026-06-08 user ruling: create/review workers use opus max (was opus-4-7). 2026-07-25: model_id renamed claude-opus-4-8[1m] -> claude-opus-5[1m] (Claude Code CLI /model picker's current Opus tier; same modelPricing.opus rate, no cost change).",
+      "estimated_cost_usd": { "S": 0.10, "M": 0.25, "L": 0.50, "XL": 0.85 }
+    },
+    "dev-story": {
+      "model_id": "claude-sonnet-5[1m]",
+      "effort": "max",
+      "model_alias": "sonnet",
+      "reasoning": "2026-07-19 使用者裁定: dev 全階段(dev-story/dev-story-complex/dev-story-fix-Rn)改 claude-sonnet-5[1m] + effort max, supersede 2026-06-11 opus-4.8 裁定. Sonnet 5 原生 1M(CLI 2.1.211 實測 modelUsage.contextWindow=1000000, sonnet ALWAYS [1m])+ effort max 自動注入 ultrathink(worker-dev.ps1:107), routine dev 效率優先. create-story/code-review 維持 opus max 不變(2026-07-25 model_id 由 claude-opus-4-8[1m] 改 claude-opus-5[1m],價格/model_alias 不變). estimated_cost_usd 保守留 opus-scaled(sonnet 3/15 < opus 5/25 實際更低, budget gate headroom 不變不動 budgetPerPhase).",
+      "estimated_cost_usd": { "S": 0.15, "M": 0.40, "L": 1.00, "XL": 2.00 }
+    },
+    "dev-story-complex": {
+      "model_id": "claude-sonnet-5[1m]",
+      "effort": "max",
+      "model_alias": "sonnet",
+      "reasoning": "2026-07-19 使用者裁定: dev 全階段統一 claude-sonnet-5[1m] + max, 複雜卡(EF Migration/multi-table schema/refactor-XL)不再自動升 opus(supersede 2026-06-08 opus+ultrathink 裁定). effort=max 仍自動注入 ultrathink(worker-dev.ps1:107)供複雜卡深度. 中控判斷卡需 migration/複雜 schema 時改派此 phase 取代 dev-story(模型同, 差異=語意標記 + phaseTimeouts 較長).",
+      "estimated_cost_usd": { "S": 0.15, "M": 0.40, "L": 1.00, "XL": 2.00 }
+    },
+    "code-review": {
+      "model_id": "claude-opus-5[1m]",
+      "effort": "max",
+      "model_alias": "opus",
+      "reasoning": "code-review requires maximum depth for production quality analysis and CR findings. 2026-06-08 user ruling: create/review workers use opus max (was opus-4-7). 2026-07-25: model_id renamed claude-opus-4-8[1m] -> claude-opus-5[1m] (Claude Code CLI /model picker's current Opus tier; same modelPricing.opus rate, no cost change).",
+      "estimated_cost_usd": { "S": 0.10, "M": 0.30, "L": 0.60, "XL": 1.20 }
+    },
+    "dev-story-fix-Rn": {
+      "model_id": "claude-sonnet-5[1m]",
+      "effort": "max",
+      "model_alias": "sonnet",
+      "reasoning": "2026-07-19 使用者裁定: dev retry 同 dev-story 改 claude-sonnet-5[1m] + max(supersede 2026-06-11 opus). CR-driven 修復用 sonnet 5 + effort max 自動注入 ultrathink.",
+      "estimated_cost_usd": { "S": 0.15, "M": 0.40, "L": 1.00, "XL": 2.00 }
+    },
+    "subagent": {
+      "model_id": "claude-haiku-4-5-20251001",
+      "effort": "default",
+      "model_alias": "haiku",
+      "reasoning": "subagent exploration tasks are fast and cost-effective with Haiku",
+      "estimated_cost_usd": { "S": 0.03, "M": 0.06, "L": 0.13, "XL": 0.25 }
+    }
+  },
+  "model_purity_enforcement": {
+    "allowFallback": false,
+    "fallbackChain": [],
+    "exempt_models": ["claude-haiku-4-5-20251001"],
+    "match_mode": "full_model_id",
+    "strict_effort": true
+  },
+  "otelCollector": {
+    "portRange": { "min": 49152, "max": 65535 },
+    "maxPortRetries": 10,
+    "portFileTimeoutSec": 5,
+    "healthCheckIntervalSec": 30,
+    "shutdownTimeoutMs": 5000,
+    "script": "scripts/otel-micro-collector.js"
+  },
+  "budgetPerPhase": {
+    "create-story": {
+      "S": 0.20,
+      "M": 0.35,
+      "L": 0.70,
+      "XL": 1.00
+    },
+    "dev-story": {
+      "S": 0.35,
+      "M": 0.85,
+      "L": 1.70,
+      "XL": 3.50
+    },
+    "code-review": {
+      "S": 0.35,
+      "M": 0.85,
+      "L": 1.70,
+      "XL": 3.50
+    }
+  },
+  "generalTask": {
+    "_comment": "party-to-pipeline v5.3.0 Mode C General-Task settings. presets = friendly names for dispatch-general.ps1 -Model; raw model ids also accepted (passthrough, [1m] suffix PRESERVED -- Mode C never strips it). effort fixed max + ultrathink directive injected by worker-general.ps1. 2026-07-16 v5.7.0: added sonnet-5 (current Sonnet tier, recommended for routine general tasks) + fable-5 (top tier, opt-in); sonnet-4.6 presets retained as LEGACY (model still Active). 2026-07-25 v5.9.0: added opus-5 (Claude Code CLI /model picker's current Opus tier, new recommended default for complex/create/review-tier general tasks); opus-4.8 preset retained as LEGACY (model still Active, mirrors sonnet-4.6 precedent).",
+    "presets": {
+      "opus-5": { "model_id": "claude-opus-5[1m]", "_comment": "2026-07-25: current Opus tier per Claude Code CLI /model picker (supersedes opus-4.8 preset). CLI 2.1.219 live-verified: claude-opus-5[1m] -> modelUsage.contextWindow=1000000, canonicalModel=claude-opus-5. Same modelPricing.opus rate as opus-4.8 (no cost change)." },
+      "opus-4.8": { "model_id": "claude-opus-4-8[1m]", "_comment": "LEGACY since 2026-07-25 (superseded by opus-5 preset; claude-opus-4-8 still Active, kept for compat). 2026-07-16: [1m] made explicit (Opus 4.8 natively 1M in current CLI, suffix harmless/normalized; no long-context premium)." },
+      "sonnet-5": { "model_id": "claude-sonnet-5[1m]", "_comment": "2026-07-16: current Sonnet tier, recommended default for routine general tasks. CLI 2.1.211 live-verified: claude-sonnet-5[1m] -> modelUsage.contextWindow=1000000. Carries 2026-06-07 user ruling: sonnet ALWAYS [1m], never bare 200k" },
+      "fable-5": { "model_id": "claude-fable-5[1m]", "_comment": "2026-07-16: top tier for hardest/longest general tasks, opt-in only (NOT a default). Natively 1M ([1m] accepted, CLI normalizes). ~2x opus cost ($10/$50 per MTok), minutes-long turns expected" },
+      "sonnet-4.6": { "model_id": "claude-sonnet-4-6[1m]", "_comment": "LEGACY since 2026-07-16 (superseded by sonnet-5 preset; claude-sonnet-4-6 still Active, kept for compat). 2026-06-07 user ruling: sonnet ALWAYS [1m] mode" },
+      "sonnet-4.6-1m": { "model_id": "claude-sonnet-4-6[1m]", "_comment": "LEGACY alias since 2026-07-16" }
+    },
+    "effort": "max",
+    "default_timeout_sec": 3600,
+    "lingering_grace_sec": 90,
+    "countdown_sec": 3,
+    "close_mode": "auto",
+    "close_delay_sec": 5,
+    "report_dir": "docs/tracking/active/general-tasks"
+  },
+  "handshake": {
+    "_comment": "party-to-pipeline v4.0.0 ACK handshake config. enabled=false initially for gradual rollout (dogfood 7 cycles), then flip to true for default behavior.",
+    "enabled": false,
+    "timeout_sec": 90,
+    "ack_wait_sec": 60,
+    "countdown_sec": 5,
+    "fallback_to_legacy": true,
+    "worker_timeout_sec": 1800,
+    "window_close_timeout_sec": 10,
+    "ipc_dir_pattern": ".claude/ipc/{StoryId}__{Timestamp}/"
+  },
+  "workerProtocol": {
+    "_comment": "epic-whp party-to-pipeline 自建雙向握手協議. resumeEnabled=true landed by whp-1-poc-resume-and-closeevent (2026-07-26, see SSoT §20.2.1 + docs/tracking/archived/epic-whp/whp-1-poc-resume-and-closeevent.track.md for evidence-grade caveats). 9 guardian*/stall*/ackCheckIntervalMin keys landed by whp-7-guardian-daemon (2026-07-28, see docs/implementation-artifacts/specs/epic-whp/whp-7-guardian-daemon-spec.md §4.4) -- guardianDispatchGraceSec + guardianScopeMaxFiles are NOT in original SSoT §22.8 list (added deliberately, see spec §4.4). dispatchConfirmSec + reaperOnDispatch landed by whp-4-write-path-wiring (2026-07-29, BR-130): dispatchConfirmSec=60 is the SSoT §22.8 authoritative value, superseding guardian-tick.js:51's internal fallback of 30 -- this is a deliberate, non-silent behavior change: the guardian's dispatching-ghost death threshold moves from 150s to 180s (dispatchConfirmSec + guardianDispatchGraceSec). autoCloseEnabled landed by whp-2-no-autoclose-liveness (2026-08-01, SSoT §22.8) -- CORRECTED at code-review (2026-08-01): this key currently has NO runtime consumer. Per BR-012 (user ruling: retired blocks are archived as comments, not flag-gated), the close-watchdog and dispatcher lingering-branch code paths were unconditionally commented out in all 4 worker-*.ps1 and dispatch-general.ps1, not wired behind this flag -- flipping it to true is a silent no-op today. It is kept as a documented placeholder for a future flag-gated re-enable (should one ever be built) and as an explicit signal that the retirement is intentional and named, not merely dropped. The REAL rollback path for this Story's change is `git revert` the whp-2 commit, or manually un-commenting the 5 blocks BR-012 preserved verbatim (see worker-lifecycle-judgment.md + party-to-pipeline-自建雙向協議-架構規格書.md 第十一章 for the archived originals + rationale). closeConfirmSec landed by whp-6-directive-delivery-and-close (2026-08-01, BR-032): bounded confirmation window (seconds) close-worker.ps1's C6 step polls for wrapper_pid death after taskkill -- absent/unreadable config falls back to the same default (15) hard-coded in close-worker-ops.js, per BR032_CloseConfirmSecFromConfig_DefaultsTo15WhenAbsent. guardianStaleMin/digestDetailCap/ackEscalateAfterRounds landed by whp-8-report-ack-notify (2026-08-02, BR-012/BR-029): the create-story SDD spec assumed ackEscalateAfterRounds pre-existed (whp-7's own spec text 'Left to whp-8' was misread as 'already added') -- a repo-wide grep at dev-story time confirmed zero occurrences and guardian-tick.js has never read any such threshold, so this is a genuine new addition, not a read of a pre-existing value; guardian-tick.test.js's AC12 lock (which asserted this key's ABSENCE, comment 'whp-8 owns it') was updated in the same commit. Left to owning story: reviewReminderMin (whp-10). hookGraceSec landed by whp-11-d2-inline-revise (2026-08-02, BR-004/025/026): bounded-wait ceiling (seconds) stop-report.ps1's D2 branch polls for a pending controller-to-worker directive before writing reported -- absent config falls back to 120 (in-code default), out-of-range values clamp to [0,300] and log D2-GRACE-CLAMPED (deliberately narrower than this file's own phaseTimeouts, which run into the millions of ms -- BR-026 chose to clamp rather than trust an arbitrarily large configured value, since the wait blocks the Stop hook chain's remaining 9 hooks if they run sequentially, see dev_notes 「Stop chain 排序與 timeout」). 0 is a valid, deliberate value -- see AC12: it fully disables the poll (single check, zero wait), the documented zero-cost opt-out. knockEnabled landed by whp-12-knock-console-inject (2026-08-02, BR-022): kill switch for the slow-loop knock (console input injection into an already-idle worker). UNLIKE autoCloseEnabled above, this key HAS a real runtime consumer -- knock-worker-ops.js resolveKnockEnabled() reads it on every decideKnock() call and returns reason='disabled' with zero DB reads and zero injection when false; smoke Group 16 asserts both the grep-able consumer and the actual no-op behaviour (AC10 was written specifically to keep this key from becoming a second autoCloseEnabled). Absent/unreadable config defaults to true: the PoC verdict is viable (P1 + P2a 3/3, see Story dev_notes), so a missing config must not silently disable an already-validated channel.",
+    "hookGraceSec": 120,
+    "resumeEnabled": true,
+    "closeConfirmSec": 15,
+    "guardianFastTickSec": 30,
+    "guardianSlowTickSec": 600,
+    "guardianIdleExitMin": 60,
+    "guardianDispatchGraceSec": 120,
+    "guardianScopeMaxFiles": 2000,
+    "stallFirstCheckMin": 30,
+    "stallRecheckMin": 10,
+    "stallRoundsToFlag": 2,
+    "ackCheckIntervalMin": 10,
+    "dispatchConfirmSec": 60,
+    "reaperOnDispatch": true,
+    "autoCloseEnabled": false,
+    "guardianStaleMin": 5,
+    "digestDetailCap": 5,
+    "ackEscalateAfterRounds": 3,
+    "knockEnabled": true
+  },
+  "ctrlChannel": {
+    "_comment": "ccb-4-ctrl-notify-knock: 中控↔中控通知三掛點。每個鍵都有真實消費端(grep 可命中讀取點) — 對照 TD-WHP2-AUTOCLOSE-FLAG-NO-CONSUMER 那個零消費端旗標的教訓。",
+    "probeThrottleSec": 180,
+    "knockMinIntervalSec": 60,
+    "knockEnabled": true
+  }
+}

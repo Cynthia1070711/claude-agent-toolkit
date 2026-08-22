@@ -1,0 +1,36 @@
+{
+  "_comment_": "Template D — Stop verification via prompt-type hook (NOT a script — paste this block into settings.json under hooks.Stop)",
+  "_comment_2_": "Why prompt-type? Stop verification needs SEMANTIC judgment ('did Claude actually verify?'), not pattern matching. LLM evaluates and returns {ok: bool, reason?: string}.",
+  "_comment_3_": "Cost note: each Stop fires a small LLM call (~1-2K tokens). Long sessions accumulate. Consider gating with `if` to only fire when Edit/Write happened in session.",
+  "_settings_block_": {
+    "hooks": {
+      "Stop": [
+        {
+          "hooks": [
+            {
+              "type": "prompt",
+              "prompt": "Evaluate whether Claude truly verified the task before stopping. Check the last 10 turns:\n1) Was test or build executed for code changes? (look for `dotnet test`, `npm test`, `pytest`, etc.)\n2) Was read-before-modify followed? (every Edit preceded by Read of same file)\n3) Are claims backed by file:line citations?\n4) For docs/schema changes: was schema alignment confirmed?\n\nReturn strict JSON:\n  {\"ok\": true} — verification looks adequate\n  {\"ok\": false, \"reason\": \"missing step X\"} — Claude must continue\n\nDo not be overly strict; minor cosmetic edits or read-only tasks do not require running tests.",
+              "timeout": 30
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "_alternative_agent_type_": {
+    "_comment_": "If prompt-type isn't thorough enough, use agent-type which can read files. Slower but more reliable.",
+    "_block_": {
+      "Stop": [
+        {
+          "hooks": [
+            {
+              "type": "agent",
+              "prompt": "You are a verification auditor. Inspect the session transcript and the workspace. Determine if the user's stated task was actually completed and verified. Use Read/Grep/Glob to check.\n\nReport:\n  {\"ok\": true} or {\"ok\": false, \"reason\": \"...\"}",
+              "timeout": 60
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

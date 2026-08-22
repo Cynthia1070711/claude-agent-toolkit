@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://phycool.local/schemas/ecc-haiku-dispatch/instinct-dispatch.schema.json",
+  "title": "IInstinctDispatcher Contract Schema",
+  "description": "ECC L2 atomic instinct Haiku Agent dispatcher input/output contract. 對齊 ADR-ECC-LEARNING-001 v1.2.0 §Instinct↔SUPREME Rule Mapping Table (10 instincts × 10 SUPREME rules · 1-to-1 mapping). 範式: Haiku Agent (claude-haiku-4-5-20251001) 接收 input → atomic dispatch → 寫回 output + state_diff。對齊 IDD-STR-001 D2 獨立 Haiku Agent + D3 不追 HyperAgents + D4 Stage β evaluation gate.",
+  "version": "1.0.0",
+  "definitions": {
+    "InstinctName": {
+      "type": "string",
+      "enum": [
+        "skill_invocation",
+        "hook_dispatch",
+        "cross_ref",
+        "depth_first",
+        "governance",
+        "parallel_isolation",
+        "capability_integration",
+        "pipeline_handshake",
+        "mcp_payload",
+        "encoding_discipline"
+      ],
+      "description": "10 L2 atomic instincts (Phase 1: 4 + Phase 2: 6). 對齊 ADR-ECC-LEARNING-001 v1.2.0 §D1 + §Instinct↔SUPREME Mapping Table."
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\+08:00|Z)$",
+      "description": "ISO 8601 timestamp · UTC+8 preferred (對齊 constitutional-standard §Timestamp Mandate)."
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/definitions/InstinctDispatchInput" },
+    { "$ref": "#/definitions/InstinctDispatchOutput" }
+  ],
+  "InstinctDispatchInput": {
+    "type": "object",
+    "required": ["instinct_name", "payload", "timestamp"],
+    "properties": {
+      "instinct_name": { "$ref": "#/definitions/InstinctName" },
+      "payload": {
+        "type": "object",
+        "required": ["trigger_context", "rule_reference"],
+        "properties": {
+          "trigger_context": {
+            "type": "string",
+            "minLength": 10,
+            "description": "觸發情境描述 (e.g., 'Edit .claude/skills/start-servers/SKILL.md')"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "涉及檔案路徑 (絕對 OR 相對 project root)"
+          },
+          "rule_reference": {
+            "type": "string",
+            "minLength": 5,
+            "description": "對應 SUPREME rule name (對齊 ADR v1.2.0 §Instinct↔SUPREME Mapping Table). 例: 'skill-tool-invocation-mandatory v1.2.0'"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "額外元資料 (e.g., session_id / commit_hash / additional_context)",
+            "additionalProperties": true
+          }
+        }
+      },
+      "timestamp": { "$ref": "#/definitions/Timestamp" }
+    },
+    "additionalProperties": false
+  },
+  "InstinctDispatchOutput": {
+    "type": "object",
+    "required": ["status", "result", "state_diff", "timestamp", "evidence"],
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["success", "failure", "partial"]
+      },
+      "result": {
+        "type": "object",
+        "required": ["action_taken", "side_effects"],
+        "properties": {
+          "action_taken": {
+            "type": "string",
+            "minLength": 10,
+            "description": "atomic action 描述 (e.g., 'Skill tool 字面調用 evidence 寫入 state file')"
+          },
+          "side_effects": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "monitor state files 寫入清單 (.context-db/ecc-state/*.json paths)"
+          }
+        }
+      },
+      "state_diff": {
+        "type": "object",
+        "required": ["state_file", "before", "after"],
+        "properties": {
+          "state_file": {
+            "type": "string",
+            "pattern": "^\\.context-db/ecc-state/[a-z-]+-state\\.json$",
+            "description": "state file path (e.g., '.context-db/ecc-state/skill-invocation-state.json')"
+          },
+          "before": {
+            "type": "object",
+            "description": "state file before dispatch (snapshot)",
+            "additionalProperties": true
+          },
+          "after": {
+            "type": "object",
+            "description": "state file after dispatch (snapshot)",
+            "additionalProperties": true
+          }
+        }
+      },
+      "timestamp": { "$ref": "#/definitions/Timestamp" },
+      "evidence": {
+        "type": "object",
+        "required": ["rule_applied", "evidence_paths"],
+        "properties": {
+          "rule_applied": {
+            "type": "string",
+            "description": "SUPREME rule applied (對齊 ADR v1.2.0 §Instinct↔SUPREME Mapping)"
+          },
+          "evidence_paths": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "evidence references: file:line refs / Memory id (e.g., 'context_entries id=4303') / commit hash (e.g., 'c423a33b')"
+          }
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}

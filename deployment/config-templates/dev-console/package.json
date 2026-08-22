@@ -1,0 +1,50 @@
+{
+  "name": "@phycool/dev-console",
+  "version": "0.1.0",
+  "description": "PhyCool DevConsole — Standalone Vite + React + Express + SQLite",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n client,server -c cyan,yellow \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "vite",
+    "dev:server": "tsx watch server/index.ts",
+    "build": "tsc -p tsconfig.server.json && vite build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "chart.js": "^4.5.1",
+    "cors": "^2.8.5",
+    "express": "^5.0.1",
+    "highlight.js": "^11.11.1",
+    "js-yaml": "^4.1.1",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.3.0",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.13.10",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/supertest": "^7.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "concurrently": "^9.1.2",
+    "jsdom": "^28.1.0",
+    "supertest": "^7.2.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.1",
+    "vitest": "^3.0.8"
+  }
+}

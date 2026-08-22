@@ -1,0 +1,301 @@
+/* ============================================================
+   tech-debt.css — Tech Debt 追蹤板樣式（深色主題 --dvc-* 變數）
+   DVS-07 AC-6
+   ============================================================ */
+
+.debt-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.debt-page__header {
+  margin-bottom: 16px;
+}
+
+.debt-page__title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  margin: 0 0 6px;
+}
+
+.debt-page__desc {
+  font-size: 14px;
+  color: var(--dvc-text-secondary);
+  margin: 0;
+}
+
+/* ── 統計列 ── */
+.debt-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.debt-stat-card {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 12px 16px;
+  min-width: 80px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.debt-stat-count {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+.debt-stat-label {
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+}
+
+.debt-stat-card--pending .debt-stat-count { color: var(--dvc-status-warning); }
+.debt-stat-card--resolved .debt-stat-count { color: var(--dvc-status-ok); }
+.debt-stat-card--wontfix .debt-stat-count { color: var(--dvc-slate-400); }
+.debt-stat-card--critical .debt-stat-count { color: var(--dvc-red-400); }
+.debt-stat-card--high .debt-stat-count { color: var(--dvc-status-warning); }
+
+/* ── 控制列 ── */
+.debt-page__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.debt-page__filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.debt-filter-select {
+  padding: 5px 10px;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  color: var(--dvc-text-primary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.debt-page__loading,
+.debt-page__error {
+  color: var(--dvc-text-secondary);
+  font-size: 14px;
+  padding: 24px 0;
+}
+
+.debt-page__error {
+  color: var(--dvc-status-error);
+}
+
+/* ── 狀態分組 ── */
+.debt-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.debt-group {
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  overflow: hidden;
+}
+
+.debt-group__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--dvc-bg-secondary);
+  border-bottom: 1px solid var(--dvc-border);
+}
+
+.debt-group__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+}
+
+.debt-group__count {
+  font-size: 13px;
+  color: var(--dvc-text-muted);
+  background: var(--dvc-bg-card);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.debt-group__empty {
+  padding: 16px;
+  font-size: 13px;
+  color: var(--dvc-text-muted);
+}
+
+.debt-card-list {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Debt Card ── */
+.debt-card {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.debt-card:hover {
+  border-color: var(--dvc-accent);
+  box-shadow: 0 0 0 1px var(--dvc-accent-bg-subtle);
+}
+
+.debt-card--expanded {
+  border-color: var(--dvc-accent);
+}
+
+.debt-card--pending {
+  border-left: 3px solid var(--dvc-status-warning);
+}
+
+.debt-card--resolved {
+  border-left: 3px solid var(--dvc-status-ok);
+  opacity: 0.8;
+}
+
+.debt-card--wont_fix {
+  border-left: 3px solid var(--dvc-slate-500);
+  opacity: 0.7;
+}
+
+.debt-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.debt-card__id {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--dvc-font-mono);
+  color: var(--dvc-accent-text);
+  background: var(--dvc-accent-bg-subtle);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.debt-card__status-label {
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+  margin-left: auto;
+}
+
+.debt-card__summary {
+  font-size: 13px;
+  color: var(--dvc-text-primary);
+  margin: 0 0 8px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.debt-card__meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.debt-card__meta-item {
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+}
+
+.debt-card__meta-label {
+  color: var(--dvc-text-secondary);
+  font-weight: 500;
+}
+
+.badge--dimension {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--dvc-indigo-200);
+  font-weight: 500;
+}
+
+/* ── Expand icon ── */
+.debt-card__expand-icon {
+  font-size: 10px;
+  color: var(--dvc-text-muted);
+  margin-left: 4px;
+  transition: transform 0.2s;
+}
+
+/* ── Detail panel (expanded) ── */
+.debt-card__detail {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--dvc-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.debt-card__detail-section h4 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dvc-accent-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 4px;
+}
+
+.debt-card__detail-section p {
+  font-size: 13px;
+  color: var(--dvc-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.debt-card__files {
+  display: block;
+  font-size: 12px;
+  color: var(--dvc-accent);
+  background: var(--dvc-bg-secondary);
+  padding: 8px 12px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.debt-card__no-detail {
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .debt-page { padding: 16px; }
+  .debt-stats { gap: 6px; }
+  .debt-stat-card { min-width: 60px; padding: 8px 10px; }
+  .debt-stat-count { font-size: 18px; }
+}
+@media (max-width: 480px) {
+  .debt-page { padding: 12px; }
+  .debt-card__meta { flex-direction: column; gap: 4px; }
+}

@@ -1,0 +1,453 @@
+/* ============================================================
+   god-nodes.css — God Node centrality dashboard styles (R2 redesign)
+   Story: td-devconsole-godnode-and-mem-dashboard
+   範式對齊: /patterns Embedding Status Bar + Domain Activity sidebar
+   tokens: --dvc-*
+   ============================================================ */
+
+.god-nodes-page {
+  padding: 1.5rem;
+}
+
+.god-nodes-page__header {
+  margin-bottom: 1.25rem;
+}
+
+.god-nodes-page__header h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+.god-nodes-page__subtitle {
+  color: var(--dvc-text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ── Status Bar (top) ─────────────────────────────────────── */
+.god-nodes-page__status-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.god-nodes-page__stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--dvc-bg-card);
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  min-width: 0;
+  flex: 1 1 160px;
+}
+
+.god-nodes-page__stat-chip--highlight {
+  border: 1px solid var(--dvc-accent);
+  background: var(--dvc-accent-bg-subtle);
+}
+
+.god-nodes-page__stat-chip--health {
+  flex: 2 1 220px;
+}
+
+.god-nodes-page__stat-icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.god-nodes-page__stat-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.god-nodes-page__stat-value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.god-nodes-page__stat-pct {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dvc-accent-text);
+  margin-left: 0.25rem;
+}
+
+.god-nodes-page__stat-label {
+  font-size: 0.6875rem;
+  color: var(--dvc-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Filter Bar ────────────────────────────────────────── */
+.god-nodes-page__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: var(--dvc-bg-card);
+  border-radius: var(--dvc-radius);
+}
+
+.god-nodes-page__filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--dvc-text-secondary);
+}
+
+.god-nodes-page__filter-group label {
+  white-space: nowrap;
+}
+
+.god-nodes-page__filter-group select {
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-primary);
+  border: 1px solid var(--dvc-border);
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+  min-width: 80px;
+}
+
+.god-nodes-page__filter-note {
+  font-size: 0.6875rem;
+  color: var(--dvc-text-secondary);
+  margin-left: auto;
+}
+
+.god-nodes-page__error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--dvc-status-error);
+  padding: 0.625rem 1rem;
+  border-radius: var(--dvc-radius);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+/* ── Main grid: List (left) + Sidebar (right) ────────── */
+.god-nodes-page__main {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .god-nodes-page__main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.god-nodes-page__list-area {
+  background: var(--dvc-bg-card);
+  border-radius: var(--dvc-radius);
+  padding: 1rem;
+}
+
+.god-nodes-page__list-area h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+/* ── Top List Table ────────────────────────────────── */
+.god-nodes-page__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.god-nodes-page__table thead {
+  text-align: left;
+  color: var(--dvc-text-secondary);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--dvc-border);
+}
+
+.god-nodes-page__table thead th {
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  font-weight: 600;
+}
+
+.god-nodes-page__table tbody tr {
+  border-bottom: 1px solid var(--dvc-border-light);
+}
+
+.god-nodes-page__table tbody tr:hover {
+  background: var(--dvc-bg-hover);
+}
+
+.god-nodes-page__table td {
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  vertical-align: middle;
+}
+
+.god-nodes-page__rank {
+  color: var(--dvc-text-secondary);
+  font-weight: 600;
+  font-family: var(--dvc-font-mono);
+  width: 32px;
+}
+
+.god-nodes-page__symbol-btn {
+  background: transparent;
+  border: none;
+  color: var(--dvc-accent-text);
+  font-family: var(--dvc-font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.god-nodes-page__symbol-btn:hover {
+  color: var(--dvc-text-primary);
+  text-decoration: underline;
+}
+
+.god-nodes-page__chip {
+  display: inline-block;
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-family: var(--dvc-font-mono);
+  white-space: nowrap;
+}
+
+.god-nodes-page__bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 200px;
+}
+
+.god-nodes-page__bar-track {
+  flex: 1;
+  height: 8px;
+  background: var(--dvc-bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.god-nodes-page__bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 200ms ease-out;
+}
+
+.god-nodes-page__score {
+  font-family: var(--dvc-font-mono);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  color: var(--dvc-text-primary);
+  min-width: 48px;
+  text-align: right;
+}
+
+.god-nodes-page__file-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--dvc-font-mono);
+  font-size: 0.6875rem;
+  color: var(--dvc-text-secondary);
+}
+
+.god-nodes-page__file-path {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.god-nodes-page__copy-btn {
+  background: var(--dvc-bg-secondary);
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  color: var(--dvc-text-secondary);
+  cursor: pointer;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.god-nodes-page__copy-btn:hover {
+  background: var(--dvc-bg-hover);
+  color: var(--dvc-text-primary);
+}
+
+.god-nodes-page__empty {
+  color: var(--dvc-text-secondary);
+  font-size: 0.8125rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* ── Sidebar Cards ───────────────────────────────────── */
+.god-nodes-page__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.god-nodes-page__card {
+  background: var(--dvc-bg-card);
+  border-radius: var(--dvc-radius);
+  padding: 0.875rem 1rem;
+}
+
+.god-nodes-page__card h2 {
+  margin: 0 0 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+/* ── By Namespace Sidebar(對齊 patterns Domain Activity)── */
+.god-nodes-page__ns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+}
+
+.god-nodes-page__ns-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 32px 36px;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.375rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background var(--dvc-transition);
+}
+
+.god-nodes-page__ns-row:hover {
+  background: var(--dvc-bg-hover);
+}
+
+.god-nodes-page__ns-row--active {
+  background: var(--dvc-accent-bg-subtle);
+}
+
+.god-nodes-page__ns-name {
+  font-family: var(--dvc-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.god-nodes-page__ns-bar-track {
+  height: 6px;
+  background: var(--dvc-bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.god-nodes-page__ns-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.god-nodes-page__ns-count {
+  font-family: var(--dvc-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+  text-align: right;
+}
+
+.god-nodes-page__ns-max {
+  font-family: var(--dvc-font-mono);
+  font-size: 0.625rem;
+  color: var(--dvc-text-secondary);
+  text-align: right;
+}
+
+/* ── Distribution Stats panel ────────────────────────── */
+.distribution-stats__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.distribution-stats__chip {
+  display: flex;
+  flex-direction: column;
+  background: var(--dvc-bg-secondary);
+  border-radius: 4px;
+  padding: 0.4375rem 0.5rem;
+}
+
+.distribution-stats__chip--highlight {
+  background: var(--dvc-accent-bg-subtle);
+}
+
+.distribution-stats__label {
+  font-size: 0.6875rem;
+  color: var(--dvc-text-secondary);
+}
+
+.distribution-stats__value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+  font-family: var(--dvc-font-mono);
+}
+
+.distribution-stats__note {
+  margin-top: 0.625rem;
+  font-size: 0.6875rem;
+  color: var(--dvc-text-secondary);
+  line-height: 1.4;
+}
+
+/* ── Copy Toast ──────────────────────────────────────── */
+.god-nodes-page__toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--dvc-bg-card);
+  color: var(--dvc-text-primary);
+  border: 1px solid var(--dvc-accent);
+  border-radius: var(--dvc-radius);
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  animation: god-nodes-toast-in 200ms ease-out;
+}
+
+@keyframes god-nodes-toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Memory Dashboard charts (in /patterns sidebar, +4 cards) ── */
+.dashboard-chart {
+  position: relative;
+  height: 220px;
+  width: 100%;
+}
+
+.dashboard-chart--small {
+  height: 180px;
+}

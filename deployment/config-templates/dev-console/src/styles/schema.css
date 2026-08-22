@@ -1,0 +1,279 @@
+/* ============================================================
+   schema.css — Schema Explorer 頁面樣式
+   Phase 4+5: BEM .schema-page__* — 使用 --dvc-* 變數
+   ============================================================ */
+
+.schema-page {
+  padding: 1.5rem;
+}
+
+.schema-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.schema-page__header h1 {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+}
+
+.schema-page__stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.schema-page__stat {
+  color: var(--dvc-text-secondary);
+  font-size: 0.875rem;
+}
+
+/* ---- Layout ---- */
+.schema-page__layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  min-height: calc(100vh - 12rem);
+}
+
+/* ---- Sidebar ---- */
+.schema-page__sidebar {
+  background: var(--dvc-bg-card);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 12rem);
+}
+
+/* SearchBar 在窄 sidebar 內適配 */
+.schema-page__sidebar .search-bar {
+  margin-bottom: 0;
+  gap: 4px;
+}
+
+.schema-page__sidebar .search-bar__input {
+  min-width: 0;
+  padding: 6px 10px;
+  font-size: 0.8125rem;
+}
+
+.schema-page__sidebar .search-bar__btn {
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.schema-page__table-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+}
+
+.schema-page__table-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--dvc-text-secondary);
+  transition: background var(--dvc-transition);
+}
+
+.schema-page__table-item:hover {
+  background: var(--dvc-bg-hover);
+}
+
+.schema-page__table-item--active {
+  background: var(--dvc-accent-bg-subtle);
+  color: var(--dvc-accent);
+  font-weight: 600;
+}
+
+.schema-page__table-name {
+  font-family: var(--dvc-font-mono);
+}
+
+.schema-page__table-count {
+  color: var(--dvc-text-muted);
+  font-size: 0.75rem;
+}
+
+/* ---- Main content ---- */
+.schema-page__content {
+  background: var(--dvc-bg-card);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.schema-page__content h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  color: var(--dvc-text-primary);
+}
+
+.schema-page__empty {
+  color: var(--dvc-text-muted);
+  text-align: center;
+  margin-top: 4rem;
+  font-size: 0.9375rem;
+}
+
+.schema-page__row-badge {
+  font-size: 0.75rem;
+  color: var(--dvc-text-muted);
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+/* ---- Sections ---- */
+.schema-page__columns,
+.schema-page__indexes,
+.schema-page__rows {
+  margin-top: 1.5rem;
+}
+
+.schema-page__columns h3,
+.schema-page__indexes h3,
+.schema-page__rows h3 {
+  color: var(--dvc-text-secondary);
+  font-size: 0.875rem;
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+
+/* ---- Column table ---- */
+.schema-page__col-table,
+.schema-page__data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.schema-page__col-table th,
+.schema-page__data-table th {
+  text-align: left;
+  padding: 0.5rem;
+  color: var(--dvc-text-muted);
+  border-bottom: 1px solid var(--dvc-border);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.schema-page__col-table td,
+.schema-page__data-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--dvc-border-light);
+  color: var(--dvc-text-secondary);
+}
+
+.schema-page__col-name {
+  font-family: var(--dvc-font-mono);
+  color: var(--dvc-accent);
+}
+
+/* ---- Data table ---- */
+.schema-page__table-wrapper {
+  overflow-x: auto;
+}
+
+.schema-page__cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+
+.schema-page__cell em {
+  color: var(--dvc-text-muted);
+  font-style: italic;
+}
+
+/* ---- Badges ---- */
+.schema-page__badge {
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+  margin-left: 0.5rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.schema-page__badge--unique {
+  background: var(--dvc-accent-bg-subtle);
+  color: var(--dvc-accent);
+}
+
+/* ---- Indexes ---- */
+.schema-page__indexes ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.schema-page__indexes li {
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+  border-bottom: 1px solid var(--dvc-border-light);
+}
+
+.schema-page__indexes li:last-child {
+  border-bottom: none;
+}
+
+.schema-page__indexes code {
+  font-family: var(--dvc-font-mono);
+  color: var(--dvc-accent);
+}
+
+/* ---- Scrollbar (垂直 — sidebar) ---- */
+.schema-page__sidebar::-webkit-scrollbar { width: 4px; }
+.schema-page__sidebar::-webkit-scrollbar-track { background: transparent; }
+.schema-page__sidebar::-webkit-scrollbar-thumb { background: var(--dvc-slate-600); border-radius: 2px; }
+.schema-page__sidebar::-webkit-scrollbar-thumb:hover { background: var(--dvc-slate-500); }
+
+/* ---- Scrollbar (水平 — data table) ---- */
+.schema-page__table-wrapper::-webkit-scrollbar { height: 5px; }
+.schema-page__table-wrapper::-webkit-scrollbar-track { background: var(--dvc-bg-secondary, rgba(15,23,42,0.5)); border-radius: 3px; }
+.schema-page__table-wrapper::-webkit-scrollbar-thumb { background: var(--dvc-slate-600); border-radius: 3px; }
+.schema-page__table-wrapper::-webkit-scrollbar-thumb:hover { background: var(--dvc-slate-500); }
+
+/* ---- Scrollbar (水平 — content overflow) ---- */
+.schema-page__content::-webkit-scrollbar { height: 5px; }
+.schema-page__content::-webkit-scrollbar-track { background: transparent; }
+.schema-page__content::-webkit-scrollbar-thumb { background: var(--dvc-slate-600); border-radius: 3px; }
+.schema-page__content::-webkit-scrollbar-thumb:hover { background: var(--dvc-slate-500); }
+
+/* ---- Error toast ---- */
+.schema-page__error-toast {
+  background: var(--dvc-error-bg, #3b1a1a);
+  color: var(--dvc-error, #f87171);
+  border: 1px solid var(--dvc-error-border, #7f1d1d);
+  border-radius: 6px;
+  padding: 0.625rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+/* ---- Sidebar states ---- */
+.schema-page__sidebar-loading,
+.schema-page__sidebar-empty {
+  color: var(--dvc-text-muted);
+  font-size: 0.8125rem;
+  padding: 1rem 0.75rem;
+  text-align: center;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .schema-page__layout { grid-template-columns: 1fr; }
+  .schema-page__sidebar { max-height: 200px; }
+  .schema-page__header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}

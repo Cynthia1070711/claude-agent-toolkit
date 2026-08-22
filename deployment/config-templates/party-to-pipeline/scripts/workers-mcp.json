@@ -1,0 +1,68 @@
+{
+  "_comment": "Worker-only MCP config (party-to-pipeline sub-windows). Excludes chrome-devtools (real user Chrome port 9222 needs Alan's manual auth). Use with --strict-mcp-config to bypass project .mcp.json autoload. Claude-in-Chrome sandbox MCP loaded via --chrome flag separately. GitNexus added 2026-05-18. 2026-05-22 A2 動作加入 github + context7 + azure (對齊 Ultimate Strategy Report 階段一,子視窗 create/dev/review 也需這 3 個 MCP)。.mcp.json 已在 .gitignore L80,workers-mcp.json 也應同樣保護(若未在 .gitignore 需補)。",
+  "mcpServers": {
+    "phycool-context": {
+      "type": "stdio",
+      "command": "node",
+      "args": [".context-db/server.js"]
+    },
+    "gitnexus": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "gitnexus.cmd", "mcp"]
+    },
+    "codegraph": {
+      "_comment": "2026-05-25 子視窗開放 codegraph(使用者核准,比照 gitnexus 2026-05-18)。context 組裝器。--no-watch:子視窗只查詢不啟動 file watcher,避免與主視窗 watcher 同寫 .codegraph/codegraph.db 競爭(codegraph serve 預設含 watcher,與 gitnexus mcp 純查詢不同)。索引新鮮度由主視窗 watcher 或手動 codegraph index 維持。",
+      "type": "stdio",
+      "command": "codegraph",
+      "args": ["serve", "--mcp", "--no-watch"]
+    },
+    "github": {
+      "_comment": "2026-05-23 Stage α post-α 調整: Docker ghcr.io/github/github-mcp-server + GITHUB_TOOLSETS=B selective(~45-50 tools)。涵蓋 PhyCool use cases。子視窗同步主視窗配置。",
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "-e",
+        "GITHUB_TOOLSETS",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}",
+        "GITHUB_TOOLSETS": "context,issues,pull_requests,repos,actions,code_security,users,notifications"
+      }
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
+    },
+    "azure": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@azure/mcp@latest",
+        "server",
+        "start"
+      ],
+      "env": {
+        "AZURE_MCP_COLLECT_TELEMETRY": "false"
+      }
+    }
+  }
+}

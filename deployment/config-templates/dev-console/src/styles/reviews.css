@@ -1,0 +1,105 @@
+/* PhyCool Review Analyst — Web UI 樣式 */
+
+.reviews-page { padding: 1.5rem; max-width: 1400px; margin: 0 auto; width: 100%; }
+.reviews-page h1 { margin-bottom: 1rem; color: var(--text-primary, #e2e8f0); }
+.reviews-page h2 { margin: 1.5rem 0 0.75rem; color: var(--text-primary, #e2e8f0); font-size: 1.1rem; }
+
+/* 統計卡片 */
+.review-stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem; margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: var(--card-bg, #1e293b); border-radius: 8px; padding: 1rem;
+  text-align: center; border: 1px solid var(--border, #334155);
+}
+.stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary, #e2e8f0); }
+.stat-label { font-size: 0.75rem; color: var(--text-secondary, #94a3b8); margin-top: 0.25rem; }
+.stat-critical .stat-value { color: #ef4444; }
+.stat-high .stat-value { color: #f97316; }
+.stat-ok .stat-value { color: #22c55e; }
+.stat-warn .stat-value { color: #eab308; }
+
+/* 模組進度表格 */
+.module-progress-section { margin-bottom: 1.5rem; }
+.module-progress-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--card-bg, #1e293b); border-radius: 8px; overflow: hidden;
+}
+.module-progress-table th { background: var(--header-bg, #0f172a); padding: 0.5rem 0.75rem; text-align: left; font-size: 0.8rem; color: var(--text-secondary, #94a3b8); }
+.module-progress-table td { padding: 0.5rem 0.75rem; border-top: 1px solid var(--border, #334155); font-size: 0.85rem; }
+
+/* 篩選 */
+.review-filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.review-filters select, .review-filters input {
+  background: var(--card-bg, #1e293b); color: var(--text-primary, #e2e8f0);
+  border: 1px solid var(--border, #334155); border-radius: 6px; padding: 0.4rem 0.6rem; font-size: 0.85rem;
+}
+
+/* 報告表格 */
+.review-reports-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--card-bg, #1e293b); border-radius: 8px; overflow: hidden;
+}
+.review-reports-table th { background: var(--header-bg, #0f172a); padding: 0.5rem 0.75rem; text-align: left; font-size: 0.8rem; color: var(--text-secondary, #94a3b8); }
+.review-reports-table td { padding: 0.5rem 0.75rem; border-top: 1px solid var(--border, #334155); font-size: 0.85rem; }
+.review-reports-table a { color: #818cf8; text-decoration: none; }
+.review-reports-table a:hover { text-decoration: underline; }
+.empty-row { text-align: center; color: var(--text-secondary, #94a3b8); padding: 2rem !important; }
+
+.status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 0.4rem; }
+.mode-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+.mode-code { background: #1e3a5f; color: #60a5fa; }
+.mode-e2e { background: #3b1f4f; color: #c084fc; }
+.bug-summary { display: inline-flex; align-items: center; gap: 6px; }
+.bug-breakdown { display: inline-flex; gap: 3px; }
+.bug-count { display: inline-block; min-width: 20px; text-align: center; padding: 1px 5px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+.bug-count.p0 { background: #7f1d1d; color: #fca5a5; }
+.bug-count.p1 { background: #7c2d12; color: #fdba74; }
+.bug-count.p2 { background: #713f12; color: #fde047; }
+.bug-count.p3 { background: #1e3a8a; color: #93c5fd; }
+.bug-count.p4 { background: #374151; color: #d1d5db; }
+
+/* 報告詳情 */
+.back-link { color: #818cf8; text-decoration: none; font-size: 0.85rem; }
+.report-header { margin: 1rem 0; }
+.report-meta { display: flex; gap: 1.5rem; color: var(--text-secondary, #94a3b8); font-size: 0.85rem; margin-top: 0.5rem; }
+
+/* 評分 */
+.scores-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; }
+.score-card { background: var(--card-bg, #1e293b); border-radius: 8px; padding: 0.75rem; text-align: center; border: 1px solid var(--border, #334155); }
+.score-value { font-size: 1.5rem; font-weight: 700; }
+.score-label { font-size: 0.7rem; color: var(--text-secondary, #94a3b8); margin-top: 0.25rem; }
+
+/* 人工審查區 */
+.review-action-section { background: var(--card-bg, #1e293b); border-radius: 8px; padding: 1rem; margin: 1rem 0; border: 1px solid var(--border, #334155); }
+.reviewed-badge { color: #22c55e; font-weight: 600; }
+.review-form textarea { width: 100%; background: var(--header-bg, #0f172a); color: var(--text-primary, #e2e8f0); border: 1px solid var(--border, #334155); border-radius: 6px; padding: 0.5rem; resize: vertical; }
+.btn-review { margin-top: 0.5rem; padding: 0.5rem 1rem; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.btn-review:hover { background: #4338ca; }
+
+/* Bug 發現清單 */
+.findings-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.finding-card { background: var(--card-bg, #1e293b); border-radius: 8px; border: 1px solid var(--border, #334155); overflow: hidden; }
+.finding-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.75rem; cursor: pointer; }
+.finding-header:hover { background: rgba(255,255,255,0.03); }
+.severity-badge { padding: 2px 8px; border-radius: 4px; color: white; font-size: 0.75rem; font-weight: 700; }
+.finding-title { flex: 1; font-size: 0.85rem; }
+.finding-type { font-size: 0.75rem; color: var(--text-secondary, #94a3b8); background: var(--header-bg, #0f172a); padding: 2px 6px; border-radius: 4px; }
+.cross-badge { font-size: 0.7rem; background: #166534; color: #86efac; padding: 2px 6px; border-radius: 4px; }
+.fix-status-select { background: var(--header-bg, #0f172a); color: var(--text-primary, #e2e8f0); border: 1px solid var(--border, #334155); border-radius: 4px; padding: 2px 4px; font-size: 0.75rem; }
+.finding-detail { padding: 0.75rem; border-top: 1px solid var(--border, #334155); font-size: 0.85rem; line-height: 1.6; }
+.finding-detail div { margin-bottom: 0.4rem; }
+.finding-detail pre { background: var(--header-bg, #0f172a); padding: 0.5rem; border-radius: 4px; overflow-x: auto; font-size: 0.8rem; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .reviews-page { padding: 16px; }
+  .report-meta { flex-wrap: wrap; gap: 0.75rem; }
+  .module-progress-table,
+  .review-reports-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+@media (max-width: 480px) {
+  .reviews-page { padding: 12px; }
+  .scores-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+}

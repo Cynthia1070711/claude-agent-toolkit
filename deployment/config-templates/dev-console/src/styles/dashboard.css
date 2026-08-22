@@ -1,0 +1,316 @@
+/* ============================================================
+   dashboard.css — Dashboard 頁面樣式
+   DVS-05 AC-3, AC-4
+   使用 --dvc-* CSS Variable，不硬編碼色碼
+   ============================================================ */
+
+/* KPI 卡片 Grid */
+.dvc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* KPI 卡片 */
+.dvc-kpi-card {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color var(--dvc-transition);
+}
+
+.dvc-kpi-card:hover {
+  border-color: var(--dvc-accent);
+}
+
+.dvc-kpi-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.dvc-kpi-label {
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dvc-kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--dvc-text-primary);
+  line-height: 1.1;
+}
+
+.dvc-kpi-subtitle {
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+}
+
+/* KPI 卡片 Skeleton 載入動畫 */
+.dvc-kpi-skeleton {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@keyframes dvc-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.dvc-skeleton-line {
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--dvc-slate-800) 25%,
+    var(--dvc-slate-700) 50%,
+    var(--dvc-slate-800) 75%
+  );
+  background-size: 200% 100%;
+  animation: dvc-shimmer 1.5s infinite;
+}
+
+.dvc-skeleton-line.sm { height: 12px; width: 60%; }
+.dvc-skeleton-line.lg { height: 28px; width: 40%; }
+
+/* 最近活動列表 */
+.dvc-activity-section {
+  background: var(--dvc-bg-secondary);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 20px;
+}
+
+.dvc-activity-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dvc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.dvc-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dvc-activity-item {
+  padding: 12px;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: calc(var(--dvc-radius) - 2px);
+  transition: border-color var(--dvc-transition);
+  cursor: default;
+}
+
+.dvc-activity-item:hover {
+  border-color: var(--dvc-slate-500);
+}
+
+.dvc-activity-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.dvc-activity-time {
+  font-size: 11px;
+  color: var(--dvc-text-muted);
+  font-family: var(--dvc-font-mono);
+}
+
+.dvc-activity-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.dvc-badge-session { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+.dvc-badge-debug   { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.dvc-badge-decision{ background: rgba(99, 102, 241, 0.15); color: #6366f1; }
+.dvc-badge-pattern { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+.dvc-badge-workflow{ background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.dvc-badge-default { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+
+.dvc-activity-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dvc-activity-content {
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+  line-height: 1.5;
+}
+
+.dvc-activity-expand-btn {
+  background: none;
+  border: none;
+  color: var(--dvc-accent);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 4px;
+}
+
+.dvc-activity-expand-btn:hover {
+  color: var(--dvc-accent-hover);
+}
+
+.dvc-no-activity {
+  text-align: center;
+  color: var(--dvc-text-muted);
+  padding: 32px 0;
+  font-size: 13px;
+}
+
+/* ─── dvs-07: WFQ 視覺化圖表區 ─────────────────────────────── */
+
+/* WFQ 分節標題 */
+.dvc-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dvc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 20px 0 12px;
+}
+
+/* 分節標題列（標題 + 右側期間篩選）*/
+.dvc-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dvc-section-header .dvc-section-title {
+  margin-bottom: 12px;
+}
+
+/* 統計區間篩選（起日 ~ 迄日 + 回復本月）*/
+.dvc-range-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.dvc-range-label {
+  font-size: 12px;
+  color: var(--dvc-text-muted);
+}
+
+.dvc-range-input {
+  padding: 3px 8px;
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  background: var(--dvc-bg-card);
+  color: var(--dvc-text-primary);
+  font-size: 12px;
+  font-family: var(--dvc-font-mono);
+  color-scheme: dark; /* 讓原生日曆圖示與面板套用深色 */
+}
+
+.dvc-range-input:focus {
+  outline: none;
+  border-color: var(--dvc-accent);
+}
+
+.dvc-range-sep {
+  color: var(--dvc-text-muted);
+  font-size: 12px;
+}
+
+.dvc-range-reset {
+  padding: 4px 10px;
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--dvc-transition), color var(--dvc-transition);
+}
+
+.dvc-range-reset:hover {
+  background: var(--dvc-accent-bg-subtle);
+  color: var(--dvc-accent-text);
+}
+
+/* 圖表雙欄 Grid（左趨勢圖 2fr / 右圓餅圖 1fr）*/
+.dvc-wfq-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* 圖表卡片框 */
+.dvc-chart-card {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 20px;
+}
+
+.dvc-chart-card:hover {
+  border-color: var(--dvc-slate-500);
+}
+
+/* 圖表標題 */
+.dvc-chart-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dvc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+
+/* 圖表實際繪製區域（固定高度供 chart.js 使用）*/
+.dvc-chart-inner {
+  height: 220px;
+  position: relative;
+}
+
+/* 響應式 */
+@media (max-width: 768px) {
+  .dvc-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dvc-wfq-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .dvc-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

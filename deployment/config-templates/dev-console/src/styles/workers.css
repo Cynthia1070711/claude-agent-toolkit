@@ -1,0 +1,589 @@
+/* ============================================================
+   workers.css — /workers 工作台樣式（whp-10-devconsole-ui）
+   全部顏色走 var(--dvc-*)；chart.js dataset 色票為 JS 常數例外
+   （集中宣告於 lib/workerCharts.ts，對齊 charts/TechDebtSeverityChart.tsx 範式）。
+   ============================================================ */
+
+.workers-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── 頁首常駐：守護狀態列 ─────────────────────────────────── */
+
+.workers-guardian-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--dvc-radius);
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  color: var(--dvc-text-primary);
+  font-size: 13px;
+}
+
+.workers-guardian-bar--absent {
+  color: var(--dvc-text-secondary);
+}
+
+.workers-guardian-bar.is-fresh {
+  border-color: var(--dvc-status-ok);
+}
+
+.workers-guardian-bar.is-stale {
+  border-color: var(--dvc-status-error);
+  color: var(--dvc-status-error);
+}
+
+/* ── 頁首常駐：KPI 四卡（沿用 dashboard.css .dvc-kpi-*）+ 需注意徽章 ── */
+
+.workers-kpi-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.workers-attention-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--dvc-radius);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  color: var(--dvc-text-secondary);
+}
+
+.workers-attention-badge.is-attention {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: var(--dvc-status-error);
+  color: var(--dvc-status-error);
+}
+
+/* ── Tabs（WAI-ARIA APG）─────────────────────────────────── */
+
+.workers-tablist {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--dvc-border);
+}
+
+.workers-tab {
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--dvc-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: color var(--dvc-transition), border-color var(--dvc-transition);
+}
+
+.workers-tab:hover {
+  color: var(--dvc-text-primary);
+}
+
+.workers-tab[aria-selected='true'] {
+  color: var(--dvc-accent-text);
+  border-bottom-color: var(--dvc-accent);
+  font-weight: 600;
+}
+
+.workers-tabpanel {
+  padding-top: 12px;
+}
+
+/* ── 三重編碼 tone（lifecycleView / formatRelativeHeartbeat 共用）── */
+
+.tone-fresh, .tone-success, .tone-active {
+  color: var(--dvc-status-ok);
+}
+
+.tone-warn, .tone-attention {
+  color: var(--dvc-status-warning);
+}
+
+.tone-stale, .tone-danger {
+  color: var(--dvc-status-error);
+}
+
+.tone-neutral, .tone-none {
+  color: var(--dvc-text-secondary);
+}
+
+/* ── 分頁 A：執行中看板 ──────────────────────────────────── */
+
+.worker-board {
+  overflow-x: auto;
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  background: var(--dvc-bg-card);
+}
+
+.worker-board__track-group {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dvc-text-secondary);
+  background: var(--dvc-bg-secondary);
+  border-bottom: 1px solid var(--dvc-border);
+}
+
+.worker-board__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.worker-board__table th {
+  text-align: left;
+  padding: 8px 12px;
+  color: var(--dvc-text-secondary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--dvc-border);
+  white-space: nowrap;
+}
+
+.worker-board__table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--dvc-border-light);
+  color: var(--dvc-text-primary);
+  white-space: nowrap;
+}
+
+.worker-board__table .is-retry {
+  color: var(--dvc-status-warning);
+  font-weight: 600;
+}
+
+.worker-board__closable {
+  color: var(--dvc-status-ok);
+}
+
+.worker-board__closable.is-blocked {
+  color: var(--dvc-status-error);
+  font-weight: 700;
+}
+
+.worker-board__empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--dvc-text-secondary);
+}
+
+.worker-board__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.worker-board__actions button {
+  background: transparent;
+  border: 1px solid var(--dvc-border);
+  color: var(--dvc-text-secondary);
+  border-radius: var(--dvc-radius);
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.worker-board__actions button:hover {
+  border-color: var(--dvc-accent);
+  color: var(--dvc-accent-text);
+}
+
+.worker-board__clipboard-fallback {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--dvc-status-warning);
+}
+
+.worker-board__clipboard-fallback textarea {
+  width: 100%;
+  margin-top: 4px;
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-primary);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+}
+
+/* ── 分頁 A：四段待辦佇列 ────────────────────────────────── */
+
+.worker-queues {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.worker-queue-section {
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  background: var(--dvc-bg-card);
+  padding: 12px 16px;
+}
+
+.worker-queue-section.is-attention {
+  border-color: var(--dvc-status-error);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.worker-queue-section__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.worker-queue-section.is-attention .worker-queue-section__title {
+  color: var(--dvc-status-error);
+}
+
+.worker-queue-section__count {
+  color: var(--dvc-text-secondary);
+  font-weight: 400;
+}
+
+.worker-queue-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--dvc-border-light);
+  flex-wrap: wrap;
+}
+
+.worker-queue-row:first-of-type {
+  border-top: none;
+}
+
+.worker-queue-row__meta {
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+}
+
+/* 旗標已清除、但守護仍標 stalled-suspect 而留在需注意段的列：不給按鈕，只給狀態說明。 */
+.worker-queue-row__acked {
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+  white-space: nowrap;
+  align-self: center;
+}
+
+.worker-queue-row__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.worker-queue-row__actions button {
+  border-radius: var(--dvc-radius);
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--dvc-border);
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-primary);
+}
+
+.worker-queue-row__actions button.is-primary {
+  background: var(--dvc-accent);
+  border-color: var(--dvc-accent);
+  color: var(--dvc-slate-100);
+}
+
+.worker-queue-row__actions button.is-danger {
+  border-color: var(--dvc-status-error);
+  color: var(--dvc-status-error);
+  background: transparent;
+}
+
+.worker-queue-section__empty {
+  color: var(--dvc-text-secondary);
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.worker-queue-warning {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: var(--dvc-radius);
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--dvc-status-warning);
+  font-size: 12px;
+}
+
+.worker-queue-message-state {
+  font-size: 12px;
+  color: var(--dvc-text-secondary);
+}
+
+/* 危險動作二次確認 dialog（自建，不依賴其他頁 CSS）*/
+
+.worker-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--dvc-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+}
+
+.worker-dialog {
+  background: var(--dvc-modal-bg);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 20px;
+  min-width: 320px;
+  max-width: 480px;
+}
+
+.worker-dialog__title {
+  margin: 0 0 8px 0;
+  color: var(--dvc-text-primary);
+  font-size: 15px;
+}
+
+.worker-dialog__message {
+  color: var(--dvc-text-secondary);
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+
+.worker-dialog textarea {
+  width: 100%;
+  min-height: 80px;
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-primary);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 8px;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.worker-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.worker-dialog__actions button {
+  border-radius: var(--dvc-radius);
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--dvc-border);
+  background: var(--dvc-bg-secondary);
+  color: var(--dvc-text-primary);
+}
+
+.worker-dialog__actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.worker-dialog__actions button.is-danger {
+  background: var(--dvc-status-error);
+  border-color: var(--dvc-status-error);
+  color: var(--dvc-slate-100);
+}
+
+/* ── 分頁 B：歷程 ─────────────────────────────────────────── */
+
+.worker-history__filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.worker-history__filters select,
+.worker-history__filters input {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  color: var(--dvc-text-primary);
+  border-radius: var(--dvc-radius);
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.worker-history__empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--dvc-text-secondary);
+}
+
+.worker-history__charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.worker-chart-card {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 12px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.worker-chart-card__title {
+  font-size: 13px;
+  color: var(--dvc-text-secondary);
+  margin: 0 0 8px 0;
+}
+
+.worker-chart-card__scope-note {
+  font-size: 11px;
+  color: var(--dvc-text-secondary);
+  margin: 4px 0 0 0;
+}
+
+/* ── 分頁 C：稽核 ─────────────────────────────────────────── */
+
+.worker-audit__section {
+  background: var(--dvc-bg-card);
+  border: 1px solid var(--dvc-border);
+  border-radius: var(--dvc-radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.worker-audit__section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dvc-text-primary);
+  margin: 0 0 10px 0;
+}
+
+.worker-audit__zombie-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px solid var(--dvc-border-light);
+  font-size: 13px;
+}
+
+.worker-audit__zombie-row:first-of-type {
+  border-top: none;
+}
+
+.worker-audit__invariant-row {
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--dvc-status-warning);
+}
+
+.worker-audit__reap-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.worker-audit__reap-preview {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: var(--dvc-radius);
+  background: var(--dvc-bg-secondary);
+  font-size: 12px;
+}
+
+/* ── 抽屜 ─────────────────────────────────────────────────── */
+
+.worker-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--dvc-modal-backdrop);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 850;
+}
+
+.worker-drawer {
+  width: min(480px, 100%);
+  height: 100%;
+  background: var(--dvc-modal-bg);
+  border-left: 1px solid var(--dvc-border);
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.worker-drawer__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.worker-drawer__close {
+  background: transparent;
+  border: 1px solid var(--dvc-border);
+  color: var(--dvc-text-secondary);
+  border-radius: var(--dvc-radius);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.worker-drawer__section {
+  margin-bottom: 20px;
+}
+
+.worker-drawer__section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dvc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin: 0 0 8px 0;
+}
+
+.worker-drawer__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.worker-drawer__timeline-node {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--dvc-text-primary);
+}
+
+.worker-drawer__timeline-node.is-pending {
+  color: var(--dvc-text-secondary);
+}
+
+.worker-drawer__message {
+  padding: 8px 0;
+  border-top: 1px solid var(--dvc-border-light);
+  font-size: 12px;
+  color: var(--dvc-text-primary);
+}
+
+.worker-drawer__message:first-of-type {
+  border-top: none;
+}
+
+.worker-drawer__empty {
+  color: var(--dvc-text-secondary);
+  font-size: 13px;
+}

@@ -1,5 +1,28 @@
 {
+  "env": {
+    "ENABLE_TOOL_SEARCH": "auto:2",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "95",
+    "BASH_DEFAULT_TIMEOUT_MS": "120000",
+    "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1",
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
+    "MCP_TIMEOUT": "40000",
+    "MAX_MCP_OUTPUT_TOKENS": "50000",
+    "PHYCOOL_RULE_VIOLATION_HINT_ENABLED": "true",
+    "PHYCOOL_GODNODE_AUTO_REFRESH": "true",
+    "PHYCOOL_PPR_ENABLED": "true"
+  },
   "permissions": {
+    "allow": [
+      "Edit(.claude/**)",
+      "Edit(.gemini/**)",
+      "Edit(.agent/**)",
+      "Bash(cp *skills*)",
+      "Bash(ls *skills*)",
+      "Bash(mkdir *skills*)",
+      "Bash(mkdir .claude/*)",
+      "Bash(mkdir .gemini/*)",
+      "Bash(mkdir .agent/*)"
+    ],
     "deny": [
       "Read(.env)",
       "Read(.env.*)",
@@ -10,5 +33,527 @@
       "Read(**/credentials*)",
       "Read(**/secrets*)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/pre-commit-quality.js",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/pre-tool-bash-better-sqlite3-guard.js",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tasks-backfill-review-audit-enforcer.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tianji-baseline-snapshot-gate.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tianji-concurrent-pilot-guard.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tianji-q4-audit-gate.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tianji-impulse-cooldown-guard.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && powershell -File scripts/file-lock-check.ps1 -AgentId CC-OPUS",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/config-protection.js",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/pre-tool-violation-gate.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/cross-ref-precheck.js",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/encoding-bom-guard.js",
+            "timeout": 1500
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/crlf-normalize-guard.js",
+            "timeout": 1500
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/skill-tool-invocation-guard.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/hooks-skill-invocation-guard.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__phycool-context",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/mcp-health-check.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__phycool-context__add_context",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/rule-violation-write-guard.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/read-before-edit-guard.js",
+            "timeout": 1500
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/pre-edit-impact-advisor.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/worker-kill-guard.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && powershell -File scripts/file-lock-acquire.ps1 -AgentId CC-OPUS",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .context-db/scripts/observe-pattern.js",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tianji-scope-creep-detector.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/report-paradigm-guard.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/agent-heartbeat.js",
+            "timeout": 2000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/event-bus-publisher.js",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tianji-ssot-sync-checker.js",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/skills/cc-config-author/scripts/cc-config-guard.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/db-first-write-guard.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/skill-index-drift-detector.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/track-reads.js",
+            "timeout": 1000
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/skill-invocation-state-tracker.js",
+            "timeout": 2000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/api-runtime-verification-guard.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/ctrl-channel-probe.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/pre-prompt-rag.js",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tianji-reject-cooldown-check.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/bmad-slash-story-inject.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/ctrl-channel-inject.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/worker-notify-inject.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/pipeline-heartbeat.js",
+            "timeout": 1000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && powershell -NoProfile -ExecutionPolicy Bypass -File .claude/skills/party-to-pipeline/scripts/stop-report.ps1",
+            "timeout": 1500
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .context-db/scripts/log-session.js",
+            "timeout": 3000,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .context-db/scripts/incremental-embed.js",
+            "timeout": 5000,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/pipeline-auto-exit.js",
+            "timeout": 2000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/skills/pipeline-window-control/scripts/pipeline-notify.js",
+            "timeout": 2000,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/debt-discovery.js",
+            "timeout": 2000,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/suggest-compact.js",
+            "timeout": 2000,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/detect-rule-violation-hint.js",
+            "timeout": 2500,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/ceo-briefing-generator.js",
+            "timeout": 5000,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/ecc-emergence-gate.cjs",
+            "timeout": 10000,
+            "async": true
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/ctrl-channel-stop-check.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .context-db/scripts/log-session.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node scripts/otel-session-aggregate.js",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/precompact-tool-preprune.js",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .context-db/scripts/log-session.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/session-recovery.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node scripts/otel-auto-start.js",
+            "timeout": 2000
+          }
+        ]
+      },
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/tianji-pilot-timebox-monitor.js",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/SessionStart.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/maintenance-3day-refresh.js",
+            "timeout": 3000
+          },
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/retrieval-health-advisor.js",
+            "timeout": 3000
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/ecc-quota-alert.js",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/subagent-context-inject.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "mcp__phycool-context",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/mcp-health-check.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "FileChanged": [
+      {
+        "matcher": "SKILL.md",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/skill-change-detector.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "Bash|Edit|Write|Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/pipeline-permission.js",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${PROJECT_ROOT}\" && node .claude/hooks/instructions-loaded-logger.js",
+            "timeout": 2000
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node scripts/pipeline-statusline.cjs"
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": false,
+    "frontend-design@claude-code-plugins": true,
+    "ralph-wiggum@claude-code-plugins": false,
+    "csharp-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "ponytail@ponytail": true
   }
 }

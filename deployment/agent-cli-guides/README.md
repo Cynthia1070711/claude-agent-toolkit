@@ -1,117 +1,198 @@
-# Agent CLI 入門指南索引
+# Agent CLI 使用指南總覽
 
-> **版本**: v1.0.0 | **更新日期**: 2026-02-27
-> **用途**: 四引擎協作環境的 CLI 入門指南集中索引，搭配 `docs/開發前環境部署_v3.0.0.md` 使用
-
----
-
-## 指南導航
-
-| 引擎 | 入門指南 | 定位 |
-|------|----------|------|
-| Claude Code CLI | [claude-code-guide.md](./claude-code-guide.md) | 主線指揮官 — Story 建立、Code Review、架構決策 |
-| Gemini CLI | [gemini-cli-guide.md](./gemini-cli-guide.md) | 探索偵察兵 — 大範圍搜尋、文檔分析、Hooks 自動化（含完整 Hooks JSON Schema） |
-| Antigravity IDE | [antigravity-guide.md](./antigravity-guide.md) | IDE 整合開發 — 視覺化編輯、即時預覽、重構輔助 |
-| Rovo Dev CLI | [rovo-dev-guide.md](./rovo-dev-guide.md) | Atlassian 生態整合 — Jira/Confluence 聯動、Event Hooks |
+> **版本**: 3.0.0
+> **建立日期**: 2026-08-07 11:45:00
+> **更新日期**: 2026-08-07 14:30:00
 
 ---
 
-## 四引擎能力比較表
+## 指南列表
 
-### 基本規格
-
-| 維度 | Claude Code CLI | Gemini CLI | Antigravity IDE | Rovo Dev CLI |
-|------|----------------|------------|-----------------|--------------|
-| **開發商** | Anthropic | Google | Windsurf (Codeium) | Atlassian |
-| **執行方式** | Terminal CLI | Terminal CLI | IDE 內建 | Terminal CLI |
-| **核心模型** | Claude Opus 4.6 / Sonnet 4.6 / Haiku 4.5 | Gemini 2.5 Pro / Flash | Claude Opus 4.6 / Sonnet 4.6 | Claude Sonnet 4.6 / Gemini 2.5 Pro |
-| **上下文窗口** | 200K tokens | 1M tokens | 200K tokens | 128K tokens |
-| **自動壓縮** | ✅ 內建 auto-compact | ✅ PreCompress Hook | ✅ 自動摘要 | ⚠️ 手動管理 |
-
-### 功能矩陣
-
-| 功能 | Claude Code | Gemini CLI | Antigravity | Rovo Dev |
-|------|------------|------------|-------------|----------|
-| **檔案讀寫** | ✅ Read/Write/Edit | ✅ read_file/write_file | ✅ IDE 原生 | ✅ read_file/edit_file |
-| **終端指令** | ✅ Bash tool | ✅ run_shell_command | ✅ 內建 Terminal | ✅ run_command |
-| **Subagent** | ✅ Task tool (多型別) | ❌ 無原生支援 | ✅ Cascade 多步驟 | ⚠️ 有限支援 |
-| **MCP Server** | ✅ 完整支援 | ✅ 完整支援 | ✅ 完整支援 | ⚠️ 部分支援 |
-| **Hooks 機制** | ✅ settings.json hooks | ✅ 完整 Hooks API（10+ 事件） | ❌ 無 | ✅ Event Hooks (config.yml) |
-| **Plan Mode** | ✅ EnterPlanMode | ❌ 無 | ✅ 規劃模式 | ❌ 無 |
-| **Skills/Rules** | ✅ .claude/skills + rules | ✅ .gemini/skills | ✅ .windsurfrules | ⚠️ .agent/ config |
-| **記憶系統** | ✅ auto-memory | ✅ GEMINI.md | ✅ 專案記憶 | ⚠️ 手動配置 |
-| **Git 整合** | ✅ 原生 | ✅ 原生 | ✅ IDE 原生 | ✅ 原生 |
-| **瀏覽器自動化** | ✅ chrome MCP | ⚠️ 需 MCP 擴充 | ❌ 無 | ❌ 無 |
-
-### Hooks 機制比較
-
-| 維度 | Claude Code | Gemini CLI | Rovo Dev |
-|------|------------|------------|----------|
-| **配置位置** | `.claude/settings.json` | `.gemini/settings.json` | `.agent/config.yml` |
-| **事件類型** | BeforeTool / AfterTool | BeforeTool / AfterTool / BeforeAgent / AfterAgent / BeforeModel / AfterModel / SessionStart / SessionEnd / Notification / PreCompress / BeforeToolSelection | BeforeTool / AfterTool |
-| **封鎖能力** | ✅ deny 工具執行 | ✅ deny/block + 合成回應 | ✅ deny 工具執行 |
-| **工具篩選** | ❌ 無 | ✅ BeforeToolSelection（白名單） | ❌ 無 |
-| **LLM 攔截** | ❌ 無 | ✅ BeforeModel 可覆寫請求或注入合成回應 | ❌ 無 |
-| **通訊協議** | stdin JSON → stdout JSON | stdin JSON → stdout JSON | stdin JSON → stdout JSON |
-| **Timeout** | 依設定 | 預設 60s，可自訂 | 依設定 |
-
-### 成本模型
-
-| 引擎 | 計費方式 | 備註 |
-|------|----------|------|
-| **Claude Code** | API 用量計費（Opus > Sonnet > Haiku） | Subagent 建議用 Haiku 降低成本 |
-| **Gemini CLI** | API 用量計費（Pro > Flash） | 1M 上下文但 Pro 成本較高 |
-| **Antigravity** | IDE 訂閱制 | 包含模型使用額度 |
-| **Rovo Dev** | Atlassian 訂閱 + API 用量 | 與 Jira/Confluence 綁定 |
+| CLI 工具                           | 指南文檔                                        | 定位                      | 適用場景                                          |
+| ---------------------------------- | ----------------------------------------------- | ------------------------- | ------------------------------------------------- |
+| **Claude Code CLI**          | [claude-code-guide.md](./claude-code-guide.md)   | **主力開發工具**    | 全棧開發、代碼審查、重構、CI/CD、Agentic Workflow |
+| **Gemini CLI**               | [gemini-cli-guide.md](./gemini-cli-guide.md)     | **免費額度首選**    | 大上下文分析、Google 生態整合、搜尋接地           |
+| **Google Antigravity (AGY)** | [antigravity-guide.md](./antigravity-guide.md)   | **Agent-First IDE** | 多代理協作、視覺化 Diff、雲端無縫切換             |
+| **Codex CLI**                | [codex-cli-guide.md](./codex-cli-guide.md)       | **OpenAI 生態整合** | ChatGPT 方案用戶、三合一體驗 (CLI/IDE/Desktop)    |
+| **Crush (原 OpenCode)**      | [opencode-cli-guide.md](./opencode-cli-guide.md) | **終端機原生 TUI**  | 多模型提供商、Vim 操作、自架模型支援              |
 
 ---
 
-## 新引擎接入 SOP（5 步驟）
+## 快速對比表
 
-當專案需要新增第五個（或更多）AI 引擎時，依照以下 SOP 接入：
-
-### Step 1: 讀取入門指南
-
-1. 取得新引擎的官方文檔或入門指南
-2. 整理為 `docs/agent-cli-guides/{engine}-guide.md`，格式參考現有 4 份指南
-3. 更新本 README 的導航表與比較表
-
-### Step 2: 建立引擎配置
-
-1. 在專案根目錄建立引擎專屬配置目錄（如 `.{engine}/`）
-2. 配置 deny 規則（禁止危險操作），參考：
-   - Claude Code: `.claude/settings.json` → `deny` 陣列
-   - Gemini CLI: `.gemini/settings.json` → `hooks.BeforeTool`
-   - Rovo Dev: `.agent/config.yml` → `denied_tools`
-3. 配置 Skills/Rules 目錄結構
-
-### Step 3: 註冊 Agent ID
-
-1. 在 `docs/開發前環境部署_v3.0.0.md` PART 2 的 Agent ID 命名表新增條目
-2. 格式：`{引擎縮寫}-{模型等級}`，例如 `CP-GPT4`、`MS-PHI`
-3. 在 `sprint-status.yaml` 的 `assigned_agent` 欄位中啟用新 ID
-
-### Step 4: 設定交接協議
-
-1. 確保新引擎能讀寫共享狀態：
-   - `docs/implementation-artifacts/sprint-status.yaml`
-   - `docs/tracking/active/*.track.md`
-2. 配置交接三步驟驗證（讀取 sprint-status → 讀取 tracking → 確認上一 Agent 最後 log）
-3. 在新引擎的記憶/配置檔中寫入交接規則
-
-### Step 5: 驗證
-
-1. **配置驗證**: 新引擎能正確讀取專案結構、Skills、Rules
-2. **交接驗證**: 從 Claude Code 交接一個測試任務給新引擎，確認：
-   - 新引擎能讀取 sprint-status.yaml 並理解 Story 狀態
-   - 新引擎能正確更新 tracking file 並標註自己的 Agent ID
-   - 交接回 Claude Code 時三步驟驗證通過
-3. **安全驗證**: deny 規則生效，危險操作被攔截
+| 特性                     | Claude Code                    | Gemini CLI                     | Antigravity (AGY)             | Codex CLI                | Crush                  |
+| ------------------------ | ------------------------------ | ------------------------------ | ----------------------------- | ------------------------ | ---------------------- |
+| **廠商**           | Anthropic                      | Google                         | Cognition (Devin)             | OpenAI                   | Charm                  |
+| **授權**           | 專有                           | Apache 2.0                     | 專有                          | Apache 2.0               | MIT                    |
+| **介面**           | Terminal + IDE + Desktop + Web | Terminal                       | **IDE (主要)** + Remote | Terminal + IDE + Desktop | Terminal (TUI)         |
+| **模型**           | Claude 4.6 系列                | Gemini 3 系列                  | SWE-1.6 + 多模型              | GPT-4o/o1/o3 系列        | **全提供商**     |
+| **Context Window** | 200K (1M 可選)                 | **1M**                   | 依模型                        | 128K-1M                  | 依模型                 |
+| **免費額度**       | 有限                           | **慷慨 (60rpm/1000rpd)** | SWE-1.6 無限                  | ChatGPT 方案含           | 依提供商               |
+| **MCP 支援**       | ✅ 完整                        | ✅ 完整                        | ✅ 內建                       | ✅                       | ✅                     |
+| **ACP 支援**       | ✅                             | ✅                             | ✅ 原生                       | ✅                       | ✅                     |
+| **LSP 整合**       | Via Extensions                 | Via Extensions                 | 內建 IDE                      | Via Extensions           | ✅ 原生                |
+| **自定義命令**     | Skills/Commands                | Custom Commands                | Skills                        | Commands                 | ✅ 原生                |
+| **會話管理**       | Auto-compact                   | Checkpointing                  | Spaces + 雲端同步             | Teleport/Cloud           | SQLite + Auto Compact  |
+| **Git 整合**       | 原生                           | 原生                           | 內建 IDE                      | 原生                     | 工具支援               |
+| **CI/CD 整合**     | GitHub Actions                 | GitHub Actions                 | 不適用                        | GitHub Actions           | 腳本支援               |
+| **跨設備同步**     | Teleport/Remote                | 無                             | **雲端無縫切換**        | Teleport/Cloud           | 無                     |
+| **Vim/鍵盤操作**   | 基礎                           | 基礎                           | IDE 標準                      | 基礎                     | **原生 Vim TUI** |
 
 ---
 
-## 版本歷史
+## 選型建議
 
-| 版本 | 日期 | 變更 |
-|------|------|------|
-| v1.0.0 | 2026-02-27 | 初版：四引擎入門指南打包 + 索引 + 比較表 + 新引擎接入 SOP |
+### **主要開發機 (單一選擇)**
+
+| 團隊/個人狀況                   | 推薦                        | 理由                                        |
+| ------------------------------- | --------------------------- | ------------------------------------------- |
+| **標準全棧開發**          | **Claude Code**       | 生態最完整、Agentic Loop 最強、技能生態豐富 |
+| **預算敏感/大上下文**     | **Gemini CLI**        | 1M Context 免費、Google Search Grounding    |
+| **多代理協作/視覺化**     | **Antigravity (AGY)** | Spaces 管理、Supercomplete、雲端同步        |
+| **ChatGPT 訂閱用戶**      | **Codex CLI**         | 方案整合、三合一體驗、OpenAI 模型優先       |
+| **終端機純粹主義/多模型** | **Crush**             | TUI 體驗、全提供商、Vim 操作、自架模型      |
+
+### **輔助工具 (可並行使用)**
+
+| 需求                     | 工具組合                                              |
+| ------------------------ | ----------------------------------------------------- |
+| **代碼審查自動化** | Claude Code (GitHub Actions) + Codex (PR Review)      |
+| **大代碼庫分析**   | Gemini CLI (1M Context) + Claude Code (重構)          |
+| **多代理並行**     | Antigravity Spaces + Crush (ACP 協作)                 |
+| **成本優化**       | Gemini CLI (免費) + Crush (自架模型) + Codex (方案含) |
+
+---
+
+## 環境變數統一管理
+
+建立 `~/.env.ai` 統一管理所有 CLI 需要的 API Keys：
+
+```bash
+# ~/.env.ai (權限 600)
+# Anthropic / Claude Code
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Google / Gemini CLI / Vertex AI
+export GEMINI_API_KEY="..."
+export GOOGLE_CLOUD_PROJECT="my-project-123"
+export GOOGLE_GENAI_USE_VERTEXAI="true"
+
+# OpenAI / Codex CLI
+export OPENAI_API_KEY="sk-..."
+
+# GitHub Copilot (Crush, Codex IDE)
+export GITHUB_TOKEN="gho_..."
+
+# AWS Bedrock (Crush)
+export AWS_ACCESS_KEY_ID="..."
+export AWS_SECRET_ACCESS_KEY="..."
+export AWS_REGION="us-east-1"
+
+# Groq (Crush)
+export GROQ_API_KEY="gsk_..."
+
+# Azure OpenAI (Crush)
+export AZURE_OPENAI_ENDPOINT="https://xxx.openai.azure.com"
+export AZURE_OPENAI_API_KEY="..."
+export AZURE_OPENAI_API_VERSION="2024-10-01"
+
+# OpenRouter (Crush 統一介面)
+export OPENROUTER_API_KEY="sk-or-..."
+
+# 自架模型 (Crush)
+export LOCAL_ENDPOINT="http://localhost:11434/v1"  # Ollama
+```
+
+在 Shell 配置中載入：
+
+```bash
+# ~/.zshrc 或 ~/.bashrc
+[ -f ~/.env.ai ] && source ~/.env.ai
+```
+
+---
+
+## 共同配置最佳實踐
+
+### **1. 專案級配置檔 (提交到 Git)**
+
+| 工具                  | 配置檔                                   | 用途                               |
+| --------------------- | ---------------------------------------- | ---------------------------------- |
+| **Claude Code** | `CLAUDE.md`、`.claude/settings.json` | 專案規範、權限、Hooks、MCP         |
+| **Gemini CLI**  | `GEMINI.md`、`.gemini/settings.json` | 上下文、模型、工具權限、MCP        |
+| **Codex CLI**   | `AGENTS.md`                            | 專案規範、開發指令                 |
+| **Crush**       | `.crush.json`、`.crush/commands/`    | 提供商、模型、LSP、MCP、自定義命令 |
+| **Antigravity** | IDE 設定同步                             | Settings → Sync                   |
+
+### **2. 統一專案規範模板 (AGENTS.md / CLAUDE.md / GEMINI.md)**
+
+```markdown
+# 專案規範 (通用)
+
+## 技術棧
+- Runtime: Node.js 20 + TypeScript 5.6 / .NET 8
+- Package Manager: pnpm 9
+- Framework: React 18 + Vite 5 / ASP.NET Core 8
+
+## 程式碼規範
+- 日期時間: UTC 儲存，顯示轉 Asia/Taipei (ADR-TZ-001)
+- API 回應: RFC 7807 ProblemDetails
+- 無硬編碼色彩: 使用 Design Tokens (--color-*)
+- 無 Base64 圖片在 CanvasJson (ADR-ARCH-001)
+
+## 架構決策 (ADR)
+- ADR-ARCH-001: Editor v2.0 (CanvasJson V2, AssetService, JSON Patch)
+- ADR-TZ-001: 時區處理標準
+- ADR-UI-005: FloatingToolbar 實作規範
+
+## 開發指令
+- Build: `pnpm run build` / `dotnet build`
+- Test: `pnpm run test` / `dotnet test`
+- Lint: `pnpm run lint`
+- Typecheck: `pnpm run typecheck` / `dotnet build`
+
+## 審查清單
+- [ ] 測試覆蓋率 ≥ 80% (Backend) / ≥ 70% (Frontend)
+- [ ] 無硬編碼十六進位色碼
+- [ ] 無 Base64 圖片
+- [ ] CanvasJson ≤ 500KB
+- [ ] 所有 MCP 伺服器正常連線
+```
+
+### **3. MCP 伺服器標準化配置**
+
+```json
+// .claude/mcp_config.json / .gemini/settings.json / .crush.json 共用
+{
+  "mcpServers": {
+    "github": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"]},
+    "filesystem": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]},
+    "slack": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-slack"]},
+    "postgres": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://..."]},
+    "sqlite": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-sqlite", "./data.db"]}
+  }
+}
+```
+
+---
+
+## 版本歷程
+
+| 版本   | 日期       | 變更內容                                                                                                                                        |
+| ------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| v1.0.0 | 2026-05-01 | 初版：Claude Code、Gemini CLI、Antigravity、Rovo Dev                                                                                            |
+| v2.0.0 | 2026-08-07 | 更新版本標頭、移除 Rovo Dev、修正 AGY 定義                                                                                                      |
+| v3.0.0 | 2026-08-07 | **全面更新 2026 最新資訊**：Claude Code 4.6、Gemini 3、Antigravity→Devin Desktop、新增 Codex CLI、OpenCode→Crush 遷移、統一配置最佳實踐 |
+
+---
+
+## 參考資源
+
+- **開發前環境部署.md** PART 1: Token 減量策略
+- **Claude Code 官方文檔**: https://code.claude.com/docs/
+- **Gemini CLI 官方文檔**: https://geminicli.com/docs/
+- **Devin Desktop 文檔**: https://docs.devin.ai/desktop/
+- **Codex CLI 文檔**: https://developers.openai.com/codex
+- **Crush 專案**: https://github.com/charmbracelet/crush
+- **Agent Client Protocol (ACP)**: https://github.com/agent-client-protocol/acp
+- **MCP 伺服器註冊表**: https://github.com/modelcontextprotocol/servers

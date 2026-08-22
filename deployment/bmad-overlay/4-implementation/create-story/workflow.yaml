@@ -14,12 +14,11 @@ story_dir: "{implementation_artifacts}"
 # Workflow components
 installed_path: "{project-root}/_bmad/bmm/workflows/4-implementation/create-story"
 template: "{installed_path}/template.md"
-instructions: "{installed_path}/instructions.xml"
+instructions: "{installed_path}/workflow.md"
 validation: "{installed_path}/checklist.md"
 
 # Variables and inputs
 variables:
-  sprint_status: "{implementation_artifacts}/sprint-status.yaml || {output_folder}/sprint-status.yaml" # Primary source for story tracking
   epics_file: "{output_folder}/epics.md" # Enhanced epics+stories with BDD and source hints
   prd_file: "{output_folder}/PRD.md" # Fallback for requirements (if not in epics file)
   architecture_file: "{planning_artifacts}/architecture.md" # Fallback for constraints (if not in epics file)

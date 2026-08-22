@@ -1,0 +1,239 @@
+/* ============================================================
+   rule-violations.css — Rule Violation Tracker page styling
+   Story: ctr-p2-violation-tracker Task 6
+   Dark theme consistent with patterns.css / variables.css
+   ============================================================ */
+
+.rule-violations-page {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.rule-violations-page__header {
+  margin-bottom: 24px;
+}
+
+.rule-violations-page__header h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary, #e4e4e7);
+}
+
+.rule-violations-page__subtitle {
+  margin: 0;
+  color: var(--text-secondary, #9ca3af);
+  font-size: 14px;
+}
+
+/* ── KPI chips row ───────────────────────────────────────── */
+.rule-violations-page__kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.rule-violations-page__kpi-chip {
+  background: var(--card-bg, #1e293b);
+  border: 1px solid var(--border-color, #334155);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rule-violations-page__kpi-chip--status-green { border-left: 4px solid #10b981; }
+.rule-violations-page__kpi-chip--status-yellow { border-left: 4px solid #f59e0b; }
+.rule-violations-page__kpi-chip--status-red { border-left: 4px solid #ef4444; }
+
+.rule-violations-page__kpi-label {
+  font-size: 12px;
+  color: var(--text-secondary, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rule-violations-page__kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #e4e4e7);
+  line-height: 1.1;
+}
+
+.rule-violations-page__kpi-sub {
+  font-size: 12px;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.rule-violations-page__status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.rule-violations-page__status-badge--green { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+.rule-violations-page__status-badge--yellow { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+.rule-violations-page__status-badge--red { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+
+.rule-violations-page__compare-pos { color: #f87171; }
+.rule-violations-page__compare-neg { color: #34d399; }
+
+/* ── Grid: by-rule + by-phase ────────────────────────────── */
+.rule-violations-page__grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .rule-violations-page__grid { grid-template-columns: 1fr; }
+}
+
+.rule-violations-page__card {
+  background: var(--card-bg, #1e293b);
+  border: 1px solid var(--border-color, #334155);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.rule-violations-page__card h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #e4e4e7);
+}
+
+/* ── By-rule table ───────────────────────────────────────── */
+.rule-violations-page__rule-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rule-violations-page__rule-table th,
+.rule-violations-page__rule-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color, #334155);
+  font-size: 13px;
+  color: var(--text-primary, #e4e4e7);
+}
+
+.rule-violations-page__rule-table th {
+  color: var(--text-secondary, #9ca3af);
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rule-violations-page__rule-table td.rule-count { text-align: right; font-weight: 600; }
+
+/* ── By-phase bars ───────────────────────────────────────── */
+.rule-violations-page__phase-item {
+  margin-bottom: 12px;
+}
+
+.rule-violations-page__phase-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--text-primary, #e4e4e7);
+}
+
+.rule-violations-page__phase-bar {
+  background: var(--border-color, #334155);
+  border-radius: 3px;
+  height: 6px;
+  overflow: hidden;
+}
+
+.rule-violations-page__phase-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  transition: width 0.3s ease;
+}
+
+/* ── Timeline table ──────────────────────────────────────── */
+.rule-violations-page__timeline {
+  margin-top: 24px;
+}
+
+.rule-violations-page__timeline table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rule-violations-page__timeline th,
+.rule-violations-page__timeline td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color, #334155);
+  font-size: 13px;
+  color: var(--text-primary, #e4e4e7);
+  vertical-align: top;
+}
+
+.rule-violations-page__timeline th {
+  color: var(--text-secondary, #9ca3af);
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rule-violations-page__timeline td.ts {
+  white-space: nowrap;
+  font-family: var(--font-mono, 'Courier New', monospace);
+  font-size: 12px;
+  color: var(--text-secondary, #9ca3af);
+}
+
+.rule-violations-page__sev {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.rule-violations-page__sev--critical { background: rgba(220, 38, 38, 0.18); color: #f87171; }
+.rule-violations-page__sev--high { background: rgba(239, 68, 68, 0.18); color: #f87171; }
+.rule-violations-page__sev--medium { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+.rule-violations-page__sev--low { background: rgba(16, 185, 129, 0.18); color: #34d399; }
+
+.rule-violations-page__flag {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 4px;
+  color: var(--text-secondary, #9ca3af);
+  background: var(--border-color, #334155);
+}
+
+.rule-violations-page__flag--on { color: #34d399; background: rgba(16, 185, 129, 0.12); }
+.rule-violations-page__flag--off { color: #f87171; background: rgba(239, 68, 68, 0.12); }
+
+.rule-violations-page__empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary, #9ca3af);
+  font-size: 14px;
+}
+
+.rule-violations-page__error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}

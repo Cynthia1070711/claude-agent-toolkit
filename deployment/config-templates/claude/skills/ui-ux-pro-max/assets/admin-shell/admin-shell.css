@@ -1,0 +1,58 @@
+/* admin-shell.css — 後台殼層樣式（BS5 + CSS 變數）
+   蒸餾自 Adminator _shell.scss:2-10 + _responsive.scss:26-102（MIT © 2018 Aigars Silkalns）
+   取實戰數值（grid 比例 / sticky / 3 態 sidebar / frosted-glass）捨 webpack/SCSS 形。
+   依賴 design-tokens-template.json 三層 token（--bg-sidebar / --overlay / --border / scene token）。
+   完整說明見 references/16-admin-app-shell.md。 */
+
+.admin-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w, 248px) 1fr;
+  min-height: 100vh;
+}
+.admin-shell__sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--bg-sidebar);
+  border-inline-end: 1px solid var(--border); /* 邏輯屬性：zh-TW LTR 零成本前瞻 */
+}
+.admin-shell__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Iron Law：防寬表格/寬 chart 撐破 grid */
+}
+.admin-shell__topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-admin-topbar, 10);
+  height: 60px;
+  backdrop-filter: saturate(140%) blur(10px); /* frosted glass 實戰值 */
+  background: var(--overlay);                  /* light rgba(240,244,248,.72) / dark rgba(11,17,32,.72) */
+}
+.admin-shell__content { flex: 1; padding: var(--space-6, 1.5rem); }
+
+/* 3 態響應式 sidebar：full(≥1100) → icon-rail(720-1100) → drawer(<720) */
+@media (max-width: 1100px) {
+  .admin-shell { --sidebar-w: 72px; }
+  /* icon-only：隱藏文字標籤、parent item hover 出 flyout submenu */
+  .admin-shell__sidebar .nav-label { display: none; }
+}
+@media (max-width: 720px) {
+  .admin-shell { grid-template-columns: 1fr; }
+  .admin-shell__sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: var(--z-admin-drawer, 1045); /* 對齊 BS5 offcanvas + phycool-floating-ui z 階層 */
+    transform: translateX(-100%);
+    transition: transform .2s cubic-bezier(.2, .7, .2, 1); /* Adminator spring-like 曲線 */
+  }
+  .admin-shell__sidebar.is-open { transform: translateX(0); }
+}
+
+/* print：頁面列印時脫殼（對齊 references/17 invoice print-first） */
+@media print {
+  .admin-shell__sidebar, .admin-shell__topbar, .admin-shell__footer { display: none; }
+  .admin-shell { grid-template-columns: 1fr; }
+}
